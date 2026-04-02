@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: oci://ghcr.io/jaydee94/kubeseal-webgui/charts
+    - repoURL: https://jaydee94.github.io/kubeseal-webgui
       chart: kubeseal-webgui
       targetRevision: 6.0.9
       helm:
