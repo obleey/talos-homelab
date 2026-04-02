@@ -1,0 +1,42 @@
+
+api:
+  dashboard: true
+  insecure: true
+gateway:
+  enabled: true
+  listeners:
+    web:
+      namespacePolicy:
+        from: All
+      port: 8000
+      protocol: HTTP
+    websecure:
+      certificateRefs:
+      - name: wildcard-certificate-secret
+        namespace: traefik
+      namespacePolicy:
+        from: All
+      port: 8443
+      protocol: HTTPS
+ingressRoute:
+  dashboard:
+    enabled: false
+  healthcheck:
+    enabled: false
+ports:
+  traefik:
+    expose:
+      default: true
+    exposedPort: 9000
+    port: 9000
+  web:
+    exposedPort: 80
+    port: 8000
+  websecure:
+    exposedPort: 443
+    port: 8443
+providers:
+  kubernetesGateway:
+    enabled: true
+  kubernetesIngress:
+    enabled: false
