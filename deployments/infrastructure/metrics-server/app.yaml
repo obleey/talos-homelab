@@ -7,17 +7,10 @@ metadata:
     argocd.argoproj.io/sync-wave: "-3"
 spec:
   project: default
-  sources:
-    - repoURL: https://github.com/kubernetes-sigs/metrics-server
-      targetRevision: latest
-      path: .
-      directory:
-        include: "components.yaml"
-    - repoURL: https://github.com/alex1989hu/kubelet-serving-cert-approver
-      targetRevision: main
-      path: deploy
-      directory:
-        include: "standalone-install.yaml"
+  source:
+    repoURL: https://github.com/obleey/talos-homelab
+    targetRevision: HEAD
+    path: deployments/infrastructure/metrics-server
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
