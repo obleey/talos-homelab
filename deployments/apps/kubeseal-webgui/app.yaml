@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubeseal-webgui
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: oci://ghcr.io/jaydee94/kubeseal-webgui/charts
+      chart: kubeseal-webgui
+      targetRevision: 6.0.9
+      helm:
+        valueFiles:
+          - $values/deployments/apps/kubeseal-webgui/kubeseal-webgui-values.yaml
+    - repoURL: https://github.com/obleey/talos-homelab
+      targetRevision: HEAD
+      ref: values
+      path: deployments/apps/kubeseal-webgui
+      directory:
+        exclude: "{app.yaml,kubeseal-webgui-values.yaml}"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kubeseal-webgui
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

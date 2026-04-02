@@ -1,0 +1,7 @@
+sealedSecrets:
+  autoFetchCert: true
+  controllerName: sealed-secrets-controller
+  controllerNamespace: kube-system
+
+api:
+  url: "https://kubeseal.talos-cluster.local.obleey.com"
