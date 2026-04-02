@@ -21,7 +21,7 @@ notifications:
   templates:
     template.app-sync-failed: |
       message: |
-        :red_circle: *[talos-cluster]* *{{.app.metadata.name}}* sync failed!
+        :red_circle: *[TALOS-CLUSTER]* *{{.app.metadata.name | upper}}* sync failed!
         Repo: {{.app.spec.source.repoURL}}
         Error: {{.app.status.operationState.message}}
 
