@@ -17,8 +17,15 @@ spec:
     - repoURL: https://github.com/obleey/talos-homelab
       targetRevision: HEAD
       ref: values
+      path: deployments/infrastructure/traefik
+      directory:
+        exclude: "{app.yaml,traefik-values.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik
+  syncPolicy:
     syncOptions:
       - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
