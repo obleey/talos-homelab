@@ -6,3 +6,4 @@ resources:
   - cert-manager/app.yaml
   - traefik/app.yaml
   - argocd/app.yaml
+  - metrics-server/app.yaml
