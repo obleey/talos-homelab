@@ -3,6 +3,7 @@ configs:
     server.insecure: true
   cm:
     url: https://argocd.talos-cluster.local.obleey.com
+    timeout.reconciliation: 30s
 
 notifications:
   enabled: true
