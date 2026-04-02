@@ -1,3 +1,4 @@
+# bootstrap/talos-cluster.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -8,14 +9,9 @@ spec:
   source:
     repoURL: https://github.com/obleey/talos-homelab
     targetRevision: HEAD
-    path: deployments
-    directory:
-      recurse: true
-      include: "*/kustomization.yaml"
+    path: deployments/infrastructure
+    kustomize: {}
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+  syncPolicy: {}
