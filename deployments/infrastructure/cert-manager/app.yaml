@@ -17,6 +17,13 @@ spec:
     - repoURL: https://github.com/obleey/talos-homelab
       targetRevision: HEAD
       ref: values
+      path: deployments/infrastructure/cert-manager
+      directory:
+        exclude: "{app.yaml,cert-manager-values.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
