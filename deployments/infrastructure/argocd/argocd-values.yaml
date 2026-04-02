@@ -28,6 +28,8 @@ notifications:
     trigger.on-sync-failed: |
       - when: app.status.operationState != nil and app.status.operationState.phase in ['Error', 'Failed']
         send: [app-sync-failed]
+      - when: app.status.sync.status == 'Unknown'
+        send: [app-sync-failed]
 
   subscriptions:
     - recipients:
