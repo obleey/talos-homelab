@@ -1,4 +1,3 @@
-# bootstrap/talos-cluster.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -14,11 +13,4 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
-  ignoreDifferences:
-    - group: argoproj.io
-      kind: Application
-      jsonPointers:
-        - /metadata/annotations/argocd.argoproj.io~1tracking-id
-  syncPolicy:
-    syncOptions:
-      - RespectIgnoreDifferences=true
+  syncPolicy: {}
