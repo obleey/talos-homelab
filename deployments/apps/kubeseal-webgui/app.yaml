@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://jaydee94.github.io/kubeseal-webgui
       chart: kubeseal-webgui
-      targetRevision: 6.0.9
+      targetRevision: 6.0.4
       helm:
         valueFiles:
           - $values/deployments/apps/kubeseal-webgui/kubeseal-webgui-values.yaml
