@@ -1,3 +1,4 @@
+# bootstrap/talos-cluster.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -17,8 +18,7 @@ spec:
     - group: argoproj.io
       kind: Application
       jsonPointers:
-        - /metadata/annotations
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    syncOptions:
+      - RespectIgnoreDifferences=true
