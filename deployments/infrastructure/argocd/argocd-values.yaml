@@ -3,3 +3,6 @@ configs:
     server.insecure: true
   cm:
     url: https://argocd.talos-cluster.local.obleey.com
+    resource.customizations.ignoreDifferences.argoproj.io_Application: |
+      jqPathExpressions:
+        - .metadata.annotations["argocd.argoproj.io/tracking-id"]
