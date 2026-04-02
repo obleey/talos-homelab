@@ -7,3 +7,4 @@ resources:
   - traefik/app.yaml
   - argocd/app.yaml
   - metrics-server/app.yaml
+  - storageclasses/app.yaml
