@@ -18,6 +18,12 @@ spec:
       targetRevision: HEAD
       ref: values
       path: deployments/infrastructure/cilium
+      directory:
+        exclude: "{app.yaml,cilium-values.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
