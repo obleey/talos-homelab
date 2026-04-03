@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: metrics-server
   namespace: argocd
+  labels:
+    argocd.argoproj.io/managed-by: talos-cluster
   annotations:
     argocd.argoproj.io/sync-wave: "-3"
 spec:
