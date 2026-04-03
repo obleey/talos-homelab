@@ -9,6 +9,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-cm
     app.kubernetes.io/part-of: argocd
+  annotations:
+    argocd.argoproj.io/managed-by: argocd
 data:
   admin.enabled: "false"
   accounts.obleey: login
