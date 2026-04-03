@@ -4,6 +4,9 @@ configs:
   cm:
     url: https://argocd.talos-cluster.local.obleey.com
     timeout.reconciliation: 30s
+    resource.customizations.ignoreDifferences.argoproj.io_Application: |
+      jqPathExpressions:
+        - .metadata.annotations["argocd.argoproj.io/tracking-id"]
 
 notifications:
   enabled: true
