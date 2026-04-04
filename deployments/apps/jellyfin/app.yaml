@@ -19,6 +19,9 @@ spec:
     - repoURL: https://github.com/obleey/talos-homelab
       targetRevision: HEAD
       ref: values
+      path: deployments/apps/jellyfin
+      directory:
+        exclude: "{app.yaml,jellyfin-values.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: servarr
