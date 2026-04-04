@@ -1,0 +1,48 @@
+podPrivileges:
+  hostNetwork: true
+
+dnsPolicy: ClusterFirstWithHostNet
+
+nodeSelector:
+  kubernetes.io/hostname: talos-0z8-aw8
+
+persistence:
+  config:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    storageClass: local-path
+  media:
+    enabled: false
+  cache:
+    enabled: false
+
+volumes:
+  - name: media
+    nfs:
+      server: 10.0.0.23
+      path: /serve/starr-stack/data/media
+
+volumeMounts:
+  - name: media
+    mountPath: /data/media
+
+httpRoute:
+  enabled: true
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: traefik-gateway
+      namespace: traefik
+      sectionName: websecure
+  hostnames:
+    - "jellyfin.talos-cluster.local.obleey.com"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+service:
+  type: ClusterIP
+  port: 8096
