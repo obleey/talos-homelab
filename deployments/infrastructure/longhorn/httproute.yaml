@@ -11,6 +11,13 @@ spec:
   hostnames:
     - "longhorn.talos-cluster.local.obleey.com"
   rules:
-    - backendRefs:
-        - name: longhorn-frontend
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: longhorn-frontend
           port: 80
+          weight: 1
