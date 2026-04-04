@@ -8,13 +8,6 @@ pms:
     nameservers: []
   dnsPolicy: ClusterFirstWithHostNet
 
-extraEnv:
-  PLEX_CLAIM:
-    valueFrom:
-      secretKeyRef:
-        name: plex-claim-secret
-        key: claimToken
-
 nodeSelector:
   kubernetes.io/hostname: talos-0z8-aw8 # or talos-xxc-2bm, pick one worker
 

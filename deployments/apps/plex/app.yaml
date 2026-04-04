@@ -7,6 +7,8 @@ metadata:
     argocd.argoproj.io/managed-by: talos-cluster
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
