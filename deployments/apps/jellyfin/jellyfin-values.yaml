@@ -28,20 +28,7 @@ volumeMounts:
     mountPath: /data/media
 
 httpRoute:
-  enabled: true
-  parentRefs:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: traefik-gateway
-      namespace: traefik
-      sectionName: websecure
-  hostnames:
-    - "jellyfin.talos-cluster.local.obleey.com"
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
+  enabled: false
 
 service:
   type: ClusterIP
