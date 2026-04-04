@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prowlarr
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/managed-by: talos-cluster
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/obleey/talos-homelab
+    targetRevision: HEAD
+    path: deployments/apps/prowlarr
+    directory:
+      exclude: "{app.yaml}"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: servarr
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

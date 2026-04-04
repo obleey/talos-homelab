@@ -4,3 +4,4 @@ resources:
   - kubeseal-webgui/app.yaml
   - plex/app.yaml
   - jellyfin/app.yaml
+  - prowlarr/app.yaml
