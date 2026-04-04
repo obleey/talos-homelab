@@ -1,0 +1,31 @@
+pms:
+  claimToken: ""
+  storageClassName: local-path
+  configStorage: 50Gi
+
+  # hostNetwork is the key to showing as local not remote
+  hostNetwork: true
+  dnsConfig:
+    nameservers: []
+  dnsPolicy: ClusterFirstWithHostNet
+
+extraEnv:
+  PLEX_CLAIM:
+    valueFrom:
+      secretKeyRef:
+        name: plex-claim-secret
+        key: claimToken
+
+nodeSelector:
+  kubernetes.io/hostname: talos-0z8-aw8 # or talos-xxc-2bm, pick one worker
+
+rclone:
+  enabled: true
+  configSecret: plex-rclone-config
+  remotes:
+    - "data:data" # mounts NFS data/ at /data/data in the container
+  readOnly: true
+
+service:
+  type: ClusterIP
+  port: 32400
