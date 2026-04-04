@@ -5,3 +5,4 @@ resources:
   - plex/app.yaml
   - jellyfin/app.yaml
   - prowlarr/app.yaml
+  - radarr/app.yaml
