@@ -1,6 +1,6 @@
 pms:
-  storageClassName: local-path
-  configStorage: 50Gi
+  storageClassName: longhorn
+  configStorage: 20Gi
 
   # hostNetwork is the key to showing as local not remote
 hostNetwork: true
