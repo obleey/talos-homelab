@@ -19,35 +19,20 @@ spec:
       containers:
         - name: unpackerr
           image: golift/unpackerr
+          envFrom:
+            - configMapRef:
+                name: unpackerr-config
           env:
-            - name: TZ
-              value: Europe/Ljubljana
-            - name: UN_LOG_FILE
-              value: /data/torrents/unpackerr.log
-            - name: UN_SONARR_0_URL
-              value: http://sonarr.servarr.svc.cluster.local:8989
             - name: UN_SONARR_0_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: api-tokens-sealedsecret
                   key: sonarr-api-key
-            - name: UN_SONARR_0_PATHS_0
-              value: /data/torrents
-            - name: UN_RADARR_0_URL
-              value: http://radarr.servarr.svc.cluster.local:7878
             - name: UN_RADARR_0_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: api-tokens-sealedsecret
                   key: radarr-api-key
-            - name: UN_RADARR_0_PATHS_0
-              value: /data/torrents
-            - name: UN_PARALLEL
-              value: "1"
-            - name: UN_FILE_MODE
-              value: "0644"
-            - name: UN_DIR_MODE
-              value: "0755"
           volumeMounts:
             - name: torrents
               mountPath: /data/torrents

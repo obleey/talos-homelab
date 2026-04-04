@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: unpackerr-config
+  namespace: servarr
+data:
+  TZ: Europe/Ljubljana
+  UN_LOG_FILE: /data/torrents/unpackerr.log
+  UN_SONARR_0_URL: http://sonarr.servarr.svc.cluster.local:8989
+  UN_SONARR_0_PATHS_0: /data/torrents
+  UN_RADARR_0_URL: http://radarr.servarr.svc.cluster.local:7878
+  UN_RADARR_0_PATHS_0: /data/torrents
+  UN_PARALLEL: "1"
+  UN_FILE_MODE: "0644"
+  UN_DIR_MODE: "0755"
