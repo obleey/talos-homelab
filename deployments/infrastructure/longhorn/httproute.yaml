@@ -5,7 +5,9 @@ metadata:
   namespace: longhorn-system
 spec:
   parentRefs:
-    - name: traefik-gateway
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: traefik-gateway
       namespace: traefik
       sectionName: websecure
   hostnames:
