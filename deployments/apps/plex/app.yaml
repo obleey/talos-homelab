@@ -11,10 +11,19 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: https://github.com/obleey/talos-homelab
-    targetRevision: HEAD
-    path: deployments/apps/plex
+  sources:
+    - repoURL: https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
+      chart: plex-media-server
+      targetRevision: 1.5.0
+      helm:
+        valueFiles:
+          - $values/deployments/apps/plex/plex-values.yaml
+    - repoURL: https://github.com/obleey/talos-homelab
+      targetRevision: HEAD
+      ref: values
+      path: deployments/apps/plex
+      directory:
+        exclude: "{app.yaml,plex-values.yaml,rclone-secret.yaml,pub-cert.pem}"
   destination:
     server: https://kubernetes.default.svc
     namespace: servarr
