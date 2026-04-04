@@ -21,6 +21,8 @@ extraVolumes:
 extraVolumeMounts:
   - name: servarr-data
     mountPath: /data
+extraEnv:
+  HOSTNAME: talos-plex
 
 service:
   type: ClusterIP
