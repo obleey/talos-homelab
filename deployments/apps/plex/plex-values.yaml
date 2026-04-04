@@ -12,11 +12,17 @@ nodeSelector:
   kubernetes.io/hostname: talos-0z8-aw8 # or talos-xxc-2bm, pick one worker
 
 rclone:
-  enabled: true
-  configSecret: plex-rclone-config
-  remotes:
-    - "data:"
-  readOnly: true
+  enabled: false
+
+extraVolumes:
+  - name: servarr-data
+    nfs:
+      server: 10.0.0.23
+      path: /serve/starr-stack/data
+
+extraVolumeMounts:
+  - name: servarr-data
+    mountPath: /data
 
 service:
   type: ClusterIP
