@@ -8,3 +8,4 @@ resources:
   - radarr/app.yaml
   - sonarr/app.yaml
   - seerr/app.yaml
+  - unpackerr/app.yaml
