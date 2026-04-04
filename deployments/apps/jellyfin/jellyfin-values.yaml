@@ -18,13 +18,13 @@ persistence:
     enabled: false
 
 volumes:
-  - name: media
+  - name: nfs-media
     nfs:
       server: 10.0.0.23
       path: /serve/starr-stack/data/media
 
 volumeMounts:
-  - name: media
+  - name: nfs-media
     mountPath: /data/media
 
 httpRoute:
