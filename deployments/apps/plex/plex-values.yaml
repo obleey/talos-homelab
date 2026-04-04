@@ -15,7 +15,7 @@ rclone:
   enabled: true
   configSecret: plex-rclone-config
   remotes:
-    - "data:data" # mounts NFS data/ at /data/data in the container
+    - "data:"
   readOnly: true
 
 service:
