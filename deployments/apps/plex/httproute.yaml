@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: plex
+  namespace: plex
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: traefik
+      sectionName: websecure
+  hostnames:
+    - "plex.talos-cluster.local.obleey.com"
+  rules:
+    - backendRefs:
+        - name: plex-plex-media-server
+          port: 32400
