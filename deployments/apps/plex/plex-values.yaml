@@ -3,10 +3,8 @@ pms:
   configStorage: 50Gi
 
   # hostNetwork is the key to showing as local not remote
-  hostNetwork: true
-  dnsConfig:
-    nameservers: []
-  dnsPolicy: ClusterFirstWithHostNet
+hostNetwork: true
+dnsPolicy: ClusterFirstWithHostNet
 
 nodeSelector:
   kubernetes.io/hostname: talos-0z8-aw8 # or talos-xxc-2bm, pick one worker
