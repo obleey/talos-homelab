@@ -1,5 +1,4 @@
 pms:
-  claimToken: ""
   storageClassName: local-path
   configStorage: 50Gi
 
