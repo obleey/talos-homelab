@@ -9,10 +9,14 @@
   "automerge": false,
   "labels": ["renovate"],
   "helm-values": {
-    "fileMatch": ["(^|/).*values\\.yaml$"]
+    "managerFilePatterns": [
+      "/(^|/).*values\.yaml$/"
+    ]
   },
   "kubernetes": {
-    "fileMatch": ["(^|/)deployments/.+\\.yaml$"]
+    "managerFilePatterns": [
+      "/(^|/)deployments/.+\.yaml$/"
+    ]
   },
   "packageRules": [
     {
@@ -27,23 +31,31 @@
       "automerge": false
     },
     {
-      "matchPackagePatterns": ["lscr.io/linuxserver/*"],
       "groupName": "linuxserver images",
-      "automerge": false
+      "automerge": false,
+      "matchPackageNames": [
+        "/lscr.io/linuxserver/*/"
+      ]
     },
     {
-      "matchPackagePatterns": ["ghcr.io/*"],
       "groupName": "ghcr images",
-      "automerge": false
+      "automerge": false,
+      "matchPackageNames": [
+        "/ghcr.io/*/"
+      ]
     },
     {
-      "matchPackagePatterns": [".*"],
       "matchUpdateTypes": ["major"],
       "automerge": false,
-      "labels": ["renovate", "major-update"]
+      "labels": ["renovate", "major-update"],
+      "matchPackageNames": [
+        "/.*/"
+      ]
     }
   ],
   "argocd": {
-    "fileMatch": ["(^|/)deployments/.+\\.yaml$"]
+    "managerFilePatterns": [
+      "/(^|/)deployments/.+\.yaml$/"
+    ]
   }
 }
