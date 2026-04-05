@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifiarr
+  namespace: servarr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notifiarr
+  template:
+    metadata:
+      labels:
+        app: notifiarr
+    spec:
+      containers:
+        - name: notifiarr
+          image: golift/notifiarr
+          ports:
+            - containerPort: 5454
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: machine-id
+              mountPath: /etc/machine-id
+              readOnly: true
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: notifiarr-config
+        - name: machine-id
+          hostPath:
+            path: /etc/machine-id
+            type: File
