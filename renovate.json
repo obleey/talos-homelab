@@ -2,7 +2,6 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "enabled": true,
-  "mode": "normal",
   "timezone": "Europe/Ljubljana",
   "prHourlyLimit": 0,
   "prConcurrentLimit": 10,
@@ -27,12 +26,15 @@
       "automerge": false
     },
     {
-      "matchPackagePatterns": ["lscr.io/linuxserver/*"],
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["lscr.io/linuxserver/.*"],
       "groupName": "linuxserver images",
+      "versioning": "loose",
       "automerge": false
     },
     {
-      "matchPackagePatterns": ["ghcr.io/*"],
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["ghcr.io/.*"],
       "groupName": "ghcr images",
       "automerge": false
     },
