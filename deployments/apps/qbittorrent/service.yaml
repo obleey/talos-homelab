@@ -10,14 +10,6 @@ spec:
     - name: webui
       port: 8080
       targetPort: 8080
-    - name: torrenting-tcp
-      port: 6881
-      targetPort: 6881
-      protocol: TCP
-    - name: torrenting-udp
-      port: 6881
-      targetPort: 6881
-      protocol: UDP
 ---
 apiVersion: v1
 kind: Service
@@ -30,12 +22,12 @@ spec:
     app: qbittorrent
   ports:
     - name: torrenting-tcp
-      port: 6881
-      targetPort: 6881
-      nodePort: 6881
+      port: 30881
+      targetPort: 30881
+      nodePort: 30881
       protocol: TCP
     - name: torrenting-udp
-      port: 6881
-      targetPort: 6881
-      nodePort: 6881
+      port: 30881
+      targetPort: 30881
+      nodePort: 30881
       protocol: UDP

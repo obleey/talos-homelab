@@ -11,7 +11,7 @@ spec:
       namespace: traefik
       sectionName: websecure
   hostnames:
-    - "qb.talos-cluster.local.obleey.com"
+    - "qbit.talos-cluster.local.obleey.com"
   rules:
     - matches:
         - path:

@@ -26,11 +26,12 @@ spec:
             - name: WEBUI_PORT
               value: "8080"
             - name: TORRENTING_PORT
-              value: "6881"
+              value: "30881"
           ports:
             - containerPort: 8080
-            - containerPort: 6881
-            - containerPort: 6881
+            - containerPort: 30881
+              protocol: TCP
+            - containerPort: 30881
               protocol: UDP
           volumeMounts:
             - name: config
