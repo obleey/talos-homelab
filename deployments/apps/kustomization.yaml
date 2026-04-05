@@ -9,3 +9,4 @@ resources:
   - sonarr/app.yaml
   - seerr/app.yaml
   - unpackerr/app.yaml
+  - notifiarr/app.yaml
