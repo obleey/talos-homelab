@@ -12,3 +12,4 @@ resources:
   - notifiarr/app.yaml
   - qbittorrent/app.yaml
   - byparr/app.yaml
+  - bazarr/app.yaml
