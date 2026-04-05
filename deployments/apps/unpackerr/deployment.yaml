@@ -18,7 +18,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: unpackerr
-          image: golift/unpackerr
+          image: golift/unpackerr:0.15.2
           envFrom:
             - configMapRef:
                 name: unpackerr-config
