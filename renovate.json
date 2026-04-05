@@ -8,10 +8,10 @@
   "automerge": false,
   "labels": ["renovate"],
   "helm-values": {
-    "managerFilePatterns": ["/(^|/).*values\.yaml$/"]
+    "managerFilePatterns": ["/(^|/).*values\\.yaml$/"]
   },
   "kubernetes": {
-    "managerFilePatterns": ["/(^|/)deployments/.+\.yaml$/"]
+    "managerFilePatterns": ["/(^|/)deployments/.+\\.yaml$/"]
   },
   "packageRules": [
     {
@@ -31,13 +31,13 @@
       "versioning": "loose",
       "allowedVersions": "!/nightly|develop|beta|alpha/",
       "automerge": false,
-      "matchPackageNames": ["/lscr.io/linuxserver/.*/"]
+      "matchPackageNames": ["/lscr\\.io\\/linuxserver\\/.*/"]
     },
     {
       "matchDatasources": ["docker"],
       "groupName": "ghcr images",
       "automerge": false,
-      "matchPackageNames": ["/ghcr.io/.*/"]
+      "matchPackageNames": ["/ghcr\\.io\\/.*/"]
     },
     {
       "matchUpdateTypes": ["major"],
@@ -47,6 +47,6 @@
     }
   ],
   "argocd": {
-    "managerFilePatterns": ["/(^|/)deployments/.+\.yaml$/"]
+    "managerFilePatterns": ["/(^|/)deployments/.+\\.yaml$/"]
   }
 }
