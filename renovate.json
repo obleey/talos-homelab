@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "enabled": true,
+  "timezone": "Europe/Ljubljana",
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 10,
+  "automerge": false,
+  "labels": ["renovate"],
+  "helm-values": {
+    "fileMatch": ["(^|/).*values\\.yaml$"]
+  },
+  "kubernetes": {
+    "fileMatch": ["(^|/)deployments/.+\\.yaml$"]
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["helmv3", "helm-values"],
+      "groupName": "helm charts",
+      "automerge": false
+    },
+    {
+      "matchManagers": ["kubernetes"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "kubernetes manifests",
+      "automerge": false
+    },
+    {
+      "matchPackagePatterns": ["lscr.io/linuxserver/*"],
+      "groupName": "linuxserver images",
+      "automerge": false
+    },
+    {
+      "matchPackagePatterns": ["ghcr.io/*"],
+      "groupName": "ghcr images",
+      "automerge": false
+    },
+    {
+      "matchPackagePatterns": [".*"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["renovate", "major-update"]
+    }
+  ],
+  "argocd": {
+    "fileMatch": ["(^|/)deployments/.+\\.yaml$"]
+  }
+}
