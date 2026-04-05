@@ -1,15 +1,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - kubeseal-webgui/app.yaml
-  - plex/app.yaml
-  - jellyfin/app.yaml
-  - prowlarr/app.yaml
-  - radarr/app.yaml
-  - sonarr/app.yaml
-  - seerr/app.yaml
-  - unpackerr/app.yaml
-  - notifiarr/app.yaml
-  - qbittorrent/app.yaml
-  - byparr/app.yaml
   - bazarr/app.yaml
+  - byparr/app.yaml
+  - jellyfin/app.yaml
+  - kubeseal-webgui/app.yaml
+  - notifiarr/app.yaml
+  - plex/app.yaml
+  - prowlarr/app.yaml
+  - qbittorrent/app.yaml
+  - radarr/app.yaml
+  - seerr/app.yaml
+  - sonarr/app.yaml
+  - unpackerr/app.yaml
