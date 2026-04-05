@@ -29,6 +29,7 @@
       "matchDatasources": ["docker"],
       "groupName": "linuxserver images",
       "versioning": "loose",
+      "allowedVersions": "!/nightly|develop|beta|alpha/",
       "automerge": false,
       "matchPackageNames": ["/lscr.io/linuxserver/.*/"]
     },
