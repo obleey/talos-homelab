@@ -54,9 +54,6 @@ config:
       Downloads:
         style: row
         columns: 2
-  providers:
-    longhorn:
-      url: https://longhorn.talos-cluster.local.obleey.com
 
   bookmarks:
     - Developer:
@@ -88,6 +85,7 @@ config:
           memory: true
           showLabel: true
     - longhorn:
+        url: https://longhorn.talos-cluster.local.obleey.com
         expanded: true
         total: true
         labels: true
