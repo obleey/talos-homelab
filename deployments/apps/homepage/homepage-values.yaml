@@ -98,6 +98,10 @@ config:
             icon: argo-cd.png
             href: https://argocd.talos-cluster.local.obleey.com
             description: GitOps continuous delivery
+            widget:
+              type: argocd
+              url: https://argocd.talos-cluster.local.obleey.com
+              key: "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}"
         - Kubeseal:
             icon: kubernetes.png
             href: https://kubeseal.talos-cluster.local.obleey.com
