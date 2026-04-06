@@ -109,6 +109,9 @@ config:
             icon: longhorn.png
             href: https://longhorn.talos-cluster.local.obleey.com
             description: Distributed block storage
+            widget:
+              type: longhorn
+              url: http://longhorn.longhorn-system.svc.cluster.local:8000
         - Kubeseal:
             icon: kubernetes.png
             href: https://kubeseal.talos-cluster.local.obleey.com
