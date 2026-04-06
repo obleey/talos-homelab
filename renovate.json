@@ -29,9 +29,15 @@
       "matchDatasources": ["docker"],
       "groupName": "linuxserver images",
       "versioning": "loose",
-      "allowedVersions": "!/nightly|develop|beta|alpha/",
+      "allowedVersions": "!/nightly|develop|beta|alpha|[0-9a-f]{6,}-/",
       "automerge": false,
       "matchPackageNames": ["/lscr\\.io\\/linuxserver\\/.*/"]
+    },
+    {
+      "matchPackageNames": ["lscr.io/linuxserver/sonarr"],
+      "matchDatasources": ["docker"],
+      "allowedVersions": "!/^[4-9]\\./",
+      "automerge": false
     },
     {
       "matchDatasources": ["docker"],
