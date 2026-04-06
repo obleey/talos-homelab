@@ -68,6 +68,7 @@ config:
         text: Welcome back, Obleey!
     - datetime:
         text_size: xl
+        locale: sl-SI
         format:
           timeStyle: short
           dateStyle: short
