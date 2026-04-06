@@ -114,6 +114,10 @@ config:
             widget:
               type: traefik
               url: http://traefik.traefik.svc.cluster.local:9000
+        - Longhorn:
+            icon: longhorn.png
+            href: https://longhorn.talos-cluster.local.obleey.com
+            description: Storage management
         - Kubeseal:
             icon: kubernetes.png
             href: https://kubeseal.talos-cluster.local.obleey.com
