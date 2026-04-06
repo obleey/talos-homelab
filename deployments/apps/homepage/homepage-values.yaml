@@ -34,10 +34,6 @@ persistence:
     accessMode: ReadWriteOnce
     size: 1Gi
 
-providers:
-  longhorn:
-    url: https://longhorn.talos-cluster.local.obleey.com
-
 config:
   kubernetes:
     mode: cluster
@@ -58,6 +54,9 @@ config:
       Downloads:
         style: row
         columns: 2
+  providers:
+    longhorn:
+      url: https://longhorn.talos-cluster.local.obleey.com
 
   bookmarks:
     - Developer:
