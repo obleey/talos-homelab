@@ -14,6 +14,8 @@ metadata:
 data:
   policy.csv: |
     g, obleey, role:admin
+    g, readonly, role:readonly
   policy.default: role:readonly
   policy.matchMode: glob
   scopes: "[groups]"
+  accounts.readonly: apiKey
