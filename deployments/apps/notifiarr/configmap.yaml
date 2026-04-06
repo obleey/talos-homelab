@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notifiarr-machine-id
+  namespace: servarr
+data:
+  machine-id: "BA2D97F3-730F-4265-94F9-F6A0CAE2D18F"
