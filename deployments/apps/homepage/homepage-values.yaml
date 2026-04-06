@@ -91,6 +91,11 @@ config:
     - search:
         provider: duckduckgo
         target: _blank
+    - longhorn:
+        expanded: true
+        total: true
+        labels: true
+        nodes: true
 
   services:
     - Infrastructure:
@@ -109,16 +114,6 @@ config:
             widget:
               type: traefik
               url: http://traefik.traefik.svc.cluster.local:9000
-        - Longhorn:
-            icon: longhorn.png
-            href: https://longhorn.talos-cluster.local.obleey.com
-            description: Distributed block storage
-            widget:
-              type: longhorn
-              expanded: true
-              total: true
-              labels: true
-              nodes: true
         - Kubeseal:
             icon: kubernetes.png
             href: https://kubeseal.talos-cluster.local.obleey.com
