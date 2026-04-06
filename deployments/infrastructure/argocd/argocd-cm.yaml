@@ -15,7 +15,7 @@ data:
   admin.enabled: "false"
   accounts.obleey: login
   accounts.obleey.enabled: "true"
-  accounts.readonly: login
+  accounts.readonly: login, apiKey
   accounts.readonly.enabled: "true"
   application.instanceLabelKey: argocd.argoproj.io/instance
   application.sync.impersonation.enabled: "false"
