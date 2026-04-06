@@ -1,0 +1,157 @@
+image:
+  repository: ghcr.io/gethomepage/homepage
+
+enableRbac: true
+
+serviceAccount:
+  name: homepage
+  create: true
+
+service:
+  main:
+    ports:
+      http:
+        port: 3000
+
+controller:
+  strategy: Recreate
+
+env:
+  - name: HOMEPAGE_ALLOWED_HOSTS
+    value: "hub.talos-cluster.local.obleey.com"
+
+envFrom:
+  - secretRef:
+      name: homepage-secrets
+
+persistence:
+  logs:
+    enabled: true
+    type: pvc
+    mountPath: /app/config/logs
+    storageClass: longhorn
+    accessMode: ReadWriteOnce
+    size: 1Gi
+
+config:
+  kubernetes:
+    mode: cluster
+    gateway: true
+
+  settingsString: |
+    title: Talos Homelab
+    theme: dark
+    color: slate
+    headerStyle: clean
+    layout:
+      Infrastructure:
+        style: row
+        columns: 3
+      Media:
+        style: row
+        columns: 3
+      Downloads:
+        style: row
+        columns: 2
+
+  bookmarks:
+    - Developer:
+        - Github:
+            - abbr: GH
+              href: https://github.com/obleey
+              icon: github.png
+
+  widgets:
+    - greeting:
+        text_size: xl
+        text: Welcome back
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
+          dateStyle: short
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: talos-cluster
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    - search:
+        provider: duckduckgo
+        target: _blank
+
+  services:
+    - Infrastructure:
+        - Longhorn:
+            icon: longhorn.png
+            href: https://longhorn.talos-cluster.local.obleey.com
+            description: Distributed block storage
+        - ArgoCD:
+            icon: argo-cd.png
+            href: https://argocd.talos-cluster.local.obleey.com
+            description: GitOps continuous delivery
+        - Kubeseal:
+            icon: kubernetes.png
+            href: https://kubeseal.talos-cluster.local.obleey.com
+            description: Sealed secrets UI
+
+    - Media:
+        - Plex:
+            icon: plex.png
+            href: https://app.plex.tv
+            description: Media server
+            widget:
+              type: plex
+              url: http://10.0.0.151:32400
+              key: "{{HOMEPAGE_VAR_PLEX_TOKEN}}"
+        - Jellyfin:
+            icon: jellyfin.png
+            href: https://jellyfin.talos-cluster.local.obleey.com
+            description: Media server
+            widget:
+              type: jellyfin
+              url: https://jellyfin.talos-cluster.local.obleey.com
+              key: "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}"
+              enableBlocks: true
+              enableNowPlaying: true
+        - Radarr:
+            icon: radarr.png
+            href: https://radarr.talos-cluster.local.obleey.com
+            description: Movie management
+            widget:
+              type: radarr
+              url: http://radarr.servarr.svc.cluster.local:7878
+              key: "{{HOMEPAGE_VAR_RADARR_API_KEY}}"
+        - Sonarr:
+            icon: sonarr.png
+            href: https://sonarr.talos-cluster.local.obleey.com
+            description: TV show management
+            widget:
+              type: sonarr
+              url: http://sonarr.servarr.svc.cluster.local:8989
+              key: "{{HOMEPAGE_VAR_SONARR_API_KEY}}"
+        - Prowlarr:
+            icon: prowlarr.png
+            href: https://prowlarr.talos-cluster.local.obleey.com
+            description: Indexer management
+            widget:
+              type: prowlarr
+              url: http://prowlarr.servarr.svc.cluster.local:9696
+              key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
+
+    - Downloads:
+        - qBittorrent:
+            icon: qbittorrent.png
+            href: https://qbit.talos-cluster.local.obleey.com
+            description: Torrent client
+            widget:
+              type: qbittorrent
+              url: http://qbittorrent.servarr.svc.cluster.local:8080
+              username: "{{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}"
+              password: "{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}"
