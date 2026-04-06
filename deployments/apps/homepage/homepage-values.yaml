@@ -66,15 +66,6 @@ config:
               icon: github.png
 
   widgets:
-    - greeting:
-        text_size: xl
-        text: Welcome back, Obleey!
-    - datetime:
-        text_size: xl
-        locale: sl-SI
-        format:
-          timeStyle: short
-          dateStyle: short
     - kubernetes:
         cluster:
           show: true
