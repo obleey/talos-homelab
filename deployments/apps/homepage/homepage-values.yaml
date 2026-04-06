@@ -102,7 +102,13 @@ config:
             icon: kubernetes.png
             href: https://kubeseal.talos-cluster.local.obleey.com
             description: Sealed secrets UI
-
+        - Traefik:
+            icon: traefik.png
+            href: https://traefik.talos-cluster.local.obleey.com/dashboard/
+            description: Ingress controller
+            widget:
+              type: traefik
+              url: http://traefik.servarr.svc.cluster.local:9000
     - Media:
         - Plex:
             icon: plex.png
