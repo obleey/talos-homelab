@@ -87,9 +87,6 @@ config:
           cpu: true
           memory: true
           showLabel: true
-    - search:
-        provider: duckduckgo
-        target: _blank
     - longhorn:
         expanded: true
         total: true
