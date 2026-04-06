@@ -79,7 +79,6 @@ config:
           memory: true
           showLabel: true
     - longhorn:
-        url: https://longhorn.talos-cluster.local.obleey.com
         expanded: true
         total: true
         labels: true
