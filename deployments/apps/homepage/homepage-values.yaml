@@ -45,8 +45,8 @@ config:
     color: slate
     headerStyle: clean
     providers:
-    longhorn:
-      url: https://longhorn.talos-cluster.local.obleey.com
+      longhorn:
+        url: https://longhorn.talos-cluster.local.obleey.com
     layout:
       Infrastructure:
         style: row
