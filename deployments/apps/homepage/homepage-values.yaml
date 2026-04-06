@@ -148,7 +148,7 @@ config:
     - Downloads:
         - qBittorrent:
             icon: qbittorrent.png
-            href: https://qbit.talos-cluster.local.obleey.com
+            href: https://qb.talos-cluster.local.obleey.com
             description: Torrent client
             widget:
               type: qbittorrent
