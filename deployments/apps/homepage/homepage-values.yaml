@@ -54,6 +54,9 @@ config:
       Downloads:
         style: row
         columns: 2
+  providers:
+    longhorn:
+      url: http://longhorn.longhorn-system.svc.cluster.local:8000
 
   bookmarks:
     - Developer:
@@ -109,9 +112,12 @@ config:
             icon: longhorn.png
             href: https://longhorn.talos-cluster.local.obleey.com
             description: Distributed block storage
-            widget:
+            longhorn:
               type: longhorn
-              url: http://longhorn.longhorn-system.svc.cluster.local:8000
+              expanded: true
+              total: true
+              labels: true
+              nodes: true
         - Kubeseal:
             icon: kubernetes.png
             href: https://kubeseal.talos-cluster.local.obleey.com
