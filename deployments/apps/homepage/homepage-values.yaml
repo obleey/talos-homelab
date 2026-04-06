@@ -90,10 +90,6 @@ config:
 
   services:
     - Infrastructure:
-        - Longhorn:
-            icon: longhorn.png
-            href: https://longhorn.talos-cluster.local.obleey.com
-            description: Distributed block storage
         - ArgoCD:
             icon: argo-cd.png
             href: https://argocd.talos-cluster.local.obleey.com
@@ -102,10 +98,6 @@ config:
               type: argocd
               url: https://argocd.talos-cluster.local.obleey.com
               key: "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}"
-        - Kubeseal:
-            icon: kubernetes.png
-            href: https://kubeseal.talos-cluster.local.obleey.com
-            description: Sealed secrets UI
         - Traefik:
             icon: traefik.png
             href: https://traefik.talos-cluster.local.obleey.com/dashboard/
@@ -113,6 +105,15 @@ config:
             widget:
               type: traefik
               url: http://traefik.traefik.svc.cluster.local:9000
+        - Longhorn:
+            icon: longhorn.png
+            href: https://longhorn.talos-cluster.local.obleey.com
+            description: Distributed block storage
+        - Kubeseal:
+            icon: kubernetes.png
+            href: https://kubeseal.talos-cluster.local.obleey.com
+            description: Sealed secrets UI
+
     - Media:
         - Plex:
             icon: plex.png
