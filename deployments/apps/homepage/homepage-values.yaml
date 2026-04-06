@@ -36,7 +36,7 @@ persistence:
 
 providers:
   longhorn:
-    url: http://longhorn.longhorn-system.svc.cluster.local:8000
+    url: https://longhorn.talos-cluster.local.obleey.com
 
 config:
   kubernetes:
