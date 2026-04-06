@@ -108,7 +108,7 @@ config:
             description: Ingress controller
             widget:
               type: traefik
-              url: http://traefik.servarr.svc.cluster.local:9000
+              url: http://traefik.traefik.svc.cluster.local:9000
     - Media:
         - Plex:
             icon: plex.png
@@ -152,7 +152,14 @@ config:
               type: prowlarr
               url: http://prowlarr.servarr.svc.cluster.local:9696
               key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
-
+        - Bazarr:
+            icon: bazarr.png
+            href: https://bazarr.talos-cluster.local.obleey.com
+            description: Subtitle management
+            widget:
+              type: bazarr
+              url: http://bazarr.servarr.svc.cluster.local:6767
+              key: "{{HOMEPAGE_VAR_BAZARR_API_KEY}}"
     - Downloads:
         - qBittorrent:
             icon: qbittorrent.png
