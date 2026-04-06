@@ -19,7 +19,8 @@ controller:
 env:
   - name: HOMEPAGE_ALLOWED_HOSTS
     value: "hub.talos-cluster.local.obleey.com"
-
+  - name: TZ
+    value: "Europe/Ljubljana"
 envFrom:
   - secretRef:
       name: homepage-secrets
@@ -64,7 +65,7 @@ config:
   widgets:
     - greeting:
         text_size: xl
-        text: Welcome back
+        text: Welcome back, Obleey!
     - datetime:
         text_size: xl
         format:
