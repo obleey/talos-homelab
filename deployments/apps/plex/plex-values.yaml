@@ -2,12 +2,11 @@ pms:
   storageClassName: local-path
   configStorage: 20Gi
 
-  # hostNetwork is the key to showing as local not remote
 hostNetwork: true
 dnsPolicy: ClusterFirstWithHostNet
 
 nodeSelector:
-  kubernetes.io/hostname: talos-0z8-aw8 # or talos-xxc-2bm, pick one worker
+  kubernetes.io/hostname: talos-0z8-aw8
 
 rclone:
   enabled: false
@@ -21,6 +20,7 @@ extraVolumes:
 extraVolumeMounts:
   - name: servarr-data
     mountPath: /data
+
 extraEnv:
   HOSTNAME: talos-plex
 
