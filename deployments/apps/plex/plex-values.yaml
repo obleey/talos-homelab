@@ -6,7 +6,7 @@ hostNetwork: true
 dnsPolicy: ClusterFirstWithHostNet
 
 nodeSelector:
-  kubernetes.io/hostname: talos-0z8-aw8
+  kubernetes.io/hostname: talos-worker-1
 
 rclone:
   enabled: false
