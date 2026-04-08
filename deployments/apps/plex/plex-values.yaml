@@ -24,7 +24,7 @@ extraVolumeMounts:
   - name: servarr-data
     mountPath: /data
   - name: plex-transcode
-    mountPath: /transcode
+    mountPath: /transcodes
 
 extraEnv:
   HOSTNAME: talos-plex
