@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://alex1989hu.github.io/kubelet-serving-cert-approver
-    chart: kubelet-serving-cert-approver
-    targetRevision: 0.8.7
+    repoURL: https://github.com/obleey/talos-homelab
+    targetRevision: HEAD
+    path: deployments/infrastructure/kubelet-serving-cert-approver
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
