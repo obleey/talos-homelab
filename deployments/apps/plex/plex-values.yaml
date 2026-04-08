@@ -1,5 +1,5 @@
 pms:
-  storageClassName: local-path
+  storageClassName: longhorn
   configStorage: 20Gi
 
 hostNetwork: true
@@ -20,6 +20,10 @@ extraVolumes:
 extraVolumeMounts:
   - name: servarr-data
     mountPath: /data
+  - name: transcode
+    mountPath: /transcode
+  - name: cache
+    mountPath: /cache
 
 extraEnv:
   HOSTNAME: talos-plex
