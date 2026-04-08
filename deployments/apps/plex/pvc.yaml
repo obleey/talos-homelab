@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: plex-transcode
-  namespace: media
+  namespace: servarr
 spec:
   accessModes: [ReadWriteOnce]
   storageClassName: local-path
@@ -14,7 +14,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: plex-cache
-  namespace: media
+  namespace: servarr
 spec:
   accessModes: [ReadWriteOnce]
   storageClassName: local-path
