@@ -9,3 +9,4 @@ resources:
   - metrics-server/app.yaml
   - storageclasses/app.yaml
   - longhorn/app.yaml
+  - kubelet-serving-cert-approver/app.yaml
