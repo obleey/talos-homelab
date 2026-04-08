@@ -1,5 +1,5 @@
 pms:
-  storageClassName: longhorn
+  storageClassName: local-path
   configStorage: 20Gi
 
 hostNetwork: true
@@ -16,15 +16,10 @@ extraVolumes:
     nfs:
       server: 10.0.0.23
       path: /serve/starr-stack/data
-  - name: plex-transcode
-    persistentVolumeClaim:
-      claimName: plex-transcode
 
 extraVolumeMounts:
   - name: servarr-data
     mountPath: /data
-  - name: plex-transcode
-    mountPath: /transcodes
 
 extraEnv:
   HOSTNAME: talos-plex
