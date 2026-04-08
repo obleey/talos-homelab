@@ -16,14 +16,15 @@ extraVolumes:
     nfs:
       server: 10.0.0.23
       path: /serve/starr-stack/data
+  - name: plex-transcode
+    persistentVolumeClaim:
+      claimName: plex-transcode
 
 extraVolumeMounts:
   - name: servarr-data
     mountPath: /data
-  - name: transcode
+  - name: plex-transcode
     mountPath: /transcode
-  - name: cache
-    mountPath: /cache
 
 extraEnv:
   HOSTNAME: talos-plex

@@ -11,7 +11,7 @@ persistence:
     enabled: true
     accessMode: ReadWriteOnce
     size: 10Gi
-    storageClass: longhorn # /config → Longhorn
+    storageClass: longhorn
   media:
     enabled: false
   cache:
@@ -22,20 +22,20 @@ volumes:
     nfs:
       server: 10.0.0.23
       path: /serve/starr-stack/data/media
-  - name: transcode
+  - name: jf-transcode
     persistentVolumeClaim:
       claimName: jellyfin-transcode
-  - name: cache
+  - name: jf-cache
     persistentVolumeClaim:
       claimName: jellyfin-cache
 
 volumeMounts:
   - name: nfs-media
-    mountPath: /media
-  - name: transcode
-    mountPath: /transcode
-  - name: cache
-    mountPath: /cache
+    mountPath: /data/media
+  - name: jf-transcode
+    mountPath: /config/transcodes
+  - name: jf-cache
+    mountPath: /config/cache
 
 httpRoute:
   enabled: false
