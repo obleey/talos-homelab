@@ -1,6 +1,3 @@
-podPrivileges:
-  hostNetwork: true
-
 dnsPolicy: ClusterFirstWithHostNet
 
 nodeSelector:
@@ -33,3 +30,6 @@ httpRoute:
 service:
   type: ClusterIP
   port: 8096
+
+strategy:
+  type: Recreate
