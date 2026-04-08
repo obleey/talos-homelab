@@ -31,7 +31,7 @@ volumes:
 
 volumeMounts:
   - name: nfs-media
-    mountPath: /data/media
+    mountPath: /media
   - name: transcode
     mountPath: /transcode
   - name: cache
