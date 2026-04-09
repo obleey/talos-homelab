@@ -34,5 +34,6 @@ service:
 strategy:
   type: Recreate
 
-JELLYFIN_WEB_DIR:
-  value: /jellyfin/wwwroot
+env:
+  JELLYFIN_WEB_DIR:
+    value: /jellyfin/wwwroot
