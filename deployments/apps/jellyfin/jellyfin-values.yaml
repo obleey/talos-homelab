@@ -33,3 +33,6 @@ service:
 
 strategy:
   type: Recreate
+
+JELLYFIN_WEB_DIR:
+  value: /jellyfin/wwwroot
