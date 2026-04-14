@@ -12,7 +12,7 @@ metadata:
   annotations:
     argocd.argoproj.io/managed-by: talos-cluster
 data:
-  admin.enabled: "true"
+  admin.enabled: "false"
   accounts.obleey: login
   accounts.obleey.enabled: "true"
   accounts.readonly: login, apiKey
