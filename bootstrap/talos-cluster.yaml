@@ -21,6 +21,6 @@ spec:
   syncPolicy:
     syncOptions:
       - RespectIgnoreDifferences=true
-    # automated:
-    #   prune: true
-    #   selfHeal: true
+    automated:
+      prune: true
+      selfHeal: true
