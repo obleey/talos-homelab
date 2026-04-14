@@ -17,11 +17,9 @@ extraVolumes:
       server: 10.0.0.104
       path: /mnt/serve/starr-stack/data
   - name: plex-cache
-    storageClassName: longhorn
     persistentVolumeClaim:
       claimName: plex-cache
   - name: plex-transcode
-    storageClassName: longhorn
     persistentVolumeClaim:
       claimName: plex-transcode
 
