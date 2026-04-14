@@ -1,0 +1,33 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clonarr
+  namespace: servarr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clonarr
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: clonarr
+    spec:
+      containers:
+        - name: clonarr
+          image: ghcr.io/prophetse7en/clonarr:latest
+          env:
+            - name: TZ
+              value: Europe/Ljubljana
+          ports:
+            - containerPort: 6060
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: clonarr-config

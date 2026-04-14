@@ -13,3 +13,4 @@ resources:
   - seerr/app.yaml
   - sonarr/app.yaml
   - unpackerr/app.yaml
+  - clonarr/app.yaml

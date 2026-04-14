@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clonarr
+  namespace: servarr
+spec:
+  type: ClusterIP
+  selector:
+    app: clonarr
+  ports:
+    - port: 6060
+      targetPort: 6060
