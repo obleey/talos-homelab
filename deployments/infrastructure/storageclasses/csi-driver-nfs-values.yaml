@@ -1,5 +1,0 @@
-storageClass:
-  create: false
-  name: nfs-client
-externalSnapshotter:
-  enabled: true

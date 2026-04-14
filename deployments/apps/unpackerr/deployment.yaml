@@ -41,5 +41,5 @@ spec:
       volumes:
         - name: torrents
           nfs:
-            server: 10.0.0.23
-            path: /serve/starr-stack/data/torrents
+            server: 10.0.0.104
+            path: /mnt/serve/starr-stack/data/torrents

@@ -6,7 +6,6 @@ resources:
   - byparr/app.yaml
   - jellyfin/app.yaml
   - kubeseal-webgui/app.yaml
-  - notifiarr/app.yaml
   - plex/app.yaml
   - prowlarr/app.yaml
   - qbittorrent/app.yaml
@@ -14,4 +13,3 @@ resources:
   - seerr/app.yaml
   - sonarr/app.yaml
   - unpackerr/app.yaml
-  - homepage/app.yaml

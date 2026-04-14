@@ -38,5 +38,5 @@ spec:
             claimName: sonarr-config
         - name: data
           nfs:
-            server: 10.0.0.23
-            path: /serve/starr-stack/data
+            server: 10.0.0.104
+            path: /mnt/serve/starr-stack/data

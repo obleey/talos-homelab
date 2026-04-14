@@ -7,6 +7,5 @@ resources:
   - traefik/app.yaml
   - argocd/app.yaml
   - metrics-server/app.yaml
-  - storageclasses/app.yaml
   - longhorn/app.yaml
   - kubelet-serving-cert-approver/app.yaml

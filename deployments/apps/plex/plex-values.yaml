@@ -1,5 +1,5 @@
 pms:
-  storageClassName: local-path
+  storageClassName: longhorn
   configStorage: 20Gi
 
 hostNetwork: true
@@ -14,12 +14,24 @@ rclone:
 extraVolumes:
   - name: servarr-data
     nfs:
-      server: 10.0.0.23
-      path: /serve/starr-stack/data
+      server: 10.0.0.104
+      path: /mnt/serve/starr-stack/data
+  - name: plex-cache
+    storageClassName: longhorn
+    persistentVolumeClaim:
+      claimName: plex-cache
+  - name: plex-transcode
+    storageClassName: longhorn
+    persistentVolumeClaim:
+      claimName: plex-transcode
 
 extraVolumeMounts:
   - name: servarr-data
     mountPath: /data
+  - name: plex-cache
+    mountPath: /caches
+  - name: plex-transcode
+    mountPath: /transcodes
 
 extraEnv:
   HOSTNAME: talos-plex
