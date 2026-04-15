@@ -8,6 +8,9 @@ spec:
   selector:
     app: qbittorrent
   ports:
+    - name: webui
+      port: 8080
+      targetPort: 8080
     - name: torrenting-tcp
       port: 30881
       targetPort: 30881
