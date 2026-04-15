@@ -33,11 +33,9 @@ spec:
             - containerPort: 8080
               name: webui
             - containerPort: 30881
-              nodePort: 30881
               protocol: TCP
               name: torrenting-tcp
             - containerPort: 30881
-              nodePort: 30881
               protocol: UDP
               name: torrenting-udp
           volumeMounts:
