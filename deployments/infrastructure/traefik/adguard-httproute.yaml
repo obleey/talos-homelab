@@ -9,8 +9,8 @@ spec:
       namespace: traefik
       sectionName: websecure
   hostnames:
-    - adguard.local.obleey.com
+    - technitium.local.obleey.com
   rules:
     - backendRefs:
         - name: truenas
-          port: 30004
+          port: 5380
