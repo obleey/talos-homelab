@@ -1,0 +1,48 @@
+image:
+  repository: lscr.io/linuxserver/qbittorrent
+  tag: "20.04.1"
+  pullPolicy: IfNotPresent
+
+settings:
+  automaticPortSetup: false
+
+env:
+  TZ: Europe/Ljubljana
+  QBT_WEBUI_PORT: 8080
+  QBT_TORRENTING_PORT: 30881
+
+service:
+  main:
+    ports:
+      http:
+        port: 8080
+  bittorrent:
+    enabled: true
+    type: NodePort
+    ports:
+      bittorrent:
+        enabled: true
+        port: 30881
+        nodePort: 30881
+        protocol: TCP
+        targetPort: 30881
+
+ingress:
+  enabled: false
+
+persistence:
+  config:
+    enabled: true
+    existingClaim: qbittorrent-config
+  downloads:
+    enabled: true
+    mountPath: /data/torrents
+    type: custom
+    volumeSpec:
+      nfs:
+        server: 10.0.0.104
+        path: /mnt/serve/starr-stack/data/torrents
+
+# Recreate strategy to avoid two pods mounting config PVC at the same time
+controller:
+  strategy: Recreate
