@@ -1,6 +1,6 @@
 image:
-  repository: ghcr.io/home-operations/qbittorrent
-  tag: "" # leave empty to use chart's appVersion
+  repository: lscr.io/linuxserver/qbittorrent
+  tag: "20.04.1"
   pullPolicy: IfNotPresent
 
 settings:
