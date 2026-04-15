@@ -9,12 +9,19 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: https://github.com/obleey/talos-homelab
-    targetRevision: HEAD
-    path: deployments/apps/qbittorrent
-    directory:
-      exclude: "{app.yaml, qbittorrent-values.yaml}"
+  sources:
+    - repoURL: https://k8s-home-lab.github.io/helm-charts/
+      chart: qbittorrent
+      targetRevision: 14.4.0
+      helm:
+        valueFiles:
+          - $values/deployments/apps/qbittorrent/qbittorrent-values.yaml
+    - repoURL: https://github.com/obleey/talos-homelab
+      targetRevision: HEAD
+      ref: values
+      path: deployments/apps/qbittorrent
+      directory:
+        exclude: "{app.yaml,qbittorrent-values.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: servarr
