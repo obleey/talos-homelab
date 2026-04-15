@@ -28,7 +28,8 @@ service:
         targetPort: 30881
 
 ingress:
-  enabled: false
+  main:
+    enabled: false
 
 persistence:
   config:
