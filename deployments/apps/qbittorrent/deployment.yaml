@@ -31,10 +31,13 @@ spec:
               value: "30881"
           ports:
             - containerPort: 8080
+              name: webui
             - containerPort: 30881
               protocol: TCP
+              name: torrenting-tcp
             - containerPort: 30881
               protocol: UDP
+              name: torrenting-udp
           volumeMounts:
             - name: config
               mountPath: /config
