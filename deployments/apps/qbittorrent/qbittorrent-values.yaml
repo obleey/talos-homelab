@@ -8,8 +8,6 @@ settings:
 
 env:
   TZ: Europe/Ljubljana
-  QBT_WEBUI_PORT: 8080
-  QBT_TORRENTING_PORT: 30881
 
 service:
   main:
