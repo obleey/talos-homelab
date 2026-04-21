@@ -1,4 +1,5 @@
 image:
+  # renovate: datasource=custom.plex depName=plex versioning=loose
   tag: "1.43.0.10492-121068a07"
 
 pms:
