@@ -15,7 +15,7 @@
       ]
     }
   },
-  "helmValues": {
+  "helm-values": {
     "fileMatch": ["(^|/).*values\\.yaml$"]
   },
   "kubernetes": {
