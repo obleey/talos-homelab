@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: clonarr
-          image: ghcr.io/prophetse7en/clonarr:latest
+          image: ghcr.io/prophetse7en/clonarr:v2.0.8
           env:
             - name: TZ
               value: Europe/Ljubljana
