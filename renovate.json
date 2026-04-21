@@ -15,8 +15,8 @@
       ]
     }
   },
-  "helm-values": {
-    "managerFilePatterns": ["/(^|/).*values\\.yaml$/"]
+  "helmValues": {
+    "fileMatch": ["(^|/).*values\\.yaml$"]
   },
   "kubernetes": {
     "managerFilePatterns": ["/(^|/)deployments/.+\\.yaml$/"]
