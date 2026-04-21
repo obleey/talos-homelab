@@ -58,6 +58,11 @@
       "automerge": false,
       "labels": ["renovate", "major-update"],
       "matchPackageNames": ["/.*/"]
+    },
+    {
+      "matchPackageNames": ["registry.k8s.io/metrics-server/metrics-server"],
+      "datasource": "github-releases",
+      "packageName": "kubernetes-sigs/metrics-server"
     }
   ],
   "argocd": {
