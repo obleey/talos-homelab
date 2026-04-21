@@ -1,6 +1,6 @@
 image:
   # renovate: datasource=custom.plex depName=plex versioning=loose
-  tag: "1.43.0.10492-121068a07"
+  tag: "1.43.1.10611-1e34174b1"
 
 pms:
   storageClassName: longhorn
