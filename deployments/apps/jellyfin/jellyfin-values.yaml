@@ -1,3 +1,7 @@
+image:
+  # renovate: datasource=docker depName=jellyfin/jellyfin
+  tag: "10.11.8"
+
 podPrivileges:
   hostNetwork: true
 
