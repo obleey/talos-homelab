@@ -15,6 +15,15 @@
       ]
     }
   },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["(^|/).*values\\.yaml$"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+) versioning=(?<versioning>[^\\s]+)\\n\\s+tag: \"(?<currentValue>[^\"]+)\""
+      ]
+    }
+  ],
   "helm-values": {
     "fileMatch": ["(^|/).*values\\.yaml$"]
   },
@@ -61,8 +70,7 @@
     },
     {
       "matchPackageNames": ["registry.k8s.io/metrics-server/metrics-server"],
-      "datasource": "github-releases",
-      "packageName": "kubernetes-sigs/metrics-server"
+      "enabled": false
     }
   ],
   "argocd": {
