@@ -37,11 +37,11 @@ ArgoCD polls the repo every 30 seconds and reconciles any drift automatically.
 
 ### Cluster Layout
 
-| Node            | Role          | Label      |
-| --------------- | ------------- | ---------- |
-| `talos-3sw-0t2` | control-plane | `node=c-1` |
-| `talos-0z8-aw8` | worker        | `node=w-1` |
-| `talos-xxc-2bm` | worker        | `node=w-2` |
+| Node                    | Role          | Label               |
+| ----------------------- | ------------- | ------------------- |
+| `talos-control-plane-1` | control-plane | `node=controlplane` |
+| `talos-worker-1`        | worker        | `node=worker`       |
+| `talos-worker-2`        | worker        | `node=worker`       |
 
 > **Adapt this:** Change node names and labels to match your own Talos node hostnames.
 
