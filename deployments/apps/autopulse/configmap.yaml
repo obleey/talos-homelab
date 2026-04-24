@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: autopulse-config
+  namespace: servarr
+data:
+  config.yaml: |
+    app:
+      hostname: 0.0.0.0
+      port: 2875
+      database_url: "sqlite:///config/autopulse.db"
+      log_level: info
+
+    opts:
+      check_path: false
+      max_retries: 5
+      cleanup_days: 10
+
+    triggers:
+      sonarr:
+        type: sonarr
+      radarr:
+        type: radarr
+
+    targets:
+      plex:
+        type: plex
+        url: "http://10.0.0.161:32400"
+        refresh: true
+        analyze: false
+        libraries:
+          - "1"
+          - "2"
+
+      jellyfin:
+        type: jellyfin
+        url: "http://10.0.0.161:8096"

@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autopulse
+  namespace: servarr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: autopulse
+  template:
+    metadata:
+      labels:
+        app: autopulse
+    spec:
+      containers:
+        - name: autopulse
+          image: ghcr.io/dan-online/autopulse:v1.6.0-sqlite
+          env:
+            - name: TZ
+              value: Europe/Ljubljana
+            - name: AUTOPULSE__AUTH__USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: autopulse-secret
+                  key: AUTOPULSE__AUTH__USERNAME
+            - name: AUTOPULSE__AUTH__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: autopulse-secret
+                  key: AUTOPULSE__AUTH__PASSWORD
+            - name: AUTOPULSE__TARGETS__PLEX__TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: autopulse-secret
+                  key: PLEX_TOKEN
+            - name: AUTOPULSE__TARGETS__JELLYFIN__TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: autopulse-secret
+                  key: JELLYFIN_TOKEN
+          ports:
+            - containerPort: 2875
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: autopulse-config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: autopulse-config
+        - name: autopulse-config
+          configMap:
+            name: autopulse-config
+        - name: data
+          nfs:
+            server: 10.0.0.104
+            path: /mnt/serve/starr-stack/data

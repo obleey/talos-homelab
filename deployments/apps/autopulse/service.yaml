@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: autopulse
+  namespace: servarr
+spec:
+  selector:
+    app: autopulse
+  ports:
+    - port: 2875
+      targetPort: 2875
