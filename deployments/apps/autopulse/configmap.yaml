@@ -21,6 +21,8 @@ data:
         type: sonarr
       radarr:
         type: radarr
+      bazarr:
+        type: bazarr
 
     targets:
       plex:
