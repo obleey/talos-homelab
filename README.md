@@ -37,11 +37,11 @@ ArgoCD polls the repo every 30 seconds and reconciles any drift automatically.
 
 ### Cluster Layout
 
-| Node | Role | Label |
-|------|------|-------|
+| Node            | Role          | Label      |
+| --------------- | ------------- | ---------- |
 | `talos-3sw-0t2` | control-plane | `node=c-1` |
-| `talos-0z8-aw8` | worker | `node=w-1` |
-| `talos-xxc-2bm` | worker | `node=w-2` |
+| `talos-0z8-aw8` | worker        | `node=w-1` |
+| `talos-xxc-2bm` | worker        | `node=w-2` |
 
 > **Adapt this:** Change node names and labels to match your own Talos node hostnames.
 
@@ -64,9 +64,11 @@ ArgoCD polls the repo every 30 seconds and reconciles any drift automatically.
 │   │   ├── sealed-secrets/          ← Secret encryption controller
 │   │   ├── storageclasses/          ← NFS + local-path storage
 │   │   └── traefik/                 ← Gateway API controller
-│   └── apps/                        ← Your workloads go here
+│   └── apps/                        ← Workloads
 │       ├── kustomization.yaml
-│       └── kubeseal-webgui/         ← Example app
+│       ├── autopulse/               ← Media server scan automation
+│       ├── bazarr/                  ← Subtitle manager
+│       └── kubeseal-webgui/         ← Sealed Secrets web UI
 └── README.md
 ```
 
@@ -74,16 +76,66 @@ ArgoCD polls the repo every 30 seconds and reconciles any drift automatically.
 
 ## ⚙️ Infrastructure Components
 
-| Component | Chart Version | Namespace | Description |
-|-----------|--------------|-----------|-------------|
-| [ArgoCD](https://argo-cd.readthedocs.io/) | 9.4.12 | argocd | GitOps controller |
-| [Cilium](https://cilium.io/) | 1.19.2 | kube-system | CNI + LoadBalancer via L2 |
-| [cert-manager](https://cert-manager.io/) | v1.20.0 | cert-manager | Automatic TLS certificates |
-| [Traefik](https://traefik.io/) | 39.0.7 | traefik | Gateway API ingress controller |
-| [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) | 2.18.4 | kube-system | Secret encryption |
-| [Metrics Server](https://github.com/kubernetes-sigs/metrics-server) | v0.8.1 | kube-system | Resource metrics (`kubectl top`) |
-| [CSI Driver NFS](https://github.com/kubernetes-csi/csi-driver-nfs) | v4.12.1 | kube-system | NFS storage provisioner |
-| [Local Path Provisioner](https://github.com/rancher/local-path-provisioner) | v0.0.35 | local-path-storage | Node-local storage |
+| Component                                                                   | Chart Version | Namespace          | Description                                    |
+| --------------------------------------------------------------------------- | ------------- | ------------------ | ---------------------------------------------- |
+| [ArgoCD](https://argo-cd.readthedocs.io/)                                   | 9.4.12        | argocd             | GitOps controller                              |
+| [Cilium](https://cilium.io/)                                                | 1.19.2        | kube-system        | CNI + LoadBalancer via L2                      |
+| [cert-manager](https://cert-manager.io/)                                    | v1.20.0       | cert-manager       | Automatic TLS certificates                     |
+| [Traefik](https://traefik.io/)                                              | 39.0.7        | traefik            | Gateway API ingress controller                 |
+| [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets)            | 2.18.4        | kube-system        | Secret encryption                              |
+| [Metrics Server](https://github.com/kubernetes-sigs/metrics-server)         | v0.8.1        | kube-system        | Resource metrics (`kubectl top`)               |
+| [CSI Driver NFS](https://github.com/kubernetes-csi/csi-driver-nfs)          | v4.12.1       | kube-system        | NFS storage provisioner                        |
+| [Local Path Provisioner](https://github.com/rancher/local-path-provisioner) | v0.0.35       | local-path-storage | Node-local storage                             |
+| [Longhorn](https://longhorn.io/)                                            | —             | longhorn-system    | Distributed block storage for app config/state |
+
+---
+
+## 📺 Apps
+
+| App                                                          | Namespace | Version | Description                                                                     |
+| ------------------------------------------------------------ | --------- | ------- | ------------------------------------------------------------------------------- |
+| [autopulse](https://github.com/dan-online/autopulse)         | servarr   | v1.6.0  | Webhook receiver from Sonarr/Radarr → targeted library scans in Plex + Jellyfin |
+| [bazarr](https://www.bazarr.media/)                          | servarr   | 1.5.6   | Subtitle manager for Sonarr/Radarr                                              |
+| [kubeseal-webgui](https://github.com/Mahsad/kubeseal-webgui) | —         | —       | Web UI for sealing secrets                                                      |
+
+### autopulse
+
+autopulse replaces autoscan. It receives webhooks from Sonarr and Radarr when media is downloaded or upgraded, then sends targeted refresh requests directly to Plex and Jellyfin — no full library scans needed.
+
+```
+Sonarr/Radarr → webhook → autopulse → Plex  (targeted metadata refresh)
+                                    → Jellyfin (targeted library scan)
+```
+
+**Stack layout:**
+
+```
+deployments/apps/autopulse/
+├── app.yaml              ← ArgoCD Application manifest
+├── pvc.yaml              ← 1Gi Longhorn PVC for SQLite DB + config
+├── configmap.yaml        ← config.yaml (no secrets — tokens injected via env vars)
+├── sealedsecret.yaml     ← auth credentials + Plex/Jellyfin tokens
+├── deployment.yaml       ← autopulse v1.6.0-sqlite
+├── deployment-ui.yaml    ← autopulse UI
+├── services.yaml         ← ClusterIP services for API (:2875) + UI (:3000)
+└── httproutes.yaml       ← HTTPRoutes via traefik-gateway (websecure)
+```
+
+**Sonarr/Radarr webhook config:**
+
+| Field    | Value                                                             |
+| -------- | ----------------------------------------------------------------- |
+| URL      | `http://autopulse.servarr.svc.cluster.local:2875/triggers/sonarr` |
+| Method   | POST                                                              |
+| Triggers | On Import, On Upgrade, On Rename                                  |
+| Auth     | Basic — credentials from sealed secret                            |
+
+**Hostnames:**
+
+| Service       | URL                                                   |
+| ------------- | ----------------------------------------------------- |
+| autopulse API | `https://autopulse.talos-cluster.local.obleey.com`    |
+| autopulse UI  | `https://autopulse-ui.talos-cluster.local.obleey.com` |
 
 ---
 
@@ -91,14 +143,14 @@ ArgoCD polls the repo every 30 seconds and reconciles any drift automatically.
 
 ArgoCD applies resources in dependency order using sync waves:
 
-| Wave | Component | Why |
-|------|-----------|-----|
-| `-5` | sealed-secrets | Must exist before any sealed secret is applied |
-| `-4` | cilium | CNI must be ready before other networking |
-| `-3` | cert-manager, metrics-server, storageclasses | Depends on CNI |
-| `-2` | traefik | Depends on cert-manager for TLS |
-| `-1` | argocd | Self-manages after initial install |
-| `0` | apps | Default, runs after all infrastructure |
+| Wave | Component                                    | Why                                            |
+| ---- | -------------------------------------------- | ---------------------------------------------- |
+| `-5` | sealed-secrets                               | Must exist before any sealed secret is applied |
+| `-4` | cilium                                       | CNI must be ready before other networking      |
+| `-3` | cert-manager, metrics-server, storageclasses | Depends on CNI                                 |
+| `-2` | traefik                                      | Depends on cert-manager for TLS                |
+| `-1` | argocd                                       | Self-manages after initial install             |
+| `0`  | apps                                         | Default, runs after all infrastructure         |
 
 ---
 
@@ -112,15 +164,15 @@ Cilium handles `LoadBalancer` type services using L2 announcements — no BGP, n
 # cilium/loadbalancer-pool.yaml
 spec:
   blocks:
-    - start: "10.0.0.153"   # ← Change to your IP range start
-      stop:  "10.0.0.199"   # ← Change to your IP range end
+    - start: "10.0.0.153" # ← Change to your IP range start
+      stop: "10.0.0.199" # ← Change to your IP range end
 ```
 
 ```yaml
 # cilium/l2-announcement-policy.yaml
 spec:
   interfaces:
-    - ens18   # ← Change to your network interface (run: ip link)
+    - ens18 # ← Change to your network interface (run: ip link)
 ```
 
 > **Adapt this:** Run `ip link` on your nodes to find the correct interface name. Update the IP range to match your home network subnet.
@@ -129,10 +181,21 @@ spec:
 
 Traefik is configured as a Gateway API controller with two listeners:
 
-| Listener | Port | Protocol |
-|----------|------|----------|
-| `web` | 80 | HTTP |
-| `websecure` | 443 | HTTPS with wildcard TLS |
+| Listener    | Port | Protocol                |
+| ----------- | ---- | ----------------------- |
+| `web`       | 80   | HTTP                    |
+| `websecure` | 443  | HTTPS with wildcard TLS |
+
+All apps use `HTTPRoute` resources pointing at `traefik-gateway` in the `traefik` namespace:
+
+```yaml
+parentRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: traefik-gateway
+    namespace: traefik
+    sectionName: websecure
+```
 
 ### TLS Certificates
 
@@ -150,21 +213,26 @@ All services follow: `<service>.<cluster-name>.<your-domain>`
 
 ## 💾 Storage
 
-| StorageClass | Provisioner | Default | Use For |
-|--------------|-------------|---------|---------|
-| `local-path` | `rancher.io/local-path` | ✅ | Single-node workloads |
-| `nfs-client` | `nfs.csi.k8s.io` | ❌ | Shared storage, media |
+| StorageClass | Provisioner             | Default | Use For                                 |
+| ------------ | ----------------------- | ------- | --------------------------------------- |
+| `local-path` | `rancher.io/local-path` | ✅      | Single-node workloads                   |
+| `nfs-client` | `nfs.csi.k8s.io`        | ❌      | Shared storage, media                   |
+| `longhorn`   | `driver.longhorn.io`    | ❌      | App config, databases, replicated state |
 
 ### NFS Configuration
 
 ```yaml
 # storageclasses/nfs-storageclass.yaml
 parameters:
-  server: 10.0.0.23      # ← Change to your NFS server IP
-  share: /serve/k8s      # ← Change to your NFS export path
+  server: 10.0.0.23 # ← Change to your NFS server IP
+  share: /serve/k8s # ← Change to your NFS export path
 ```
 
 > **Adapt this:** Update the NFS server IP and share path. If you have no NFS server, remove `nfs-storageclass.yaml` and the `csi-driver-nfs` source from `storageclasses/app.yaml`.
+
+### Longhorn
+
+Longhorn provides replicated block storage across worker nodes. Used for app config volumes (e.g. autopulse SQLite DB) where data needs to survive node failures without NFS.
 
 ---
 
@@ -193,10 +261,10 @@ kubectl create secret generic my-secret \
 
 # 2. Seal it with the cluster's public key
 kubeseal -f /tmp/my-secret.yaml \
-  -w deployments/infrastructure/my-app/my-secret-sealed.yaml
+  -w deployments/apps/my-app/my-secret-sealed.yaml
 
 # 3. Commit the sealed secret safely
-git add deployments/infrastructure/my-app/my-secret-sealed.yaml
+git add deployments/apps/my-app/my-secret-sealed.yaml
 git commit -m "feat: add sealed secret for my-app"
 git push
 ```
@@ -217,12 +285,13 @@ kubeseal -f /tmp/raw-secret.yaml -w sealed-secret.yaml
 
 ### Secrets in this repo
 
-| Secret | Namespace | Contains |
-|--------|-----------|---------|
-| `git-creds-sealed.yaml` | argocd | GitHub credentials for repo access |
-| `cloudflare-api-token-sealed.yaml` | cert-manager | Cloudflare DNS token for TLS |
-| `argocd-notifications-secret-sealed.yaml` | argocd | Slack bot token |
-| `mount-options-sealed.yaml` | kube-system | NFS mount options |
+| Secret                                    | Namespace    | Contains                                              |
+| ----------------------------------------- | ------------ | ----------------------------------------------------- |
+| `git-creds-sealed.yaml`                   | argocd       | GitHub credentials for repo access                    |
+| `cloudflare-api-token-sealed.yaml`        | cert-manager | Cloudflare DNS token for TLS                          |
+| `argocd-notifications-secret-sealed.yaml` | argocd       | Slack bot token                                       |
+| `mount-options-sealed.yaml`               | kube-system  | NFS mount options                                     |
+| `sealedsecret.yaml`                       | servarr      | autopulse auth credentials + Plex/Jellyfin API tokens |
 
 ---
 
@@ -244,7 +313,7 @@ kubeseal -f /tmp/raw-secret.yaml -w sealed-secret.yaml
 **1. Clone and configure**
 
 ```bash
-git clone https://github.com/your-username/talos-homelab
+git clone https://github.com/obleey/talos-homelab
 cd talos-homelab
 ```
 
@@ -274,6 +343,16 @@ kubectl create secret generic argocd-notifications-secret \
   --from-literal=slack-token=<slack-token> \
   -n argocd -o yaml | \
   kubeseal -w deployments/infrastructure/argocd/argocd-notifications-secret-sealed.yaml
+
+# autopulse credentials + media server tokens
+kubectl create secret generic autopulse-secret \
+  --namespace servarr \
+  --from-literal=AUTOPULSE__AUTH__USERNAME=<username> \
+  --from-literal=AUTOPULSE__AUTH__PASSWORD=<password> \
+  --from-literal=PLEX_TOKEN=<plex-token> \
+  --from-literal=JELLYFIN_TOKEN=<jellyfin-token> \
+  --dry-run=client -o yaml | \
+  kubeseal --format yaml > deployments/apps/autopulse/sealedsecret.yaml
 ```
 
 **3. Install ArgoCD**
@@ -323,9 +402,11 @@ Every app follows the same pattern:
 ```
 deployments/apps/my-app/
 ├── app.yaml              ← ArgoCD Application manifest
-├── my-app-values.yaml    ← Helm values
+├── deployment.yaml       ← Workload
+├── service.yaml          ← ClusterIP service
 ├── httproute.yaml        ← Gateway API route
-└── secret-sealed.yaml    ← Any sealed secrets
+├── pvc.yaml              ← Longhorn PVC (if stateful)
+└── sealedsecret.yaml     ← Sealed secrets (if needed)
 ```
 
 **app.yaml template:**
@@ -336,27 +417,25 @@ kind: Application
 metadata:
   name: my-app
   namespace: argocd
+  labels:
+    argocd.argoproj.io/managed-by: talos-cluster
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  sources:
-    - repoURL: https://helm.example.com
-      chart: my-chart
-      targetRevision: 1.0.0
-      helm:
-        valueFiles:
-          - $values/deployments/apps/my-app/my-app-values.yaml
-    - repoURL: https://github.com/your-username/talos-homelab
-      targetRevision: HEAD
-      ref: values
-      path: deployments/apps/my-app
-      directory:
-        exclude: "{app.yaml,my-app-values.yaml}"
+  source:
+    repoURL: https://github.com/obleey/talos-homelab
+    targetRevision: HEAD
+    path: deployments/apps/my-app
+    directory:
+      exclude: "{app.yaml}"
   destination:
     server: https://kubernetes.default.svc
-    namespace: my-app
+    namespace: my-namespace
   syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
 ```
 
 Add to `deployments/apps/kustomization.yaml` and push. ArgoCD picks it up within 30 seconds.
@@ -369,7 +448,7 @@ ArgoCD sends Slack notifications on sync failures.
 
 ```
 🔴 [TALOS-CLUSTER] MY-APP sync failed!
-Repo: https://github.com/your-username/talos-homelab
+Repo: https://github.com/obleey/talos-homelab
 Error: <error details>
 ```
 
@@ -388,7 +467,16 @@ kubectl top nodes
 kubectl top pods -A
 
 # Seal a new secret
-kubeseal -f /tmp/secret.yaml -w deployments/path/to/sealed-secret.yaml
+kubeseal -f /tmp/secret.yaml -w deployments/apps/my-app/sealed-secret.yaml
+
+# Tail autopulse logs
+kubectl logs -f -n servarr deploy/autopulse
+
+# Restart autopulse after config change
+kubectl rollout restart -n servarr deployment/autopulse
+
+# Edit autopulse config live
+kubectl edit configmap autopulse-config -n servarr
 
 # Rebuild cluster from scratch (everything is in git)
 helm install argocd argo/argo-cd -n argocd \
