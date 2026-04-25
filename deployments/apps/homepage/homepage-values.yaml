@@ -171,6 +171,10 @@ config:
               type: bazarr
               url: http://bazarr.servarr.svc.cluster.local:6767
               key: "{{HOMEPAGE_VAR_BAZARR_API_KEY}}"
+        - Clonarr:
+            icon: clonarr.png
+            href: https://clonarr.talos-cluster.local.obleey.com
+            description: Trash Guides syncer
     - Downloads:
         - qBittorrent:
             icon: qbittorrent.png
