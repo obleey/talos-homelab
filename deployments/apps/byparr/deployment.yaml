@@ -15,4 +15,4 @@ spec:
     spec:
       containers:
         - name: byparr
-          image: ghcr.io/thephaseless/byparr:v2.1.0
+          image: ghcr.io/thephaseless/byparr@sha256:c3eb36925057fd304a95e300626063f9bad3a1b7cbfced7f4e2a3a819905ce83
