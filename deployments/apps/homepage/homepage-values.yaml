@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/gethomepage/homepage
+  repository: ghcr.io/gethomepage/homepage:v1.12.3
 
 enableRbac: true
 
