@@ -127,7 +127,7 @@ config:
             description: Media server
             widget:
               type: plex
-              url: http://10.0.0.151:32400
+              url: http://10.0.0.161:32400
               key: "{{HOMEPAGE_VAR_PLEX_TOKEN}}"
         - Jellyfin:
             icon: jellyfin.png
