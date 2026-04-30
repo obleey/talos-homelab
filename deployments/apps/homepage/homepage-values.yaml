@@ -172,7 +172,7 @@ config:
               url: http://bazarr.servarr.svc.cluster.local:6767
               key: "{{HOMEPAGE_VAR_BAZARR_API_KEY}}"
         - Clonarr:
-            icon: clonarr.png
+            icon: https://clonarr.talos-cluster.local.obleey.com/icons/clonarr.png
             href: https://clonarr.talos-cluster.local.obleey.com
             description: Trash Guides syncer
     - Downloads:
