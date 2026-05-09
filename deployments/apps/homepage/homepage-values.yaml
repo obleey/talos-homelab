@@ -175,6 +175,15 @@ config:
             icon: https://clonarr.talos-cluster.local.obleey.com/icons/clonarr.png
             href: https://clonarr.talos-cluster.local.obleey.com
             description: Trash Guides syncer
+
+        - Seerr:
+            icon: seerr.png
+            href: https://seerr.talos-cluster.local.obleey.com
+            description: Media request management
+            widget:
+              type: seerr
+              url: http://seerr.servarr.svc.cluster.local:5055
+              key: "{{HOMEPAGE_VAR_SEERR_API_KEY}}"
     - Downloads:
         - qBittorrent:
             icon: qbittorrent.png
