@@ -64,6 +64,10 @@ config:
             - abbr: GH
               href: https://github.com/obleey
               icon: github.png
+        - Talos Homelab:
+            - abbr: TH
+              href: https://github.com/obleey/talos-homelab
+              icon: github.png
 
   widgets:
     - greeting:
