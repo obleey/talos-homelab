@@ -198,3 +198,8 @@ config:
               url: http://qbittorrent.servarr.svc.cluster.local:8080
               username: "{{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}"
               password: "{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}"
+    - Infrastructure:
+        - Technitium:
+            - abbr: Tech
+              href: https://technitium.local.obleey.com
+              icon: technitium.png
