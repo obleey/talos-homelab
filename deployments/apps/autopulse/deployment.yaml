@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: autopulse
-          image: ghcr.io/dan-online/autopulse:v1.7.0-sqlite
+          image: ghcr.io/dan-online/autopulse:v2.0.0-sqlite
           env:
             - name: TZ
               value: Europe/Ljubljana
