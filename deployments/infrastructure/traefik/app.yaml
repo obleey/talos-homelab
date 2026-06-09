@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://helm.traefik.io/traefik
       chart: traefik
-      targetRevision: 40.2.0
+      targetRevision: 40.3.0
       helm:
         valueFiles:
           - $values/deployments/infrastructure/traefik/traefik-values.yaml
