@@ -37,7 +37,7 @@ datasources:
       - name: VictoriaMetrics
         type: prometheus
         uid: victoriametrics
-        url: http://victoriametrics-victoria-metrics-single-server.observability.svc.cluster.local:8428
+        url: http://victoria-metrics-single-server.observability.svc.cluster.local:8428
         isDefault: true
         editable: false
       - name: VictoriaLogs

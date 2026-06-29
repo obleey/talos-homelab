@@ -12,5 +12,5 @@ spec:
     - vm.talos-cluster.local.obleey.com
   rules:
     - backendRefs:
-        - name: victoriametrics-victoria-metrics-single-server
+        - name: victoria-metrics-single-server
           port: 8428
