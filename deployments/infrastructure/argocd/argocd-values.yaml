@@ -67,33 +67,13 @@ notifications:
             ]
           }]
 
-    template.app-sync-succeeded: |
-      slack:
-        blocks: |
-          [{
-            "type": "section",
-            "text": {
-              "type": "mrkdwn",
-              "text": ":large_green_circle: *[talos-cluster]* *{{.app.metadata.name}}* synced successfully"
-            },
-            "accessory": {
-              "type": "button",
-              "text": {"type": "plain_text", "text": "Open App"},
-              "url": "https://argocd.talos-cluster.local.obleey.com/applications/{{.app.metadata.name}}"
-            }
-          }]
-
   triggers:
     trigger.on-sync-failed: |
       - when: app.status.operationState != nil and app.status.operationState.phase in ['Error', 'Failed']
         send: [app-sync-failed]
-    trigger.on-sync-succeeded: |
-      - when: app.status.operationState != nil and app.status.operationState.phase in ['Succeeded']
-        send: [app-sync-succeeded]
 
   subscriptions:
     - recipients:
         - slack:#deployments
       triggers:
         - on-sync-failed
-        - on-sync-succeeded
