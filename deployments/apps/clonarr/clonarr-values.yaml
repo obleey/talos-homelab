@@ -1,0 +1,27 @@
+fullnameOverride: clonarr
+
+controllers:
+  main:
+    type: deployment
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/prophetse7en/clonarr
+          tag: v3.3.0
+        env:
+          TZ: Europe/Ljubljana
+
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 6060
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    existingClaim: clonarr-config
+    globalMounts:
+      - path: /config

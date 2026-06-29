@@ -1,0 +1,17 @@
+fullnameOverride: byparr
+
+controllers:
+  main:
+    type: deployment
+    containers:
+      main:
+        image:
+          repository: ghcr.io/thephaseless/byparr
+          tag: v2.1.0
+
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 8191

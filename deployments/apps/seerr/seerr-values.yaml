@@ -1,0 +1,32 @@
+fullnameOverride: seerr
+
+controllers:
+  main:
+    type: deployment
+    strategy: Recreate
+    pod:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsGroup: 1000
+    containers:
+      main:
+        image:
+          repository: ghcr.io/seerr-team/seerr
+          tag: v3.3.0
+        env:
+          TZ: Europe/Ljubljana
+
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 5055
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    existingClaim: seerr-config
+    globalMounts:
+      - path: /app/config

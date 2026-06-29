@@ -35,7 +35,7 @@
   },
   "packageRules": [
     {
-      "matchManagers": ["helmv3", "helm-values"],
+      "matchManagers": ["helmv3", "helm-values", "argocd"],
       "groupName": "helm charts"
     },
     {
