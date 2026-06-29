@@ -92,6 +92,11 @@
       "matchPackageNames": ["ghcr.io/thephaseless/byparr"],
       "updateTypes": ["digest"],
       "enabled": true
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/dan-online/autopulse"],
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-sqlite$"
     }
   ]
 }
