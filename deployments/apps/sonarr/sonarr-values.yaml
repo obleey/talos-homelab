@@ -1,0 +1,35 @@
+fullnameOverride: sonarr
+
+controllers:
+  main:
+    type: deployment
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: lscr.io/linuxserver/sonarr
+          tag: 4.0.17.2952-ls306
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: Europe/Ljubljana
+
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 8989
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    existingClaim: sonarr-config
+    globalMounts:
+      - path: /config
+  data:
+    type: nfs
+    server: 10.0.0.104
+    path: /mnt/serve/starr-stack/data
+    globalMounts:
+      - path: /data

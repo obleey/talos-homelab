@@ -9,12 +9,19 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: https://github.com/obleey/talos-homelab
-    targetRevision: HEAD
-    path: deployments/apps/sonarr
-    directory:
-      exclude: "{app.yaml}"
+  sources:
+    - repoURL: https://bjw-s-labs.github.io/helm-charts
+      chart: app-template
+      targetRevision: 5.0.1
+      helm:
+        valueFiles:
+          - $values/deployments/apps/sonarr/sonarr-values.yaml
+    - repoURL: https://github.com/obleey/talos-homelab
+      targetRevision: HEAD
+      ref: values
+      path: deployments/apps/sonarr
+      directory:
+        exclude: "{app.yaml,sonarr-values.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: servarr
