@@ -5,6 +5,9 @@ fullnameOverride: grafana
 #   kubectl get secret -n observability grafana -o jsonpath='{.data.admin-password}' | base64 -d
 adminUser: admin
 
+deploymentStrategy:
+  type: Recreate
+
 persistence:
   enabled: true
   size: 2Gi
