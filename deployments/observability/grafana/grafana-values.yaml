@@ -78,10 +78,6 @@ dashboards:
       gnetId: 1860
       revision: 37
       datasource: VictoriaMetrics
-    kubernetes-dashboard:
-      gnetId: 15661
-      revision: 2
-      datasource: VictoriaMetrics
 
 # Sidecar watches ConfigMaps with label grafana_dashboard: "1" for dynamic dashboard loading
 sidecar:

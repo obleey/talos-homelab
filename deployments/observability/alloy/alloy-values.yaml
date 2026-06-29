@@ -17,6 +17,12 @@ alloy:
           target_label = "job"
           replacement  = "node-exporter"
         }
+        // Override nodename with the actual node hostname (Alloy runs in a container
+        // so uname() returns the pod name — copy instance label to fix this).
+        rule {
+          source_labels = ["instance"]
+          target_label  = "nodename"
+        }
       }
 
       prometheus.scrape "node_exporter" {
