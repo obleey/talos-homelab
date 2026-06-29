@@ -44,19 +44,23 @@ config:
     theme: dark
     color: slate
     headerStyle: clean
+    hideErrors: true
     providers:
       longhorn:
         url: https://longhorn.talos-cluster.local.obleey.com
     layout:
       Infrastructure:
         style: row
-        columns: 3
-      Media:
-        style: row
-        columns: 3
-      Downloads:
+        columns: 5
+      Media Servers:
         style: row
         columns: 2
+      Media Management:
+        style: row
+        columns: 4
+      Downloads:
+        style: row
+        columns: 3
 
   bookmarks:
     - Developer:
@@ -68,11 +72,19 @@ config:
             - abbr: TH
               href: https://github.com/obleey/talos-homelab
               icon: github.png
+        - Technitium DNS:
+            - abbr: DNS
+              href: https://technitium.local.obleey.com
+              icon: technitium.png
 
   widgets:
     - greeting:
         text_size: xl
         text: Welcome back, Obleey!
+    - search:
+        provider: duckduckgo
+        target: _blank
+        focus: false
     - datetime:
         text_size: xl
         locale: sl-SI
@@ -103,7 +115,7 @@ config:
         - ArgoCD:
             icon: argo-cd.png
             href: https://argocd.talos-cluster.local.obleey.com
-            description: GitOps continuous delivery
+            description: GitOps controller
             widget:
               type: argocd
               url: https://argocd.talos-cluster.local.obleey.com
@@ -111,20 +123,24 @@ config:
         - Traefik:
             icon: traefik.png
             href: https://traefik.talos-cluster.local.obleey.com/dashboard/
-            description: Ingress controller
+            description: Gateway & ingress
             widget:
               type: traefik
               url: http://traefik.traefik.svc.cluster.local:9000
         - Longhorn:
             icon: longhorn.png
             href: https://longhorn.talos-cluster.local.obleey.com
-            description: Storage management
+            description: Distributed storage
         - Kubeseal:
             icon: kubernetes.png
             href: https://kubeseal.talos-cluster.local.obleey.com
             description: Sealed secrets UI
+        - Technitium:
+            icon: technitium.png
+            href: https://technitium.local.obleey.com
+            description: DNS server
 
-    - Media:
+    - Media Servers:
         - Plex:
             icon: plex.png
             href: https://app.plex.tv
@@ -143,10 +159,12 @@ config:
               key: "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}"
               enableBlocks: true
               enableNowPlaying: true
+
+    - Media Management:
         - Radarr:
             icon: radarr.png
             href: https://radarr.talos-cluster.local.obleey.com
-            description: Movie management
+            description: Movies
             widget:
               type: radarr
               url: http://radarr.servarr.svc.cluster.local:7878
@@ -154,7 +172,7 @@ config:
         - Sonarr:
             icon: sonarr.png
             href: https://sonarr.talos-cluster.local.obleey.com
-            description: TV show management
+            description: TV shows
             widget:
               type: sonarr
               url: http://sonarr.servarr.svc.cluster.local:8989
@@ -162,7 +180,7 @@ config:
         - Prowlarr:
             icon: prowlarr.png
             href: https://prowlarr.talos-cluster.local.obleey.com
-            description: Indexer management
+            description: Indexers
             widget:
               type: prowlarr
               url: http://prowlarr.servarr.svc.cluster.local:9696
@@ -170,24 +188,24 @@ config:
         - Bazarr:
             icon: bazarr.png
             href: https://bazarr.talos-cluster.local.obleey.com
-            description: Subtitle management
+            description: Subtitles
             widget:
               type: bazarr
               url: http://bazarr.servarr.svc.cluster.local:6767
               key: "{{HOMEPAGE_VAR_BAZARR_API_KEY}}"
-        - Clonarr:
-            icon: https://clonarr.talos-cluster.local.obleey.com/icons/clonarr.png
-            href: https://clonarr.talos-cluster.local.obleey.com
-            description: Trash Guides syncer
-
         - Seerr:
             icon: seerr.png
             href: https://seerr.talos-cluster.local.obleey.com
-            description: Media request management
+            description: Media requests
             widget:
               type: seerr
               url: http://seerr.servarr.svc.cluster.local:5055
               key: "{{HOMEPAGE_VAR_SEERR_API_KEY}}"
+        - Clonarr:
+            icon: https://clonarr.talos-cluster.local.obleey.com/icons/clonarr.png
+            href: https://clonarr.talos-cluster.local.obleey.com
+            description: Trash Guides sync
+
     - Downloads:
         - qBittorrent:
             icon: qbittorrent.png
@@ -198,8 +216,11 @@ config:
               url: http://qbittorrent.servarr.svc.cluster.local:8080
               username: "{{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}"
               password: "{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}"
-    - Infrastructure:
-        - Technitium:
-            - abbr: Tech
-              href: https://technitium.local.obleey.com
-              icon: technitium.png
+        - Autopulse:
+            icon: https://autopulse.talos-cluster.local.obleey.com/favicon.ico
+            href: https://autopulse.talos-cluster.local.obleey.com
+            description: Media scan automation
+        - Unpackerr:
+            icon: unpackerr.png
+            href: https://github.com/Unpackerr/unpackerr
+            description: Archive extractor
