@@ -51,13 +51,13 @@ config:
     layout:
       Infrastructure:
         style: row
-        columns: 5
+        columns: 6
       Media Servers:
         style: row
         columns: 2
       Media Management:
         style: row
-        columns: 4
+        columns: 6
       Downloads:
         style: row
         columns: 2
@@ -72,10 +72,6 @@ config:
             - abbr: TH
               href: https://github.com/obleey/talos-homelab
               icon: github.png
-        - TrueNAS:
-            - abbr: NAS
-              href: https://truenas.local.obleey.com
-              icon: truenas.png
 
   widgets:
     - greeting:
@@ -139,6 +135,10 @@ config:
             icon: technitium.png
             href: https://technitium.local.obleey.com
             description: DNS server
+        - TrueNAS:
+            icon: truenas.png
+            href: https://truenas.local.obleey.com
+            description: Network storage
 
     - Media Servers:
         - Plex:
