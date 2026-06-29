@@ -100,7 +100,7 @@ alerting:
           - uid: slack-main
             type: slack
             settings:
-              recipient: "#alerts"
+              recipient: "#monitoring"
               token: ${GF_SLACK_TOKEN}
             disableResolveMessage: false
 
