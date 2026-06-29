@@ -219,9 +219,15 @@ alloy:
           mapping = { level = "level" }
         }
 
-        // Plain-text logs: INFO msg, [INFO] msg, warn: msg, etc.
+        // Plain-text logs: INFO, [INFO], [INF], WRN, ERR, DBG, etc.
         stage.regex {
-          expression = "^\\[?(?P<level>INFO|WARN|ERROR|DEBUG|TRACE|FATAL|info|warn|error|debug|trace|fatal)[\\]\\s:]"
+          expression = "^\\[?(?P<level>CRITICAL|FATAL|ERROR|ERR|WARNING|WARN|WRN|INFO|INF|DEBUG|DBG|TRACE|TRC|critical|fatal|error|err|warning|warn|wrn|info|inf|debug|dbg|trace|trc)[\\]\\s:]"
+        }
+
+        // Normalize to canonical lowercase (INFO→info, WRN→warn, INF→info, etc.)
+        stage.template {
+          source   = "level"
+          template = "{{ $l := .Value | ToLower }}{{ if eq $l \"inf\" }}info{{ else if eq $l \"wrn\" }}warn{{ else if eq $l \"err\" }}error{{ else if eq $l \"dbg\" }}debug{{ else if eq $l \"trc\" }}trace{{ else if eq $l \"warning\" }}warn{{ else if eq $l \"critical\" }}critical{{ else if eq $l \"fatal\" }}critical{{ else }}{{ $l }}{{ end }}"
         }
 
         stage.labels {
