@@ -55,7 +55,7 @@ data:
       "panels": [
         {
           "id": 1,
-          "title": "Logs  —  namespace: $namespace  /  deployment: $deployment",
+          "title": "Logs  —  $namespace / $deployment",
           "type": "logs",
           "gridPos": { "h": 25, "w": 24, "x": 0, "y": 0 },
           "datasource": { "type": "victoriametrics-logs-datasource", "uid": "victorialogs" },
@@ -71,7 +71,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{namespace=~\"$namespace\", pod=~\"$deployment.*\"}",
+              "expr": "{instance=~\"$namespace/$deployment.*\"}",
               "refId": "A",
               "queryType": "range",
               "maxLines": 500

@@ -188,18 +188,23 @@ alloy:
       loki.process "extract_level" {
         forward_to = [loki.write.victorialogs.receiver]
 
-        // Try to parse as JSON and pull out the level field.
-        // Silently skips non-JSON lines.
+        // JSON logs: {"level":"info",...}
         stage.json {
-          expressions = {
-            level = "level",
-          }
+          expressions = { level = "level" }
+        }
+
+        // logfmt logs: level=info or severity=warn
+        stage.logfmt {
+          mapping = { level = "level", level = "severity" }
+        }
+
+        // Plain-text prefix: INFO, WARN, ERROR, DEBUG at start of line
+        stage.regex {
+          expression = "^(?P<level>INFO|WARN|ERROR|DEBUG|TRACE|FATAL|info|warn|error|debug|trace|fatal)\\s"
         }
 
         stage.labels {
-          values = {
-            level = "",
-          }
+          values = { level = "" }
         }
       }
 
