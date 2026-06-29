@@ -13,6 +13,8 @@ spec:
     repoURL: https://github.com/obleey/talos-homelab
     targetRevision: HEAD
     path: deployments/infrastructure/metrics-server
+    directory:
+      exclude: "{app.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
