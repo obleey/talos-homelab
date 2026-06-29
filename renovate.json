@@ -30,50 +30,62 @@
   "kubernetes": {
     "managerFilePatterns": ["/(^|/)deployments/.+\\.yaml$/"]
   },
+  "argocd": {
+    "managerFilePatterns": ["/(^|/)deployments/.+\\.yaml$/"]
+  },
   "packageRules": [
     {
       "matchManagers": ["helmv3", "helm-values"],
-      "groupName": "helm charts",
-      "automerge": false
+      "groupName": "helm charts"
     },
     {
       "matchManagers": ["kubernetes"],
       "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "kubernetes manifests",
-      "automerge": false
+      "groupName": "kubernetes manifests"
     },
     {
       "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "lscr.io/linuxserver/sonarr",
+        "lscr.io/linuxserver/radarr",
+        "lscr.io/linuxserver/bazarr",
+        "lscr.io/linuxserver/prowlarr",
+        "lscr.io/linuxserver/qbittorrent"
+      ],
+      "groupName": "media stack",
+      "versioning": "loose",
+      "allowedVersions": "!/nightly|develop|beta|alpha|[0-9a-f]{6,}-/",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["/lscr\\.io\\/linuxserver\\/.*/"],
       "groupName": "linuxserver images",
       "versioning": "loose",
       "allowedVersions": "!/nightly|develop|beta|alpha|[0-9a-f]{6,}-/",
-      "automerge": false,
-      "matchPackageNames": ["/lscr\\.io\\/linuxserver\\/.*/"]
-    },
-    {
-      "matchPackageNames": ["lscr.io/linuxserver/sonarr"],
-      "matchDatasources": ["docker"],
-      "allowedVersions": "!/^[4-9]\\./",
-      "automerge": false
+      "minimumReleaseAge": "3 days"
     },
     {
       "matchDatasources": ["docker"],
+      "matchPackageNames": ["/ghcr\\.io\\/.*/"],
       "groupName": "ghcr images",
-      "automerge": false,
-      "matchPackageNames": ["/ghcr\\.io\\/.*/"]
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["golift/unpackerr"],
+      "groupName": "docker hub images",
+      "minimumReleaseAge": "3 days"
     },
     {
       "matchUpdateTypes": ["major"],
-      "automerge": false,
-      "labels": ["renovate", "major-update"],
-      "matchPackageNames": ["/.*/"]
+      "labels": ["renovate", "major-update"]
     },
     {
-      "matchPackageNames": ["registry.k8s.io/metrics-server/metrics-server"],
+      "matchPackageNames": [
+        "registry.k8s.io/metrics-server/metrics-server"
+      ],
       "enabled": false
     }
-  ],
-  "argocd": {
-    "managerFilePatterns": ["/(^|/)deployments/.+\\.yaml$/"]
-  }
+  ]
 }

@@ -32,6 +32,18 @@ spec:
       kind: Application
       jsonPointers:
         - /metadata/finalizers
+    - group: longhorn.io
+      kind: Node
+      jsonPointers:
+        - /spec
+    - group: longhorn.io
+      kind: EngineImage
+      jsonPointers:
+        - /spec
+    - group: longhorn.io
+      kind: Setting
+      jsonPointers:
+        - /value
   syncPolicy:
     automated:
       prune: true
