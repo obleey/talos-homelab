@@ -94,8 +94,10 @@
       "enabled": true
     },
     {
+      "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/dan-online/autopulse"],
-      "enabled": false
+      "updateTypes": ["digest"],
+      "enabled": true
     }
   ]
 }
