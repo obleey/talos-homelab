@@ -1,43 +1,63 @@
-image:
-  # renovate: datasource=custom.plex depName=plex versioning=loose
-  tag: "1.43.2.10687-563d026ea"
+fullnameOverride: plex
 
-pms:
-  storageClassName: longhorn
-  configStorage: 20Gi
-
-hostNetwork: true
-dnsPolicy: ClusterFirstWithHostNet
-
-nodeSelector:
-  kubernetes.io/hostname: talos-worker-1
-
-rclone:
-  enabled: false
-
-extraVolumes:
-  - name: servarr-data
-    nfs:
-      server: 10.0.0.104
-      path: /mnt/serve/starr-stack/data
-  - name: plex-cache
-    persistentVolumeClaim:
-      claimName: plex-cache
-  - name: plex-transcode
-    persistentVolumeClaim:
-      claimName: plex-transcode
-
-extraVolumeMounts:
-  - name: servarr-data
-    mountPath: /data
-  - name: plex-cache
-    mountPath: /caches
-  - name: plex-transcode
-    mountPath: /transcodes
-
-extraEnv:
-  HOSTNAME: talos-plex
+controllers:
+  main:
+    type: deployment
+    strategy: Recreate
+    pod:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        kubernetes.io/hostname: talos-worker-1
+    containers:
+      main:
+        image:
+          repository: plexinc/pms-docker
+          # renovate: datasource=custom.plex depName=plex versioning=loose
+          tag: "1.43.2.10687-563d026ea"
+        env:
+          TZ: Europe/Ljubljana
+          HOSTNAME: talos-plex
 
 service:
-  type: ClusterIP
-  port: 32400
+  app:
+    controller: main
+    ports:
+      http:
+        port: 32400
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    existingClaim: pms-config-plex-plex-media-server-0
+    globalMounts:
+      - path: /config
+  cache:
+    type: persistentVolumeClaim
+    existingClaim: plex-cache
+    globalMounts:
+      - path: /caches
+  transcode:
+    type: persistentVolumeClaim
+    existingClaim: plex-transcode
+    globalMounts:
+      - path: /transcodes
+  data:
+    type: nfs
+    server: 10.0.0.104
+    path: /mnt/serve/starr-stack/data
+    globalMounts:
+      - path: /data
+
+route:
+  app:
+    parentRefs:
+      - name: traefik-gateway
+        namespace: traefik
+        sectionName: websecure
+    hostnames:
+      - plex.talos-cluster.local.obleey.com
+    rules:
+      - backendRefs:
+          - name: plex
+            port: 32400

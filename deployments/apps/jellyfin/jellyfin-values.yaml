@@ -1,47 +1,56 @@
-image:
-  # renovate: datasource=docker depName=jellyfin/jellyfin
-  tag: "10.11.8"
+fullnameOverride: jellyfin
 
-podPrivileges:
-  hostNetwork: true
+controllers:
+  main:
+    type: deployment
+    strategy: Recreate
+    pod:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        kubernetes.io/hostname: talos-worker-1
+    containers:
+      main:
+        image:
+          repository: jellyfin/jellyfin
+          tag: "10.11.8"
+        env:
+          TZ: Europe/Ljubljana
 
-dnsPolicy: ClusterFirstWithHostNet
-
-nodeSelector:
-  kubernetes.io/hostname: talos-worker-1
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 8096
 
 persistence:
   config:
-    enabled: true
-    accessMode: ReadWriteOnce
-    size: 10Gi
-    storageClass: longhorn
-  media:
-    enabled: false
+    type: persistentVolumeClaim
+    existingClaim: jellyfin-config
+    globalMounts:
+      - path: /config
   cache:
-    enabled: false
+    type: persistentVolumeClaim
+    existingClaim: jellyfin-cache
+    globalMounts:
+      - path: /cache
+  media:
+    type: nfs
+    server: 10.0.0.104
+    path: /mnt/serve/starr-stack/data/media
+    globalMounts:
+      - path: /data/media
 
-volumes:
-  - name: nfs-media
-    nfs:
-      server: 10.0.0.104
-      path: /mnt/serve/starr-stack/data/media
-  - name: jellyfin-cache
-    persistentVolumeClaim:
-      claimName: jellyfin-cache
-
-volumeMounts:
-  - name: nfs-media
-    mountPath: /data/media
-  - name: jellyfin-cache
-    mountPath: /caches
-
-httpRoute:
-  enabled: false
-
-service:
-  type: ClusterIP
-  port: 8096
-
-deploymentStrategy:
-  type: Recreate
+route:
+  app:
+    parentRefs:
+      - name: traefik-gateway
+        namespace: traefik
+        sectionName: websecure
+    hostnames:
+      - jellyfin.talos-cluster.local.obleey.com
+    rules:
+      - backendRefs:
+          - name: jellyfin
+            port: 8096
