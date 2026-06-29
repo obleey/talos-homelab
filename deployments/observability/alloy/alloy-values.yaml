@@ -156,7 +156,7 @@ alloy:
       // ============================================================
       prometheus.remote_write "victoriametrics" {
         endpoint {
-          url = "http://victoria-metrics-single-server.observability.svc.cluster.local:8428/api/v1/write"
+          url = "http://victoriametrics-victoria-metrics-single-server.observability.svc.cluster.local:8428/api/v1/write"
         }
       }
 
