@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: victorialogs
+  name: loki
   namespace: argocd
   labels:
     argocd.argoproj.io/managed-by: talos-cluster
@@ -10,18 +10,15 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://victoriametrics.github.io/helm-charts
-      chart: victoria-logs-single
-      targetRevision: 0.9.3
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: loki
+      targetRevision: 6.55.0
       helm:
         valueFiles:
-          - $values/deployments/observability/victorialogs/vl-values.yaml
+          - $values/deployments/observability/loki/loki-values.yaml
     - repoURL: https://github.com/obleey/talos-homelab
       targetRevision: HEAD
       ref: values
-      path: deployments/observability/victorialogs
-      directory:
-        exclude: "{app.yaml,vl-values.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: observability

@@ -15,7 +15,7 @@ data:
       "description": "Pod logs filtered by namespace and deployment",
       "tags": ["kubernetes", "logs", "custom"],
       "schemaVersion": 39,
-      "version": 3,
+      "version": 4,
       "refresh": "30s",
       "time": { "from": "now-1h", "to": "now" },
       "timezone": "browser",
@@ -75,7 +75,7 @@ data:
           "title": "Logs  —  $namespace / $deployment",
           "type": "logs",
           "gridPos": { "h": 25, "w": 24, "x": 0, "y": 0 },
-          "datasource": { "type": "victoriametrics-logs-datasource", "uid": "victorialogs" },
+          "datasource": { "type": "loki", "uid": "loki" },
           "options": {
             "showTime": true,
             "showLabels": false,
@@ -88,7 +88,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{instance=~\"$namespace/$deployment.*\"} | filter level=~\"$level\"",
+              "expr": "{namespace=~\"$namespace\", pod=~\"$deployment.*\"} |~ \"$level\"",
               "refId": "A",
               "queryType": "range",
               "maxLines": 500

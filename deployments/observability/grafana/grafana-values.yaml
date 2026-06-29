@@ -22,8 +22,7 @@ envValueFrom:
       key: slack-token
       optional: true
 
-plugins:
-  - victoriametrics-logs-datasource
+plugins: []
 
 grafana.ini:
   server:
@@ -37,7 +36,7 @@ datasources:
   datasources.yaml:
     apiVersion: 1
     deleteDatasources:
-      - name: Loki
+      - name: VictoriaLogs
         orgId: 1
     datasources:
       - name: VictoriaMetrics
@@ -46,10 +45,10 @@ datasources:
         url: http://victoria-metrics-single-server.observability.svc.cluster.local:8428
         isDefault: true
         editable: false
-      - name: VictoriaLogs
-        type: victoriametrics-logs-datasource
-        uid: victorialogs
-        url: http://victorialogs-victoria-logs-single-server.observability.svc.cluster.local:9428
+      - name: Loki
+        type: loki
+        uid: loki
+        url: http://loki.observability.svc.cluster.local:3100
         editable: false
       - name: Tempo
         type: tempo
