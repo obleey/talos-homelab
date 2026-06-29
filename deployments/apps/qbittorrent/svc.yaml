@@ -6,7 +6,8 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app: qbittorrent
+    app.kubernetes.io/name: qbittorrent
+    app.kubernetes.io/instance: qbittorrent
   ports:
     - name: webui
       port: 8080

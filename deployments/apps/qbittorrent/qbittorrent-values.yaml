@@ -1,0 +1,30 @@
+fullnameOverride: qbittorrent
+
+controllers:
+  main:
+    type: deployment
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: lscr.io/linuxserver/qbittorrent
+          tag: 20.04.1
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: Europe/Ljubljana
+          WEBUI_PORT: "8080"
+          TORRENTING_PORT: "30881"
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    existingClaim: qbittorrent-config
+    globalMounts:
+      - path: /config
+  torrents:
+    type: nfs
+    server: 10.0.0.104
+    path: /mnt/serve/starr-stack/data/torrents
+    globalMounts:
+      - path: /data/torrents

@@ -1,0 +1,29 @@
+fullnameOverride: prowlarr
+
+controllers:
+  main:
+    type: deployment
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: lscr.io/linuxserver/prowlarr
+          tag: 2.4.0.5397-ls151
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: Europe/Ljubljana
+
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 9696
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    existingClaim: prowlarr-config
+    globalMounts:
+      - path: /config
