@@ -7,23 +7,6 @@
   "prConcurrentLimit": 10,
   "automerge": false,
   "labels": ["renovate"],
-  "customDatasources": {
-    "plex": {
-      "defaultRegistryUrlTemplate": "https://plex.tv/api/downloads/5.json",
-      "transformTemplates": [
-        "{\"releases\": [{\"version\": $$.computer.Linux.version}]}"
-      ]
-    }
-  },
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["(^|/).*values\\.yaml$"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+) versioning=(?<versioning>[^\\s]+)\\n\\s+tag: \"(?<currentValue>[^\"]+)\""
-      ]
-    }
-  ],
   "helm-values": {
     "fileMatch": ["(^|/).*values\\.yaml$"]
   },
@@ -73,8 +56,10 @@
     },
     {
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["golift/unpackerr"],
+      "matchPackageNames": ["golift/unpackerr", "plexinc/pms-docker", "jellyfin/jellyfin"],
       "groupName": "docker hub images",
+      "versioning": "loose",
+      "allowedVersions": "!/-(armhf|amd64|arm64)$/",
       "minimumReleaseAge": "3 days"
     },
     {

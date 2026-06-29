@@ -13,7 +13,6 @@ controllers:
       main:
         image:
           repository: plexinc/pms-docker
-          # renovate: datasource=custom.plex depName=plex versioning=loose
           tag: "1.43.2.10687-563d026ea"
         env:
           TZ: Europe/Ljubljana
