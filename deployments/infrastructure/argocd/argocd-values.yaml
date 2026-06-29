@@ -14,9 +14,6 @@ notifications:
     create: false
   cm:
     create: true
-  context:
-    argocdUrl: https://argocd.talos-cluster.local.obleey.com
-    clusterName: talos-cluster
   notifiers:
     service.slack: |
       token: $slack-token
@@ -27,8 +24,8 @@ notifications:
         attachments: |
           [{
             "color": "#E53935",
-            "title": ":red_circle: [{{.context.clusterName}}] {{.app.metadata.name}} sync failed",
-            "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+            "title": ":red_circle: [talos-cluster] {{.app.metadata.name}} sync failed",
+            "title_link": "https://argocd.talos-cluster.local.obleey.com/applications/{{.app.metadata.name}}",
             "fields": [
               {
                 "title": "Sync Status",
@@ -53,8 +50,8 @@ notifications:
         attachments: |
           [{
             "color": "#43A047",
-            "title": ":large_green_circle: [{{.context.clusterName}}] {{.app.metadata.name}} synced successfully",
-            "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"
+            "title": ":large_green_circle: [talos-cluster] {{.app.metadata.name}} synced successfully",
+            "title_link": "https://argocd.talos-cluster.local.obleey.com/applications/{{.app.metadata.name}}"
           }]
 
   triggers:
