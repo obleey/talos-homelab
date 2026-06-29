@@ -86,6 +86,12 @@
         "registry.k8s.io/metrics-server/metrics-server"
       ],
       "enabled": false
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/thephaseless/byparr"],
+      "updateTypes": ["digest"],
+      "enabled": true
     }
   ]
 }
