@@ -79,6 +79,30 @@
       "enabled": false
     },
     {
+      "matchManagers": ["helmv3", "helm-values", "argocd"],
+      "matchPackageNames": [
+        "victoria-metrics-single",
+        "loki",
+        "tempo",
+        "grafana",
+        "alloy",
+        "kube-state-metrics"
+      ],
+      "groupName": "observability stack",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "grafana/grafana",
+        "grafana/alloy",
+        "grafana/loki",
+        "grafana/tempo"
+      ],
+      "groupName": "observability images",
+      "minimumReleaseAge": "3 days"
+    },
+    {
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/thephaseless/byparr"],
       "updateTypes": ["digest"],

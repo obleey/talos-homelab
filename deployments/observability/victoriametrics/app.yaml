@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: victoriametrics
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/managed-by: talos-cluster
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://victoriametrics.github.io/helm-charts
+      chart: victoria-metrics-single
+      targetRevision: 0.11.1
+      helm:
+        valueFiles:
+          - $values/deployments/observability/victoriametrics/vm-values.yaml
+    - repoURL: https://github.com/obleey/talos-homelab
+      targetRevision: HEAD
+      ref: values
+      path: deployments/observability/victoriametrics
+      directory:
+        exclude: "{app.yaml,vm-values.yaml}"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,239 @@
+alloy:
+  configMap:
+    create: true
+    content: |
+      // ============================================================
+      // Node metrics via prometheus.exporter.unix (replaces node_exporter)
+      // ============================================================
+      prometheus.exporter.unix "node" {
+        procfs_path = "/host/proc"
+        sysfs_path  = "/host/sys"
+        rootfs_path = "/rootfs"
+      }
+
+      prometheus.scrape "node_exporter" {
+        targets         = prometheus.exporter.unix.node.targets
+        forward_to      = [prometheus.remote_write.victoriametrics.receiver]
+        scrape_interval = "60s"
+
+        clustering { enabled = true }
+
+        relabel {
+          target_label = "job"
+          replacement  = "node-exporter"
+        }
+      }
+
+      // ============================================================
+      // Kubernetes node/pod discovery
+      // ============================================================
+      discovery.kubernetes "nodes" {
+        role = "node"
+      }
+
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      // ============================================================
+      // Kubelet metrics
+      // ============================================================
+      discovery.relabel "kubelet" {
+        targets = discovery.kubernetes.nodes.targets
+
+        rule {
+          source_labels = ["__address__"]
+          regex         = "(.+):.*"
+          replacement   = "$1:10250"
+          target_label  = "__address__"
+        }
+        rule {
+          target_label = "job"
+          replacement  = "kubelet"
+        }
+      }
+
+      prometheus.scrape "kubelet" {
+        targets           = discovery.relabel.kubelet.output
+        forward_to        = [prometheus.remote_write.victoriametrics.receiver]
+        scrape_interval   = "60s"
+        scheme            = "https"
+        bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+
+        tls_config {
+          insecure_skip_verify = true
+        }
+      }
+
+      // ============================================================
+      // cAdvisor metrics
+      // ============================================================
+      discovery.relabel "cadvisor" {
+        targets = discovery.kubernetes.nodes.targets
+
+        rule {
+          source_labels = ["__address__"]
+          regex         = "(.+):.*"
+          replacement   = "$1:10250"
+          target_label  = "__address__"
+        }
+        rule {
+          target_label = "__metrics_path__"
+          replacement  = "/metrics/cadvisor"
+        }
+        rule {
+          target_label = "job"
+          replacement  = "cadvisor"
+        }
+      }
+
+      prometheus.scrape "cadvisor" {
+        targets           = discovery.relabel.cadvisor.output
+        forward_to        = [prometheus.remote_write.victoriametrics.receiver]
+        scrape_interval   = "60s"
+        scheme            = "https"
+        bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+
+        tls_config {
+          insecure_skip_verify = true
+        }
+      }
+
+      // ============================================================
+      // kube-state-metrics
+      // ============================================================
+      prometheus.scrape "kube_state_metrics" {
+        targets         = [{"__address__" = "kube-state-metrics.observability.svc.cluster.local:8080"}]
+        forward_to      = [prometheus.remote_write.victoriametrics.receiver]
+        scrape_interval = "60s"
+
+        relabel {
+          target_label = "job"
+          replacement  = "kube-state-metrics"
+        }
+      }
+
+      // ============================================================
+      // Opt-in pod annotation scraping (prometheus.io/scrape: "true")
+      // ============================================================
+      discovery.relabel "annotated_pods" {
+        targets = discovery.kubernetes.pods.targets
+
+        rule {
+          source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scrape"]
+          regex         = "true"
+          action        = "keep"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_path"]
+          target_label  = "__metrics_path__"
+          regex         = "(.+)"
+        }
+        rule {
+          source_labels = ["__address__", "__meta_kubernetes_pod_annotation_prometheus_io_port"]
+          target_label  = "__address__"
+          regex         = "([^:]+)(?::\\d+)?;(\\d+)"
+          replacement   = "$1:$2"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+      }
+
+      prometheus.scrape "annotated_pods" {
+        targets         = discovery.relabel.annotated_pods.output
+        forward_to      = [prometheus.remote_write.victoriametrics.receiver]
+        scrape_interval = "60s"
+      }
+
+      // ============================================================
+      // Remote write → VictoriaMetrics
+      // ============================================================
+      prometheus.remote_write "victoriametrics" {
+        endpoint {
+          url = "http://victoria-metrics-single-server.observability.svc.cluster.local:8428/api/v1/write"
+        }
+      }
+
+      // ============================================================
+      // Pod log collection → Loki
+      // ============================================================
+      loki.source.kubernetes "pods" {
+        targets    = discovery.kubernetes.pods.targets
+        forward_to = [loki.write.loki.receiver]
+      }
+
+      loki.write "loki" {
+        endpoint {
+          url = "http://loki.observability.svc.cluster.local:3100/loki/api/v1/push"
+        }
+      }
+
+      // ============================================================
+      // OTLP trace receiver → Tempo
+      // ============================================================
+      otelcol.receiver.otlp "default" {
+        grpc { endpoint = "0.0.0.0:4317" }
+        http { endpoint = "0.0.0.0:4318" }
+
+        output {
+          traces = [otelcol.exporter.otlp.tempo.input]
+        }
+      }
+
+      otelcol.exporter.otlp "tempo" {
+        client {
+          endpoint = "tempo.observability.svc.cluster.local:4317"
+          tls { insecure = true }
+        }
+      }
+
+  mounts:
+    extra:
+      - name: proc
+        mountPath: /host/proc
+        readOnly: true
+      - name: sys
+        mountPath: /host/sys
+        readOnly: true
+      - name: root
+        mountPath: /rootfs
+        readOnly: true
+
+serviceAccount:
+  create: true
+  name: alloy
+
+rbac:
+  create: true
+
+clustering:
+  enabled: true
+  name: alloy
+
+controller:
+  type: daemonset
+  tolerations:
+    - operator: Exists
+  volumes:
+    extra:
+      - name: proc
+        hostPath:
+          path: /proc
+      - name: sys
+        hostPath:
+          path: /sys
+      - name: root
+        hostPath:
+          path: /
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
