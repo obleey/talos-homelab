@@ -163,6 +163,9 @@ alloy:
         endpoint {
           url = "http://victoria-metrics-single-server.observability.svc.cluster.local:8428/api/v1/write"
         }
+        external_labels = {
+          cluster = "talos-cluster",
+        }
       }
 
       // ============================================================
