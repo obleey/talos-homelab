@@ -1,0 +1,35 @@
+fullnameOverride: radarr
+
+controllers:
+  main:
+    type: deployment
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: lscr.io/linuxserver/radarr
+          tag: 6.2.1.10461-ls308
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: Europe/Ljubljana
+
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 7878
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    existingClaim: radarr-config
+    globalMounts:
+      - path: /config
+  data:
+    type: nfs
+    server: 10.0.0.104
+    path: /mnt/serve/starr-stack/data
+    globalMounts:
+      - path: /data

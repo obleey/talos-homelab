@@ -1,0 +1,35 @@
+fullnameOverride: bazarr
+
+controllers:
+  main:
+    type: deployment
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: lscr.io/linuxserver/bazarr
+          tag: 1.5.6
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: Europe/Ljubljana
+
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 6767
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    existingClaim: bazarr-config
+    globalMounts:
+      - path: /config
+  data:
+    type: nfs
+    server: 10.0.0.104
+    path: /mnt/serve/starr-stack/data
+    globalMounts:
+      - path: /data
