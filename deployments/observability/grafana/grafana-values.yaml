@@ -86,6 +86,9 @@ sidecar:
     label: grafana_dashboard
     labelValue: "1"
     searchNamespace: ALL
+    folderAnnotation: grafana_folder
+    provider:
+      foldersFromFilesStructure: false
 
 alerting:
   contactpoints.yaml:
