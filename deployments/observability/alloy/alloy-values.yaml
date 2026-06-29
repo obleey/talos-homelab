@@ -11,17 +11,19 @@ alloy:
         rootfs_path = "/rootfs"
       }
 
-      prometheus.scrape "node_exporter" {
-        targets         = prometheus.exporter.unix.node.targets
-        forward_to      = [prometheus.remote_write.victoriametrics.receiver]
-        scrape_interval = "60s"
-
-        clustering { enabled = true }
-
-        relabel {
+      prometheus.relabel "node_exporter" {
+        forward_to = [prometheus.remote_write.victoriametrics.receiver]
+        rule {
           target_label = "job"
           replacement  = "node-exporter"
         }
+      }
+
+      prometheus.scrape "node_exporter" {
+        targets         = prometheus.exporter.unix.node.targets
+        forward_to      = [prometheus.relabel.node_exporter.receiver]
+        scrape_interval = "60s"
+        clustering { enabled = true }
       }
 
       // ============================================================
@@ -102,15 +104,18 @@ alloy:
       // ============================================================
       // kube-state-metrics
       // ============================================================
-      prometheus.scrape "kube_state_metrics" {
-        targets         = [{"__address__" = "kube-state-metrics.observability.svc.cluster.local:8080"}]
-        forward_to      = [prometheus.remote_write.victoriametrics.receiver]
-        scrape_interval = "60s"
-
-        relabel {
+      prometheus.relabel "kube_state_metrics" {
+        forward_to = [prometheus.remote_write.victoriametrics.receiver]
+        rule {
           target_label = "job"
           replacement  = "kube-state-metrics"
         }
+      }
+
+      prometheus.scrape "kube_state_metrics" {
+        targets         = [{"__address__" = "kube-state-metrics.observability.svc.cluster.local:8080"}]
+        forward_to      = [prometheus.relabel.kube_state_metrics.receiver]
+        scrape_interval = "60s"
       }
 
       // ============================================================
