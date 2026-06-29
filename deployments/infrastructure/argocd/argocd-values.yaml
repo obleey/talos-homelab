@@ -14,9 +14,9 @@ notifications:
     create: false
   cm:
     create: true
-    context: |
-      argocdUrl: https://argocd.talos-cluster.local.obleey.com
-      clusterName: talos-cluster
+  context:
+    argocdUrl: https://argocd.talos-cluster.local.obleey.com
+    clusterName: talos-cluster
   notifiers:
     service.slack: |
       token: $slack-token
