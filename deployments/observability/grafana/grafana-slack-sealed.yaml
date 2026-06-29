@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: grafana-slack
+  namespace: observability
+spec:
+  encryptedData:
+    slack-token: AgBN9WbfGASfTDKNpt0g2AVrhgX0icpa2+yO7ej7iU3k0ggwJSlhAfZWULKPSSBdg1F3q99C6Qf5iZS5Xv0J5Fzrq1tjphbATZ5MwpTbKrOiGAPQn60SmZmvtZE8DjCBc2pn8NUPPcV6OELmcXvvfU19b086yjXMYJtCV8gy1NpCfnLCus5+zCoFZtwni1pdfBdmOH0W3QVFa4HylnAfQKnHBYG9vNfBrPtDDErzUPSVaVJ6av6bP3fuHz8Rkm9O+DRF5+PXvSC/lRaOr6D8ubW3v7W/UCHvYEUVvZ7ST/Fl2uykHQN1ZuJeVErtaziI9JPV9vA9iAo85ECqvvM1ZJRm9DsTsbmn6qdNQwQYtZgw5GdQD9uiXrjv5R9syjBJmhvGvDGPxNSPeQ7BVgYChcaWfTtU0YpPhkYj+9sLKoHl4hUqX0zBi5Rv7hZxqeZpfY3nBJIEKzU0d04OrwbYGPrk2RFdKcaWc5C4qkhNrq6LTAtnHY0+vf3aryGpRxYvs64pAAM+AMaeV3T79i2TM5XN5LsZe39rtb7wZlEdTbsN68aBVm9EooAecJyZ5TWUhgCjtmoRw5MWh4WS7nGYNAtvuESD8CT3vQnPXnpCAauZySZN3i8NlgCL1SF4X1QtOUCpGWQBK08t2wUv3fGk6jam7VMz4OOA/I7VexZLSilPsdi4KTNW9VQi2UZAHPXfrwOKEAb4iqxkKL/7F6YdSQRh05xJHWiipTGr6iFmrw2KppOaCSMHREgqYdz5UOuqI12qPKKbqSt5uZZGYA==
+  template:
+    metadata:
+      name: grafana-slack
+      namespace: observability

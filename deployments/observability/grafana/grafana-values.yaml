@@ -1,0 +1,131 @@
+fullnameOverride: grafana
+
+# Admin password is auto-generated and stored in secret 'grafana' (key: admin-password).
+# Retrieve with:
+#   kubectl get secret -n observability grafana -o jsonpath='{.data.admin-password}' | base64 -d
+adminUser: admin
+
+persistence:
+  enabled: true
+  size: 2Gi
+  storageClass: longhorn
+
+# Slack token injected from sealed secret (grafana-slack).
+# Mark optional so Grafana starts even before the secret is created.
+envValueFrom:
+  GF_SLACK_TOKEN:
+    secretKeyRef:
+      name: grafana-slack
+      key: slack-token
+      optional: true
+
+grafana.ini:
+  server:
+    root_url: https://grafana.talos-cluster.local.obleey.com
+  analytics:
+    check_for_updates: false
+  unified_alerting:
+    enabled: true
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: VictoriaMetrics
+        type: prometheus
+        uid: victoriametrics
+        url: http://victoria-metrics-single-server.observability.svc.cluster.local:8428
+        isDefault: true
+        editable: false
+      - name: Loki
+        type: loki
+        uid: loki
+        url: http://loki.observability.svc.cluster.local:3100
+        editable: false
+        jsonData:
+          derivedFields:
+            - datasourceUid: tempo
+              matcherRegex: "traceID=(\\w+)"
+              name: TraceID
+              url: "$${__value.raw}"
+      - name: Tempo
+        type: tempo
+        uid: tempo
+        url: http://tempo.observability.svc.cluster.local:3100
+        editable: false
+        jsonData:
+          tracesToLogsV2:
+            datasourceUid: loki
+          serviceMap:
+            datasourceUid: victoriametrics
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: default
+        orgId: 1
+        type: file
+        disableDeletion: true
+        updateIntervalSeconds: 30
+        options:
+          path: /var/lib/grafana/dashboards/default
+
+dashboards:
+  default:
+    node-exporter-full:
+      gnetId: 1860
+      revision: 37
+      datasource: VictoriaMetrics
+    kubernetes-cluster:
+      gnetId: 17900
+      revision: 1
+      datasource: VictoriaMetrics
+
+# Sidecar watches ConfigMaps with label grafana_dashboard: "1" for dynamic dashboard loading
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    labelValue: "1"
+    searchNamespace: ALL
+
+alerting:
+  contactpoints.yaml:
+    apiVersion: 1
+    contactPoints:
+      - orgId: 1
+        name: Slack
+        receivers:
+          - uid: slack-main
+            type: slack
+            settings:
+              recipient: "#alerts"
+              token: ${GF_SLACK_TOKEN}
+              title: |-
+                [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+              text: |-
+                {{ range .Alerts -}}
+                *Alert:* {{ .Annotations.summary }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+                *Description:* {{ .Annotations.description }}
+                {{ end }}
+            disableResolveMessage: false
+
+  policies.yaml:
+    apiVersion: 1
+    policies:
+      - orgId: 1
+        receiver: Slack
+        group_by:
+          - grafana_folder
+          - alertname
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 4h
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
