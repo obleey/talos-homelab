@@ -16,6 +16,7 @@ server:
     envflag.enable: "true"
     envflag.prefix: VM_
     loggerFormat: json
+    graphiteListenAddr: ":2003"
 
 serviceMonitor:
   enabled: false
