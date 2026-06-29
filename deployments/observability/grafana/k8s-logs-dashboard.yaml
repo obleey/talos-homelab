@@ -12,15 +12,16 @@ data:
     {
       "uid": "k8s-logs-custom",
       "title": "Kubernetes Logs",
-      "description": "Pod logs from all namespaces via VictoriaLogs",
+      "description": "Pod logs filtered by namespace and deployment",
       "tags": ["kubernetes", "logs", "custom"],
       "schemaVersion": 39,
-      "version": 1,
+      "version": 3,
       "refresh": "30s",
       "time": { "from": "now-1h", "to": "now" },
       "timezone": "browser",
       "editable": true,
-      "graphTooltip": 1,
+      "graphTooltip": 0,
+      "annotations": { "list": [] },
       "templating": {
         "list": [
           {
@@ -37,124 +38,26 @@ data:
             "current": {}
           },
           {
-            "name": "pod",
-            "label": "Pod",
+            "name": "deployment",
+            "label": "Deployment",
             "type": "query",
             "datasource": { "type": "prometheus", "uid": "victoriametrics" },
-            "query": { "query": "label_values(kube_pod_info{namespace=~\"$namespace\"}, pod)", "refId": "A" },
+            "query": { "query": "label_values(kube_deployment_status_replicas{namespace=~\"$namespace\"}, deployment)", "refId": "A" },
             "includeAll": true,
             "allValue": ".*",
             "multi": false,
             "refresh": 2,
             "sort": 1,
             "current": {}
-          },
-          {
-            "name": "level",
-            "label": "Level",
-            "type": "custom",
-            "options": [
-              { "text": "All", "value": "", "selected": true },
-              { "text": "error", "value": "error" },
-              { "text": "warn", "value": "warn" },
-              { "text": "info", "value": "info" },
-              { "text": "debug", "value": "debug" }
-            ],
-            "includeAll": false,
-            "multi": false,
-            "current": { "text": "All", "value": "" }
           }
         ]
       },
-      "annotations": { "list": [] },
       "panels": [
         {
           "id": 1,
-          "title": "Log Rate by Namespace",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
-          "datasource": { "type": "victoriametrics-logs-datasource", "uid": "victorialogs" },
-          "options": {
-            "tooltip": { "mode": "multi" },
-            "legend": { "displayMode": "list", "placement": "bottom" }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "custom": { "lineWidth": 1, "fillOpacity": 20 },
-              "color": { "mode": "palette-classic" }
-            }
-          },
-          "targets": [
-            {
-              "expr": "{namespace=~\"$namespace\"} | count() by (namespace)",
-              "refId": "A",
-              "legendFormat": "{{namespace}}",
-              "queryType": "range"
-            }
-          ]
-        },
-        {
-          "id": 2,
-          "title": "Error Rate by Namespace",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
-          "datasource": { "type": "victoriametrics-logs-datasource", "uid": "victorialogs" },
-          "options": {
-            "tooltip": { "mode": "multi" },
-            "legend": { "displayMode": "list", "placement": "bottom" }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "custom": { "lineWidth": 2, "fillOpacity": 10 },
-              "color": { "mode": "palette-classic" }
-            }
-          },
-          "targets": [
-            {
-              "expr": "{namespace=~\"$namespace\", level=~\"error|ERROR|Error\"} | count() by (namespace)",
-              "refId": "A",
-              "legendFormat": "{{namespace}} errors",
-              "queryType": "range"
-            }
-          ]
-        },
-        {
-          "id": 3,
-          "title": "Log Level Distribution",
-          "type": "piechart",
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
-          "datasource": { "type": "victoriametrics-logs-datasource", "uid": "victorialogs" },
-          "options": {
-            "reduceOptions": { "calcs": ["sum"] },
-            "pieType": "donut",
-            "legend": { "displayMode": "list", "placement": "right" }
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": { "mode": "palette-classic" }
-            },
-            "overrides": [
-              { "matcher": { "id": "byName", "options": "error" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
-              { "matcher": { "id": "byName", "options": "warn" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
-              { "matcher": { "id": "byName", "options": "info" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] }
-            ]
-          },
-          "targets": [
-            {
-              "expr": "{namespace=~\"$namespace\"} | count() by (level)",
-              "refId": "A",
-              "legendFormat": "{{level}}",
-              "queryType": "instant"
-            }
-          ]
-        },
-        {
-          "id": 10,
-          "title": "Pod Logs",
+          "title": "Logs  —  namespace: $namespace  /  deployment: $deployment",
           "type": "logs",
-          "gridPos": { "h": 20, "w": 24, "x": 0, "y": 16 },
+          "gridPos": { "h": 25, "w": 24, "x": 0, "y": 0 },
           "datasource": { "type": "victoriametrics-logs-datasource", "uid": "victorialogs" },
           "options": {
             "showTime": true,
@@ -168,7 +71,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"}",
+              "expr": "{namespace=~\"$namespace\", pod=~\"$deployment.*\"}",
               "refId": "A",
               "queryType": "range",
               "maxLines": 500
