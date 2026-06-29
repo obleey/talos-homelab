@@ -1,0 +1,60 @@
+fullnameOverride: autopulse
+
+controllers:
+  main:
+    type: deployment
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/dan-online/autopulse
+          tag: v2.0.0-sqlite
+        env:
+          TZ: Europe/Ljubljana
+          AUTOPULSE__AUTH__USERNAME:
+            valueFrom:
+              secretKeyRef:
+                name: autopulse-secret
+                key: AUTOPULSE__AUTH__USERNAME
+          AUTOPULSE__AUTH__PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: autopulse-secret
+                key: AUTOPULSE__AUTH__PASSWORD
+          AUTOPULSE__TARGETS__PLEX__TOKEN:
+            valueFrom:
+              secretKeyRef:
+                name: autopulse-secret
+                key: PLEX_TOKEN
+          AUTOPULSE__TARGETS__JELLYFIN__TOKEN:
+            valueFrom:
+              secretKeyRef:
+                name: autopulse-secret
+                key: JELLYFIN_TOKEN
+
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 2875
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    existingClaim: autopulse-config
+    globalMounts:
+      - path: /config
+  autopulse-config:
+    type: configMap
+    name: autopulse-config
+    globalMounts:
+      - path: /app/config.yaml
+        subPath: config.yaml
+        readOnly: true
+  data:
+    type: nfs
+    server: 10.0.0.104
+    path: /mnt/serve/starr-stack/data
+    globalMounts:
+      - path: /data
