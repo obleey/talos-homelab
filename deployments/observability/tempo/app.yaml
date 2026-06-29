@@ -12,7 +12,7 @@ spec:
   sources:
     - repoURL: https://grafana.github.io/helm-charts
       chart: tempo
-      targetRevision: 1.9.0
+      targetRevision: 1.24.4
       helm:
         valueFiles:
           - $values/deployments/observability/tempo/tempo-values.yaml
