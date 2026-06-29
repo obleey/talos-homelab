@@ -21,37 +21,66 @@ notifications:
   templates:
     template.app-sync-failed: |
       slack:
-        attachments: |
+        blocks: |
           [{
-            "color": "#E53935",
-            "title": ":red_circle: [talos-cluster] {{.app.metadata.name}} sync failed",
-            "title_link": "https://argocd.talos-cluster.local.obleey.com/applications/{{.app.metadata.name}}",
+            "type": "header",
+            "text": {
+              "type": "plain_text",
+              "text": ":red_circle: Sync Failed — {{.app.metadata.name}}"
+            }
+          },
+          {
+            "type": "section",
             "fields": [
               {
-                "title": "Sync Status",
-                "value": "{{.app.status.sync.status}}",
-                "short": true
+                "type": "mrkdwn",
+                "text": "*Cluster*\ntalos-cluster"
               },
               {
-                "title": "Repository",
-                "value": "{{if .app.spec.source.repoURL}}{{.app.spec.source.repoURL}}{{else if .app.spec.sources}}{{(index .app.spec.sources 0).repoURL}}{{else}}N/A{{end}}",
-                "short": true
+                "type": "mrkdwn",
+                "text": "*Phase*\n{{.app.status.operationState.phase}}"
               },
               {
-                "title": "Error",
-                "value": "{{if .app.status.operationState.message}}{{.app.status.operationState.message}}{{else}}N/A{{end}}",
-                "short": false
+                "type": "mrkdwn",
+                "text": "*Repository*\n{{if .app.spec.source.repoURL}}{{.app.spec.source.repoURL}}{{else if .app.spec.sources}}{{(index .app.spec.sources 0).repoURL}}{{else}}N/A{{end}}"
+              },
+              {
+                "type": "mrkdwn",
+                "text": "*Error*\n```{{if .app.status.operationState.message}}{{.app.status.operationState.message}}{{else}}N/A{{end}}```"
+              }
+            ]
+          },
+          {
+            "type": "actions",
+            "elements": [
+              {
+                "type": "button",
+                "style": "danger",
+                "text": {"type": "plain_text", "text": "Open App"},
+                "url": "https://argocd.talos-cluster.local.obleey.com/applications/{{.app.metadata.name}}"
+              },
+              {
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Sync Logs"},
+                "url": "https://argocd.talos-cluster.local.obleey.com/applications/{{.app.metadata.name}}?operation=true"
               }
             ]
           }]
 
     template.app-sync-succeeded: |
       slack:
-        attachments: |
+        blocks: |
           [{
-            "color": "#43A047",
-            "title": ":large_green_circle: [talos-cluster] {{.app.metadata.name}} synced successfully",
-            "title_link": "https://argocd.talos-cluster.local.obleey.com/applications/{{.app.metadata.name}}"
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": ":large_green_circle: *[talos-cluster]* *{{.app.metadata.name}}* synced successfully"
+            },
+            "accessory": {
+              "type": "button",
+              "text": {"type": "plain_text", "text": "Open App"},
+              "url": "https://argocd.talos-cluster.local.obleey.com/applications/{{.app.metadata.name}}"
+            }
           }]
 
   triggers:
