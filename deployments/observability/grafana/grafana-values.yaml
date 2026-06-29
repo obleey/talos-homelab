@@ -36,6 +36,9 @@ grafana.ini:
 datasources:
   datasources.yaml:
     apiVersion: 1
+    deleteDatasources:
+      - name: Loki
+        orgId: 1
     datasources:
       - name: VictoriaMetrics
         type: prometheus
@@ -64,7 +67,7 @@ dashboardProviders:
       - name: default
         orgId: 1
         type: file
-        disableDeletion: true
+        disableDeletion: false
         updateIntervalSeconds: 30
         options:
           path: /var/lib/grafana/dashboards/default

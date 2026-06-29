@@ -166,11 +166,32 @@ alloy:
       }
 
       // ============================================================
-      // Pod log collection → Loki
+      // Pod log collection → VictoriaLogs
+      // clustering ensures each DaemonSet pod only processes its own node's logs
+      // loki.process extracts level from JSON so VictoriaLogs can filter/colour by it
       // ============================================================
       loki.source.kubernetes "pods" {
         targets    = discovery.kubernetes.pods.targets
+        forward_to = [loki.process.extract_level.receiver]
+        clustering { enabled = true }
+      }
+
+      loki.process "extract_level" {
         forward_to = [loki.write.victorialogs.receiver]
+
+        // Try to parse as JSON and pull out the level field.
+        // Silently skips non-JSON lines.
+        stage.json {
+          expressions = {
+            level = "level",
+          }
+        }
+
+        stage.labels {
+          values = {
+            level = "",
+          }
+        }
       }
 
       loki.write "victorialogs" {
