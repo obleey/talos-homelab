@@ -59,15 +59,3 @@ persistence:
     globalMounts:
       - path: /data
 
-route:
-  app:
-    parentRefs:
-      - name: traefik-gateway
-        namespace: traefik
-        sectionName: websecure
-    hostnames:
-      - autopulse.talos-cluster.local.obleey.com
-    rules:
-      - backendRefs:
-          - name: autopulse
-            port: 2875
