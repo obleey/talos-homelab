@@ -33,3 +33,16 @@ persistence:
     path: /mnt/serve/starr-stack/data
     globalMounts:
       - path: /data
+
+route:
+  app:
+    parentRefs:
+      - name: traefik-gateway
+        namespace: traefik
+        sectionName: websecure
+    hostnames:
+      - sonarr.talos-cluster.local.obleey.com
+    rules:
+      - backendRefs:
+          - name: sonarr
+            port: 8989

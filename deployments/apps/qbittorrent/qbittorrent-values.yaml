@@ -28,3 +28,16 @@ persistence:
     path: /mnt/serve/starr-stack/data/torrents
     globalMounts:
       - path: /data/torrents
+
+route:
+  app:
+    parentRefs:
+      - name: traefik-gateway
+        namespace: traefik
+        sectionName: websecure
+    hostnames:
+      - qb.talos-cluster.local.obleey.com
+    rules:
+      - backendRefs:
+          - name: qbittorrent
+            port: 8080

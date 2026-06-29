@@ -25,3 +25,16 @@ persistence:
     existingClaim: clonarr-config
     globalMounts:
       - path: /config
+
+route:
+  app:
+    parentRefs:
+      - name: traefik-gateway
+        namespace: traefik
+        sectionName: websecure
+    hostnames:
+      - clonarr.talos-cluster.local.obleey.com
+    rules:
+      - backendRefs:
+          - name: clonarr
+            port: 6060
