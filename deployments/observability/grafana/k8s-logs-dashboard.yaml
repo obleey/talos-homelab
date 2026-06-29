@@ -49,6 +49,23 @@ data:
             "refresh": 2,
             "sort": 1,
             "current": {}
+          },
+          {
+            "name": "level",
+            "label": "Level",
+            "type": "custom",
+            "query": "error,warn,info,debug,fatal",
+            "options": [
+              { "text": "error", "value": "(?i)error" },
+              { "text": "warn",  "value": "(?i)warn" },
+              { "text": "info",  "value": "(?i)info" },
+              { "text": "debug", "value": "(?i)debug" },
+              { "text": "fatal", "value": "(?i)fatal" }
+            ],
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": false,
+            "current": { "text": "All", "value": "$__all" }
           }
         ]
       },
@@ -71,7 +88,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{instance=~\"$namespace/$deployment.*\"}",
+              "expr": "{instance=~\"$namespace/$deployment.*\"} | filter level=~\"$level\"",
               "refId": "A",
               "queryType": "range",
               "maxLines": 500
