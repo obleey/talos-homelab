@@ -1,9 +1,9 @@
 fullnameOverride: grafana
 
-# Admin password is auto-generated and stored in secret 'grafana' (key: admin-password).
-# Retrieve with:
-#   kubectl get secret -n observability grafana -o jsonpath='{.data.admin-password}' | base64 -d
-adminUser: admin
+admin:
+  existingSecret: grafana-admin-creds
+  userKey: admin-user
+  passwordKey: admin-password
 
 deploymentStrategy:
   type: Recreate
