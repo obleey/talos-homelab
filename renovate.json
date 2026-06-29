@@ -82,7 +82,7 @@
       "matchManagers": ["helmv3", "helm-values", "argocd"],
       "matchPackageNames": [
         "victoria-metrics-single",
-        "loki",
+        "victoria-logs-single",
         "tempo",
         "grafana",
         "alloy",

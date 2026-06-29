@@ -170,12 +170,12 @@ alloy:
       // ============================================================
       loki.source.kubernetes "pods" {
         targets    = discovery.kubernetes.pods.targets
-        forward_to = [loki.write.loki.receiver]
+        forward_to = [loki.write.victorialogs.receiver]
       }
 
-      loki.write "loki" {
+      loki.write "victorialogs" {
         endpoint {
-          url = "http://loki.observability.svc.cluster.local:3100/loki/api/v1/push"
+          url = "http://victorialogs-victoria-logs-single-server.observability.svc.cluster.local:9428/insert/loki/api/v1/push"
         }
       }
 

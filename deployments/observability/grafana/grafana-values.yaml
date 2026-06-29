@@ -19,6 +19,9 @@ envValueFrom:
       key: slack-token
       optional: true
 
+plugins:
+  - victoriametrics-logs-datasource
+
 grafana.ini:
   server:
     root_url: https://grafana.talos-cluster.local.obleey.com
@@ -37,25 +40,17 @@ datasources:
         url: http://victoriametrics-victoria-metrics-single-server.observability.svc.cluster.local:8428
         isDefault: true
         editable: false
-      - name: Loki
-        type: loki
-        uid: loki
-        url: http://loki.observability.svc.cluster.local:3100
+      - name: VictoriaLogs
+        type: victoriametrics-logs-datasource
+        uid: victorialogs
+        url: http://victorialogs-victoria-logs-single-server.observability.svc.cluster.local:9428
         editable: false
-        jsonData:
-          derivedFields:
-            - datasourceUid: tempo
-              matcherRegex: "traceID=(\\w+)"
-              name: TraceID
-              url: "$${__value.raw}"
       - name: Tempo
         type: tempo
         uid: tempo
         url: http://tempo.observability.svc.cluster.local:3100
         editable: false
         jsonData:
-          tracesToLogsV2:
-            datasourceUid: loki
           serviceMap:
             datasourceUid: victoriametrics
 
@@ -230,6 +225,90 @@ alerting:
             for: 5m
             annotations:
               summary: PVC is more than 85% full
+            labels:
+              severity: warning
+            isPaused: false
+
+          - uid: k8s-container-oom-killed
+            title: Container OOM Killed
+            condition: A
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: victoriametrics
+                model:
+                  expr: kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} > 0
+                  instant: true
+                  refId: A
+            noDataState: OK
+            execErrState: Error
+            for: 0s
+            annotations:
+              summary: Container was OOM killed
+            labels:
+              severity: critical
+            isPaused: false
+
+          - uid: k8s-deployment-unavailable
+            title: Deployment Has Unavailable Replicas
+            condition: A
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: victoriametrics
+                model:
+                  expr: kube_deployment_status_replicas_unavailable > 0
+                  instant: true
+                  refId: A
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: Deployment has unavailable replicas for 5 minutes
+            labels:
+              severity: warning
+            isPaused: false
+
+          - uid: k8s-statefulset-not-ready
+            title: StatefulSet Replicas Not Ready
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: victoriametrics
+                model:
+                  expr: kube_statefulset_status_replicas_ready
+                  instant: true
+                  refId: A
+              - refId: B
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: victoriametrics
+                model:
+                  expr: kube_statefulset_status_replicas
+                  instant: true
+                  refId: B
+              - refId: C
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  type: math
+                  expression: $B - $A
+                  refId: C
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: StatefulSet has replicas that are not ready
             labels:
               severity: warning
             isPaused: false
