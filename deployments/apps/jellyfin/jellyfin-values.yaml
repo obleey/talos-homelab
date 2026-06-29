@@ -13,7 +13,7 @@ controllers:
       main:
         image:
           repository: jellyfin/jellyfin
-          tag: "10.11.8"
+          tag: "12.0-rc1.20260621-234017"
         env:
           TZ: Europe/Ljubljana
 
