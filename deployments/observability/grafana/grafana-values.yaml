@@ -77,9 +77,9 @@ dashboards:
       gnetId: 1860
       revision: 37
       datasource: VictoriaMetrics
-    kubernetes-cluster:
-      gnetId: 17900
-      revision: 1
+    kubernetes-dashboard:
+      gnetId: 15661
+      revision: 2
       datasource: VictoriaMetrics
 
 # Sidecar watches ConfigMaps with label grafana_dashboard: "1" for dynamic dashboard loading
@@ -115,6 +115,124 @@ alerting:
         group_wait: 30s
         group_interval: 5m
         repeat_interval: 4h
+
+  rules.yaml:
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: Kubernetes
+        folder: Kubernetes
+        interval: 1m
+        rules:
+          - uid: k8s-node-not-ready
+            title: Node Not Ready
+            condition: A
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: victoriametrics
+                model:
+                  expr: count(kube_node_status_condition{condition="Ready",status="true"} == 0)
+                  instant: true
+                  refId: A
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: A cluster node has been not ready for 5 minutes
+            labels:
+              severity: critical
+            isPaused: false
+
+          - uid: k8s-pod-crashlooping
+            title: Pod CrashLooping
+            condition: A
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 900
+                  to: 0
+                datasourceUid: victoriametrics
+                model:
+                  expr: increase(kube_pod_container_status_restarts_total[15m]) > 3
+                  instant: true
+                  refId: A
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: Pod has restarted more than 3 times in 15 minutes
+            labels:
+              severity: warning
+            isPaused: false
+
+          - uid: k8s-high-node-cpu
+            title: High Node CPU
+            condition: A
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: victoriametrics
+                model:
+                  expr: (1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle",job="node-exporter"}[5m]))) * 100 > 90
+                  instant: true
+                  refId: A
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: Node CPU usage above 90% for 5 minutes
+            labels:
+              severity: warning
+            isPaused: false
+
+          - uid: k8s-high-node-memory
+            title: High Node Memory
+            condition: A
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: victoriametrics
+                model:
+                  expr: (1 - node_memory_MemAvailable_bytes{job="node-exporter"} / node_memory_MemTotal_bytes{job="node-exporter"}) * 100 > 90
+                  instant: true
+                  refId: A
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: Node memory usage above 90% for 5 minutes
+            labels:
+              severity: warning
+            isPaused: false
+
+          - uid: k8s-pvc-almost-full
+            title: PVC Almost Full
+            condition: A
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: victoriametrics
+                model:
+                  expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) * 100 > 85
+                  instant: true
+                  refId: A
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: PVC is more than 85% full
+            labels:
+              severity: warning
+            isPaused: false
 
 resources:
   requests:
