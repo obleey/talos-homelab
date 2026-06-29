@@ -102,13 +102,6 @@ alerting:
             settings:
               recipient: "#alerts"
               token: ${GF_SLACK_TOKEN}
-              title: |-
-                [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
-              text: |-
-                {{ range .Alerts -}}
-                *Alert:* {{ .Annotations.summary }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
-                *Description:* {{ .Annotations.description }}
-                {{ end }}
             disableResolveMessage: false
 
   policies.yaml:
