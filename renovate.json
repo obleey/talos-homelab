@@ -63,6 +63,12 @@
       "minimumReleaseAge": "3 days"
     },
     {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["jellyfin/jellyfin"],
+      "allowedVersions": "!/^(12|13|14)/",
+      "versioning": "loose"
+    },
+    {
       "matchUpdateTypes": ["major"],
       "labels": ["renovate", "major-update"]
     },
