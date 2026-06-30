@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alerting-config
+  namespace: monitoring
+  labels:
+    grafana_alert: "1"
+data:
+  alerting.yaml: |
+    apiVersion: 1
+
+    contactPoints:
+      - orgId: 1
+        name: slack
+        receivers:
+          - uid: slack-receiver
+            type: slack
+            settings:
+              token: ${SLACK_TOKEN}
+              recipient: "#monitoring"
+              title: |
+                {{ if eq .Status "firing" }}🔴{{ else }}🟢{{ end }} {{ .CommonLabels.alertname }}
+              text: |
+                {{ range .Alerts }}
+                *Alert:* {{ .Labels.alertname }}
+                *Severity:* {{ .Labels.severity | default "unknown" }}
+                *Summary:* {{ .Annotations.summary | default .Labels.alertname }}
+                {{ end }}
+            disableResolveMessage: false
+
+    policies:
+      - orgId: 1
+        receiver: slack
+        group_by: [grafana_folder, alertname]
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 4h

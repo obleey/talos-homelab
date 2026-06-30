@@ -102,6 +102,7 @@ grafana:
     existingSecret: kps-grafana
     userKey: admin-user
     passwordKey: admin-password
+  envFromSecret: grafana-slack-token
   defaultDashboardsEnabled: true
   defaultDashboardsTimezone: browser
   sidecar:
@@ -110,6 +111,11 @@ grafana:
       searchNamespace: ALL
     datasources:
       enabled: true
+    alerts:
+      enabled: true
+      searchNamespace: ALL
+      label: grafana_alert
+      labelValue: "1"
   additionalDataSources:
     - name: Loki
       type: loki
