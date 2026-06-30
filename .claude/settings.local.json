@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rtk kubectl *)",
+      "Bash(git commit -m ' *)",
+      "Bash(rtk helm *)",
+      "Bash(python3 -c ' *)",
+      "Bash(helm show *)",
+      "Read(//tmp/**)",
+      "Bash(grep -v \"TYPE\\\\|^$\")",
+      "Bash(helm template *)"
+    ]
+  }
+}
