@@ -100,6 +100,7 @@ alertmanager:
 grafana:
   deploymentStrategy:
     type: Recreate
+    rollingUpdate: null
   admin:
     existingSecret: kps-grafana
     userKey: admin-user
