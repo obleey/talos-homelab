@@ -98,6 +98,8 @@ alertmanager:
   enabled: false
 
 grafana:
+  deploymentStrategy:
+    type: Recreate
   admin:
     existingSecret: kps-grafana
     userKey: admin-user
