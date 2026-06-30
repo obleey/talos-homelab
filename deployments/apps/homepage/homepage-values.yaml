@@ -24,9 +24,6 @@ env:
 envFrom:
   - secretRef:
       name: homepage-secrets
-  - secretRef:
-      name: homepage-observability-secrets
-      optional: true
 
 persistence:
   logs:
@@ -55,9 +52,6 @@ config:
       Infrastructure:
         style: row
         columns: 6
-      Observability:
-        style: row
-        columns: 2
       Media Servers:
         style: row
         columns: 2
@@ -146,20 +140,6 @@ config:
             href: https://truenas.local.obleey.com
             description: Network storage
 
-    - Observability:
-        - Grafana:
-            icon: grafana.png
-            href: https://grafana.talos-cluster.local.obleey.com
-            description: Dashboards & alerts
-            widget:
-              type: grafana
-              url: https://grafana.talos-cluster.local.obleey.com
-              username: "{{HOMEPAGE_VAR_GRAFANA_USERNAME}}"
-              password: "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}"
-        - VictoriaMetrics:
-            icon: victoriametrics.png
-            href: https://vm.talos-cluster.local.obleey.com/vmui
-            description: Metrics storage
 
     - Media Servers:
         - Plex:
