@@ -1,0 +1,110 @@
+fullnameOverride: kps
+
+# etcd: plain HTTP on 2381 (configured via listen-metrics-urls)
+kubeEtcd:
+  enabled: true
+  endpoints:
+    - 10.0.0.160
+  service:
+    enabled: true
+    port: 2381
+    targetPort: 2381
+  serviceMonitor:
+    scheme: http
+    insecureSkipVerify: false
+
+# scheduler: HTTPS on 10259 with bind-address=0.0.0.0
+kubeScheduler:
+  enabled: true
+  endpoints:
+    - 10.0.0.160
+  service:
+    enabled: true
+    port: 10259
+    targetPort: 10259
+  serviceMonitor:
+    scheme: https
+    insecureSkipVerify: true
+
+# controller-manager: HTTPS on 10257 with bind-address=0.0.0.0
+kubeControllerManager:
+  enabled: true
+  endpoints:
+    - 10.0.0.160
+  service:
+    enabled: true
+    port: 10257
+    targetPort: 10257
+  serviceMonitor:
+    scheme: https
+    insecureSkipVerify: true
+
+# kube-proxy is disabled on this cluster (Cilium handles it)
+kubeProxy:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    retention: 30d
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn
+          accessModes: [ReadWriteOnce]
+          resources:
+            requests:
+              storage: 20Gi
+    # pick up ServiceMonitors/PodMonitors from all namespaces
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn
+          accessModes: [ReadWriteOnce]
+          resources:
+            requests:
+              storage: 2Gi
+
+grafana:
+  admin:
+    existingSecret: kps-grafana
+    userKey: admin-user
+    passwordKey: admin-password
+  defaultDashboardsEnabled: true
+  defaultDashboardsTimezone: browser
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
+    datasources:
+      enabled: true
+  # Loki datasource — added alongside the auto-provisioned Prometheus one
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki-gateway.monitoring.svc.cluster.local
+      access: proxy
+      isDefault: false
+  persistence:
+    enabled: true
+    storageClassName: longhorn
+    size: 2Gi
+  grafana.ini:
+    server:
+      root_url: https://grafana.talos-cluster.local.obleey.com
+
+prometheus-node-exporter:
+  tolerations:
+    - effect: NoSchedule
+      operator: Exists
+
+kube-state-metrics:
+  metricLabelsAllowlist:
+    - pods=[*]
+    - deployments=[*]
+    - statefulsets=[*]
