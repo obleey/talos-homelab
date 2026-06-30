@@ -16,7 +16,7 @@ data:
           - uid: slack-receiver
             type: slack
             settings:
-              token: ${SLACK_TOKEN}
+              token: ${token}
               recipient: "#monitoring"
               title: |
                 {{ if eq .Status "firing" }}🔴{{ else }}🟢{{ end }} {{ .CommonLabels.alertname }}
