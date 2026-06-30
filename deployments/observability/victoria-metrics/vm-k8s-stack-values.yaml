@@ -1,5 +1,9 @@
 # VictoriaMetrics k8s stack — metrics + logs + traces + Grafana
 
+# Release "victoria-metrics" + chart "victoria-metrics-k8s-stack" would exceed
+# the 63-char Service name limit; fullnameOverride keeps chart-level names short.
+fullnameOverride: "vm"
+
 # ── Metrics ──────────────────────────────────────────────────────────────────
 vmsingle:
   enabled: true
