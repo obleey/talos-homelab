@@ -14,6 +14,44 @@ kubeControllerManager:
 kubeProxy:
   enabled: false
 
+# Disable alert rules — keep only recording rules (needed by dashboards).
+# Alerting is handled by Grafana unified alerting instead.
+defaultRules:
+  rules:
+    alertmanager: false
+    configReloaders: false
+    general: false
+    kubeApiserverAvailability: false
+    kubeApiserverBurnrate: false
+    kubeApiserverSlos: false
+    kubeControllerManager: false
+    kubeProxyAlerting: false
+    kubeProxyRecording: false   # kube-proxy disabled (Cilium)
+    kubeSchedulerAlerting: false
+    kubernetesApps: false
+    kubernetesResources: false
+    kubernetesStorage: false
+    kubernetesSystem: false
+    nodeExporterAlerting: false
+    prometheus: false
+    prometheusOperator: false
+    etcd: false
+    # Recording rules — keep for dashboards
+    k8sContainerCpuUsageSecondsTotal: true
+    k8sContainerMemoryCache: true
+    k8sContainerMemoryRss: true
+    k8sContainerMemorySwap: true
+    k8sContainerMemoryWorkingSetBytes: true
+    k8sContainerResource: true
+    k8sPodOwner: true
+    kubeApiserverHistogram: true
+    kubelet: true
+    kubeSchedulerRecording: true
+    kubeStateMetrics: true
+    network: true
+    node: true
+    nodeExporterRecording: true
+
 prometheus:
   prometheusSpec:
     retention: 30d
@@ -40,6 +78,7 @@ prometheus:
         scheme: https
         tls_config:
           insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
         static_configs:
           - targets: ['10.0.0.160:10259']
             labels:
@@ -48,21 +87,15 @@ prometheus:
         scheme: https
         tls_config:
           insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
         static_configs:
           - targets: ['10.0.0.160:10257']
             labels:
               node: talos-control-plane-1
 
+# Disable Alertmanager — Grafana unified alerting handles notifications
 alertmanager:
-  alertmanagerSpec:
-    storage:
-      volumeClaimTemplate:
-        spec:
-          storageClassName: longhorn
-          accessModes: [ReadWriteOnce]
-          resources:
-            requests:
-              storage: 2Gi
+  enabled: false
 
 grafana:
   admin:
@@ -77,7 +110,6 @@ grafana:
       searchNamespace: ALL
     datasources:
       enabled: true
-  # Loki datasource — added alongside the auto-provisioned Prometheus one
   additionalDataSources:
     - name: Loki
       type: loki
@@ -91,6 +123,10 @@ grafana:
   grafana.ini:
     server:
       root_url: https://grafana.talos-cluster.local.obleey.com
+    unified_alerting:
+      enabled: true
+    alerting:
+      enabled: false  # disable legacy alerting
 
 prometheus-node-exporter:
   tolerations:
