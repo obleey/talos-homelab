@@ -1,43 +1,14 @@
 fullnameOverride: kps
 
-# etcd: plain HTTP on 2381 (configured via listen-metrics-urls)
+# Endpoints are globally excluded in ArgoCD, so the ServiceMonitor/Endpoints
+# approach for control plane components won't work. Use additionalScrapeConfigs
+# with static targets instead, matching the job names dashboards expect.
 kubeEtcd:
-  enabled: true
-  endpoints:
-    - 10.0.0.160
-  service:
-    enabled: true
-    port: 2381
-    targetPort: 2381
-  serviceMonitor:
-    scheme: http
-    insecureSkipVerify: false
-
-# scheduler: HTTPS on 10259 with bind-address=0.0.0.0
+  enabled: false
 kubeScheduler:
-  enabled: true
-  endpoints:
-    - 10.0.0.160
-  service:
-    enabled: true
-    port: 10259
-    targetPort: 10259
-  serviceMonitor:
-    scheme: https
-    insecureSkipVerify: true
-
-# controller-manager: HTTPS on 10257 with bind-address=0.0.0.0
+  enabled: false
 kubeControllerManager:
-  enabled: true
-  endpoints:
-    - 10.0.0.160
-  service:
-    enabled: true
-    port: 10257
-    targetPort: 10257
-  serviceMonitor:
-    scheme: https
-    insecureSkipVerify: true
+  enabled: false
 
 # kube-proxy is disabled on this cluster (Cilium handles it)
 kubeProxy:
@@ -58,6 +29,29 @@ prometheus:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
+    additionalScrapeConfigs:
+      - job_name: kube-etcd
+        scheme: http
+        static_configs:
+          - targets: ['10.0.0.160:2381']
+            labels:
+              node: talos-control-plane-1
+      - job_name: kube-scheduler
+        scheme: https
+        tls_config:
+          insecure_skip_verify: true
+        static_configs:
+          - targets: ['10.0.0.160:10259']
+            labels:
+              node: talos-control-plane-1
+      - job_name: kube-controller-manager
+        scheme: https
+        tls_config:
+          insecure_skip_verify: true
+        static_configs:
+          - targets: ['10.0.0.160:10257']
+            labels:
+              node: talos-control-plane-1
 
 alertmanager:
   alertmanagerSpec:
