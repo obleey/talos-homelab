@@ -109,6 +109,10 @@ grafana:
     dashboards:
       enabled: true
       searchNamespace: ALL
+      folderAnnotation: grafana_folder
+      defaultFolderName: "Kubernetes"
+      provider:
+        foldersFromFilesStructure: true
     datasources:
       enabled: true
     alerts:
