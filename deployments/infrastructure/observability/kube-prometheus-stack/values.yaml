@@ -142,6 +142,10 @@ grafana:
       enabled: false  # disable legacy alerting
     dashboards:
       default_home_dashboard_path: /tmp/dashboards/Kubernetes/Infrastructure/homelab-home.json
+    date_formats:
+      full_date: DD.MM.YYYY HH:mm:ss
+      used_in_range: DD.MM.YYYY HH:mm
+      week_start: monday
 
 prometheus-node-exporter:
   tolerations:
