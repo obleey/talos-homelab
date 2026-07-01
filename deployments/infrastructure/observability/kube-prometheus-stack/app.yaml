@@ -21,6 +21,7 @@ spec:
       ref: values
       path: deployments/infrastructure/observability/kube-prometheus-stack
       directory:
+        recurse: true
         exclude: "{app.yaml,values.yaml}"
   destination:
     server: https://kubernetes.default.svc

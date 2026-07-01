@@ -6,7 +6,7 @@ metadata:
   labels:
     grafana_dashboard: "1"
   annotations:
-    grafana_folder: Kubernetes
+    grafana_folder: Infrastructure
 data:
   node-exporter-full.json: |
     {
