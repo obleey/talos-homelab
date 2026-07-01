@@ -1,0 +1,273 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alert-rules
+  namespace: monitoring
+  labels:
+    grafana_alert: "1"
+data:
+  alert-rules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: kubernetes
+        folder: Kubernetes Alerts
+        interval: 1m
+        rules:
+
+          - uid: k8s-node-not-ready
+            title: Node Not Ready
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'kube_node_status_condition{condition="Ready",status="true"} == 0'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: NoData
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "7d57716318ee0dddbac5a7f451fb7753"
+              __panelId__: "2"
+              summary: "Node {{ $labels.node }} is not ready"
+              description: "Node {{ $labels.node }} has been NotReady for more than 5 minutes."
+            isPaused: false
+
+          - uid: k8s-pod-crash-looping
+            title: Pod Crash Looping
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 900
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'rate(kube_pod_container_status_restarts_total[15m]) * 60 * 15 > 5'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: NoData
+            execErrState: Alerting
+            for: 0s
+            labels:
+              severity: critical
+            annotations:
+              summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping"
+              description: "Container {{ $labels.container }} has restarted more than 5 times in the last 15 minutes."
+            isPaused: false
+
+          - uid: k8s-deployment-unavailable
+            title: Deployment Has No Available Replicas
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'kube_deployment_status_replicas_available == 0 and kube_deployment_spec_replicas > 0'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: NoData
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "a87fb0d919ec0ea5f6543124e16c42a5"
+              summary: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has no available replicas"
+              description: "Deployment has had 0 available replicas for more than 5 minutes."
+            isPaused: false
+
+          - uid: k8s-node-disk-full
+            title: Node Disk Almost Full
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 900
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: '(node_filesystem_avail_bytes{mountpoint="/var",fstype="xfs"} / node_filesystem_size_bytes{mountpoint="/var",fstype="xfs"}) < 0.15'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: NoData
+            execErrState: Alerting
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "node-exporter-full"
+              __panelId__: "43"
+              summary: "Node {{ $labels.instance }} /var disk is almost full"
+              description: "Node {{ $labels.instance }} has less than 15% disk space remaining on /var."
+            isPaused: false
+
+          - uid: k8s-pvc-almost-full
+            title: PVC Almost Full
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 900
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes < 0.15'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: NoData
+            execErrState: Alerting
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "919b92a8e8041bd567af9edab12c840c"
+              __panelId__: "1"
+              summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is almost full"
+              description: "PVC has less than 15% capacity remaining."
+            isPaused: false
