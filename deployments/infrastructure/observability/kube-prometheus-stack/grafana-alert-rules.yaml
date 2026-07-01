@@ -163,7 +163,6 @@ data:
             labels:
               severity: critical
             annotations:
-              __dashboardUid__: "a87fb0d919ec0ea5f6543124e16c42a5"
               summary: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has no available replicas"
               description: "Deployment has had 0 available replicas for more than 5 minutes."
             isPaused: false
