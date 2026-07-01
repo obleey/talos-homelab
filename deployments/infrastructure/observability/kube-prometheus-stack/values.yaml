@@ -47,8 +47,8 @@ defaultRules:
     kubeApiserverHistogram: true
     kubelet: true
     kubeSchedulerRecording: true
-    kubeStateMetrics: true
-    network: true
+    kubeStateMetrics: false
+    network: false
     node: true
     nodeExporterRecording: true
 
@@ -100,7 +100,6 @@ alertmanager:
 grafana:
   deploymentStrategy:
     type: Recreate
-    rollingUpdate: null
   admin:
     existingSecret: kps-grafana
     userKey: admin-user
