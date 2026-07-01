@@ -55,7 +55,7 @@ data:
                   expression: A
                   refId: threshold
                   type: threshold
-            noDataState: NoData
+            noDataState: OK
             execErrState: Alerting
             for: 5m
             labels:
@@ -107,7 +107,7 @@ data:
                   expression: A
                   refId: threshold
                   type: threshold
-            noDataState: NoData
+            noDataState: OK
             execErrState: Alerting
             for: 0s
             labels:
@@ -157,7 +157,7 @@ data:
                   expression: A
                   refId: threshold
                   type: threshold
-            noDataState: NoData
+            noDataState: OK
             execErrState: Alerting
             for: 5m
             labels:
@@ -207,7 +207,7 @@ data:
                   expression: A
                   refId: threshold
                   type: threshold
-            noDataState: NoData
+            noDataState: OK
             execErrState: Alerting
             for: 15m
             labels:
@@ -259,7 +259,7 @@ data:
                   expression: A
                   refId: threshold
                   type: threshold
-            noDataState: NoData
+            noDataState: OK
             execErrState: Alerting
             for: 15m
             labels:
