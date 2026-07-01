@@ -1,0 +1,60 @@
+alloy:
+  configMap:
+    content: |
+      prometheus.exporter.blackbox "probes" {
+        config = `
+      modules:
+        http_home:
+          prober: http
+          timeout: 10s
+          http:
+            valid_status_codes: [200, 201, 301, 302, 401, 403, 404]
+            method: GET
+            follow_redirects: true
+            preferred_ip_family: "IPv4"
+            tls_config:
+              insecure_skip_verify: true
+      `
+
+        // Kubernetes cluster services
+        target { name = "argocd";    address = "https://argocd.talos-cluster.local.obleey.com";    module = "http_home" }
+        target { name = "bazarr";    address = "https://bazarr.talos-cluster.local.obleey.com";    module = "http_home" }
+        target { name = "clonarr";   address = "https://clonarr.talos-cluster.local.obleey.com";   module = "http_home" }
+        target { name = "grafana";   address = "https://grafana.talos-cluster.local.obleey.com";   module = "http_home" }
+        target { name = "hub";       address = "https://hub.talos-cluster.local.obleey.com";       module = "http_home" }
+        target { name = "jellyfin";  address = "https://jellyfin.talos-cluster.local.obleey.com";  module = "http_home" }
+        target { name = "kubeseal";  address = "https://kubeseal.talos-cluster.local.obleey.com";  module = "http_home" }
+        target { name = "longhorn";  address = "https://longhorn.talos-cluster.local.obleey.com";  module = "http_home" }
+        target { name = "plex";      address = "https://plex.talos-cluster.local.obleey.com";      module = "http_home" }
+        target { name = "prowlarr";  address = "https://prowlarr.talos-cluster.local.obleey.com";  module = "http_home" }
+        target { name = "qb";        address = "https://qb.talos-cluster.local.obleey.com";        module = "http_home" }
+        target { name = "radarr";    address = "https://radarr.talos-cluster.local.obleey.com";    module = "http_home" }
+        target { name = "seerr";     address = "https://seerr.talos-cluster.local.obleey.com";     module = "http_home" }
+        target { name = "sonarr";    address = "https://sonarr.talos-cluster.local.obleey.com";    module = "http_home" }
+        target { name = "traefik";   address = "https://traefik.talos-cluster.local.obleey.com";   module = "http_home" }
+
+        // Home network appliances
+        target { name = "technitium"; address = "https://technitium.local.obleey.com"; module = "http_home" }
+        target { name = "truenas";    address = "https://truenas.local.obleey.com";    module = "http_home" }
+      }
+
+      prometheus.scrape "blackbox" {
+        targets         = prometheus.exporter.blackbox.probes.targets
+        forward_to      = [prometheus.remote_write.prometheus.receiver]
+        job_name        = "blackbox"
+        scrape_interval = "60s"
+        scrape_timeout  = "15s"
+      }
+
+      prometheus.remote_write "prometheus" {
+        endpoint {
+          url = "http://kps-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+        }
+      }
+
+controller:
+  type: deployment
+  replicas: 1
+
+clusterRole:
+  rules: []

@@ -54,6 +54,7 @@ defaultRules:
 
 prometheus:
   prometheusSpec:
+    enableRemoteWriteReceiver: true
     retention: 30d
     storageSpec:
       volumeClaimTemplate:

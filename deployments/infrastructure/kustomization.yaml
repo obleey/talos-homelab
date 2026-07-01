@@ -13,3 +13,4 @@ resources:
   - observability/kube-prometheus-stack/app.yaml
   - observability/loki/app.yaml
   - observability/alloy/app.yaml
+  - observability/alloy-blackbox/app.yaml
