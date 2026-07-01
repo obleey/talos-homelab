@@ -61,6 +61,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "3138fa155d5915769fbded898ac09fd9"
+              __panelId__: "1"
               summary: "Kubernetes Node not ready ({{ $labels.node }})"
               description: "Node {{ $labels.node }} has been unready for more than 10 minutes. VALUE = {{ $value }}"
             isPaused: false
@@ -111,6 +113,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "200ac8fdbfbb74b39aff88118e4d1c2c"
+              __panelId__: "3"
               summary: "Kubernetes Node memory pressure ({{ $labels.node }})"
               description: "Node {{ $labels.node }} has MemoryPressure condition set. VALUE = {{ $value }}"
             isPaused: false
@@ -161,6 +165,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "node-exporter-full"
+              __panelId__: "43"
               summary: "Kubernetes Node disk pressure ({{ $labels.node }})"
               description: "Node {{ $labels.node }} has DiskPressure condition set. VALUE = {{ $value }}"
             isPaused: false
@@ -211,6 +217,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "3138fa155d5915769fbded898ac09fd9"
+              __panelId__: "1"
               summary: "Kubernetes Node network unavailable ({{ $labels.node }})"
               description: "Node {{ $labels.node }} has NetworkUnavailable condition set. VALUE = {{ $value }}"
             isPaused: false
@@ -267,6 +275,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "6581e46e4e5c7ba40a07646395ef7b23"
+              __panelId__: "1"
               summary: "Kubernetes Pod not healthy ({{ $labels.namespace }}/{{ $labels.pod }})"
               description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-running state for more than 15 minutes. VALUE = {{ $value }}"
             isPaused: false
@@ -317,6 +327,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "a164a7f0339f99e89cea5cb47e9be617"
+              __panelId__: "1"
               summary: "Kubernetes StatefulSet down ({{ $labels.namespace }}/{{ $labels.statefulset }})"
               description: "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} went down. VALUE = {{ $value }}"
             isPaused: false
@@ -367,6 +379,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "a164a7f0339f99e89cea5cb47e9be617"
+              __panelId__: "1"
               summary: "Kubernetes Deployment generation mismatch ({{ $labels.namespace }}/{{ $labels.deployment }})"
               description: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has failed but has not been rolled back. VALUE = {{ $value }}"
             isPaused: false
@@ -417,6 +431,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "a164a7f0339f99e89cea5cb47e9be617"
+              __panelId__: "1"
               summary: "Kubernetes StatefulSet generation mismatch ({{ $labels.namespace }}/{{ $labels.statefulset }})"
               description: "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has failed but has not been rolled back. VALUE = {{ $value }}"
             isPaused: false
@@ -467,6 +483,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "a164a7f0339f99e89cea5cb47e9be617"
+              __panelId__: "1"
               summary: "Kubernetes DaemonSet misscheduled ({{ $labels.namespace }}/{{ $labels.daemonset }})"
               description: "Some Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} are running where they are not supposed to run. VALUE = {{ $value }}"
             isPaused: false
@@ -517,6 +535,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "85a562078cdf77779eaa1add43ccec1e"
+              __panelId__: "5"
               summary: "Kubernetes CronJob failing ({{ $labels.namespace }}/{{ $labels.cronjob }})"
               description: "CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is failing (last schedule is newer than last success and no active runs). VALUE = {{ $value }}"
             isPaused: false
@@ -567,6 +587,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "85a562078cdf77779eaa1add43ccec1e"
+              __panelId__: "5"
               summary: "Kubernetes Job slow completion ({{ $labels.namespace }}/{{ $labels.job_name }})"
               description: "Kubernetes Job {{ $labels.namespace }}/{{ $labels.job_name }} did not complete in time. VALUE = {{ $value }}"
             isPaused: false
@@ -623,6 +645,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "919b92a8e8041bd567af9edab12c840c"
+              __panelId__: "1"
               summary: "Kubernetes Volume full in four days ({{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }})"
               description: "Volume {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is predicted to fill within 4 days based on current growth rate. VALUE = {{ $value | humanize }}"
             isPaused: false
@@ -673,6 +697,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "919b92a8e8041bd567af9edab12c840c"
+              __panelId__: "1"
               summary: "Kubernetes PersistentVolume error ({{ $labels.persistentvolume }})"
               description: "PersistentVolume {{ $labels.persistentvolume }} is in bad state: {{ $labels.phase }}. VALUE = {{ $value }}"
             isPaused: false
@@ -729,6 +755,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "09ec8aa1e996d6ffcd6817bbaff4db1b"
+              __panelId__: "6"
               summary: "Kubernetes API server errors ({{ $labels.instance }})"
               description: "Kubernetes API server is experiencing {{ $value | humanize }}% 5xx error rate on {{ $labels.instance }}."
             isPaused: false
@@ -779,6 +807,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "09ec8aa1e996d6ffcd6817bbaff4db1b"
+              __panelId__: "2"
               summary: "Kubernetes API client errors ({{ $labels.instance }}/{{ $labels.job }})"
               description: "Kubernetes API client on {{ $labels.instance }} is experiencing {{ $value | humanize }}% 4xx/5xx error rate."
             isPaused: false
@@ -829,6 +859,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "3138fa155d5915769fbded898ac09fd9"
+              __panelId__: "1"
               summary: "Kubernetes client certificate expires soon"
               description: "A client certificate used to authenticate to the apiserver is expiring in less than 24 hours. VALUE = {{ $value }}"
             isPaused: false

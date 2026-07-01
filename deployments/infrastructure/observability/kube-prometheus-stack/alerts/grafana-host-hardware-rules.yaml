@@ -119,58 +119,6 @@ data:
               description: "Disk {{ $labels.device }} on {{ $labels.mountpoint }} is almost running out of available inodes (< 10% left). VALUE = {{ $value }}"
             isPaused: false
 
-          - uid: host-fs-device-error
-            title: Host Filesystem Device Error
-            condition: threshold
-            data:
-              - refId: A
-                relativeTimeRange:
-                  from: 300
-                  to: 0
-                datasourceUid: prometheus
-                model:
-                  datasource:
-                    type: prometheus
-                    uid: prometheus
-                  expr: 'node_filesystem_device_error{fstype!~"^(fuse.*|tmpfs|cifs|nfs)"} == 1'
-                  instant: true
-                  refId: A
-              - refId: threshold
-                relativeTimeRange:
-                  from: 0
-                  to: 0
-                datasourceUid: "-100"
-                model:
-                  conditions:
-                    - evaluator:
-                        params: [0]
-                        type: gt
-                      operator:
-                        type: and
-                      query:
-                        params: [A]
-                      reducer:
-                        params: []
-                        type: last
-                      type: query
-                  datasource:
-                    type: __expr__
-                    uid: "-100"
-                  expression: A
-                  refId: threshold
-                  type: threshold
-            noDataState: OK
-            execErrState: Alerting
-            for: 2m
-            labels:
-              severity: critical
-            annotations:
-              __dashboardUid__: "node-exporter-full"
-              __panelId__: "43"
-              summary: "Host filesystem device error (instance {{ $labels.instance }})"
-              description: "Error stat-ing the {{ $labels.mountpoint }} filesystem on {{ $labels.instance }}. VALUE = {{ $value }}"
-            isPaused: false
-
           - uid: host-overtemperature
             title: Host Node Overtemperature Alarm
             condition: threshold
@@ -217,6 +165,7 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "node-exporter-full"
               summary: "Host node overtemperature alarm (instance {{ $labels.instance }})"
               description: "Physical node temperature alarm triggered on {{ $labels.instance }}. VALUE = {{ $value }}"
             isPaused: false
@@ -267,6 +216,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "node-exporter-full"
+              __panelId__: "43"
               summary: "Host software RAID insufficient drives (instance {{ $labels.instance }})"
               description: "MD RAID array {{ $labels.device }} on {{ $labels.instance }} has insufficient active drives. VALUE = {{ $value }}"
             isPaused: false

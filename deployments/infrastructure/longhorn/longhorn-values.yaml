@@ -12,3 +12,7 @@ persistence:
 
 ingress:
   enabled: false
+
+metrics:
+  serviceMonitor:
+    enabled: true

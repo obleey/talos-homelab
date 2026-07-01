@@ -62,6 +62,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "n5bu_kv4k"
+              __panelId__: "6"
               summary: "Traefik service {{ $labels.service }} has no healthy backends"
               description: "{{ $value | printf \"%.0f\" }} backend server(s) are down for Traefik service {{ $labels.service }}."
             isPaused: false
@@ -115,6 +117,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "n5bu_kv4k"
+              __panelId__: "6"
               summary: "High 5xx error rate on Traefik service {{ $labels.service }}"
               description: "Traefik service {{ $labels.service }} has a 5xx error rate of {{ $value | printf \"%.1f\" }}% (threshold: 5%)."
             isPaused: false

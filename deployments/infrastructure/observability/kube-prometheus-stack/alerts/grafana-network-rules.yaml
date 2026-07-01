@@ -66,6 +66,8 @@ data:
             labels:
               severity: warning
             annotations:
+              __dashboardUid__: "node-exporter-full"
+              __panelId__: "84"
               summary: "High inbound traffic on {{ $labels.instance }}"
               description: "Node {{ $labels.instance }} is receiving {{ $value | printf \"%.1f\" }} MB/s of inbound traffic (threshold: 50 MB/s)."
             isPaused: false
@@ -121,6 +123,8 @@ data:
             labels:
               severity: warning
             annotations:
+              __dashboardUid__: "node-exporter-full"
+              __panelId__: "84"
               summary: "High outbound traffic on {{ $labels.instance }}"
               description: "Node {{ $labels.instance }} is transmitting {{ $value | printf \"%.1f\" }} MB/s of outbound traffic (threshold: 50 MB/s — Plex/Jellyfin streaming will contribute here)."
             isPaused: false

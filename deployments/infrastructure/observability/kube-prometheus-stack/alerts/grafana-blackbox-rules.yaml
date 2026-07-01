@@ -61,6 +61,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "blackbox-http-prober"
+              __panelId__: "2"
               summary: "Host unreachable: {{ $labels.instance }}"
               description: "Blackbox probe failed for {{ $labels.instance }} (target: {{ $labels.name }}). The service is not responding."
             isPaused: false
@@ -111,6 +113,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "blackbox-http-prober"
+              __panelId__: "2"
               summary: "HTTP 5xx from {{ $labels.instance }}"
               description: "HTTP probe returned a 5xx error for {{ $labels.instance }}. STATUS = {{ $value }}"
             isPaused: false
@@ -161,6 +165,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "blackbox-http-prober"
+              __panelId__: "2"
               summary: "SSL certificate expiring in < 3 days: {{ $labels.instance }}"
               description: "SSL certificate for {{ $labels.instance }} expires in {{ $value }} days."
             isPaused: false
@@ -211,6 +217,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "blackbox-http-prober"
+              __panelId__: "2"
               summary: "SSL certificate EXPIRED: {{ $labels.instance }}"
               description: "SSL certificate for {{ $labels.instance }} has expired {{ $value | abs }} days ago."
             isPaused: false

@@ -115,6 +115,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "blackbox-http-prober"
+              __panelId__: "2"
               summary: "Certificate {{ $labels.name }} is not ready"
               description: "Certificate {{ $labels.name }} in namespace {{ $labels.exported_namespace }} has condition {{ $labels.condition }}. TLS may be broken for the affected service."
             isPaused: false
@@ -169,6 +171,8 @@ data:
             labels:
               severity: warning
             annotations:
+              __dashboardUid__: "blackbox-http-prober"
+              __panelId__: "2"
               summary: "Certificate {{ $labels.name }} expires in < 21 days"
               description: "Certificate {{ $labels.name }} in namespace {{ $labels.exported_namespace }} expires in {{ $value | printf \"%.0f\" | humanizeDuration }}. Check cert-manager renewal."
             isPaused: false
@@ -219,6 +223,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: "blackbox-http-prober"
+              __panelId__: "2"
               summary: "Cert-Manager hitting ACME rate limits for {{ $labels.host }}"
               description: "Cert-Manager is receiving 429 responses from the ACME server for {{ $labels.host }}. Certificate renewals will be delayed. Wait before retrying."
             isPaused: false

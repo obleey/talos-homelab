@@ -18,13 +18,22 @@ data:
             settings:
               token: ${token}
               recipient: "#monitoring"
-              title: |
-                {{ if eq .Status "firing" }}🔴{{ else }}🟢{{ end }} {{ .CommonLabels.alertname }}
+              title: >-
+                {{ if eq .Status "firing" }}🔴 FIRING{{ else }}✅ RESOLVED{{ end }} · {{ .CommonLabels.alertname }}{{ if .CommonAnnotations.summary }} — {{ .CommonAnnotations.summary }}{{ end }}
               text: |
-                {{ range .Alerts }}
-                *Alert:* {{ .Labels.alertname }}
-                *Severity:* {{ .Labels.severity | default "unknown" }}
-                *Summary:* {{ .Annotations.summary | default .Labels.alertname }}
+                {{ range .Alerts -}}
+                *Severity:* {{ if eq .Labels.severity "critical" }}🚨 Critical{{ else if eq .Labels.severity "warning" }}⚠️ Warning{{ else }}{{ .Labels.severity }}{{ end }}
+                {{ if .Annotations.summary }}*Summary:* {{ .Annotations.summary }}
+                {{ end -}}
+                {{ if .Annotations.description }}*Details:* {{ .Annotations.description }}
+                {{ end -}}
+                {{ if .Labels.namespace }}*Namespace:* `{{ .Labels.namespace }}`  {{ end -}}
+                {{ if .Labels.pod }}*Pod:* `{{ .Labels.pod }}`  {{ end -}}
+                {{ if .Labels.instance }}*Host:* `{{ .Labels.instance }}`  {{ end -}}
+                {{ if .Labels.service }}*Service:* `{{ .Labels.service }}`{{ end }}
+                {{ if .PanelURL }}<{{ .PanelURL }}|📊 Panel>   {{ end -}}
+                {{ if .DashboardURL }}<{{ .DashboardURL }}|📈 Dashboard>   {{ end -}}
+                <{{ .SilenceURL }}|🔕 Silence>
                 {{ end }}
             disableResolveMessage: false
 
