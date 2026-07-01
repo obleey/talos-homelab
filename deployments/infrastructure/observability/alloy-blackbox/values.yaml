@@ -17,25 +17,93 @@ alloy:
       `
 
         // Kubernetes cluster services
-        target { name = "argocd";    address = "https://argocd.talos-cluster.local.obleey.com";    module = "http_home" }
-        target { name = "bazarr";    address = "https://bazarr.talos-cluster.local.obleey.com";    module = "http_home" }
-        target { name = "clonarr";   address = "https://clonarr.talos-cluster.local.obleey.com";   module = "http_home" }
-        target { name = "grafana";   address = "https://grafana.talos-cluster.local.obleey.com";   module = "http_home" }
-        target { name = "hub";       address = "https://hub.talos-cluster.local.obleey.com";       module = "http_home" }
-        target { name = "jellyfin";  address = "https://jellyfin.talos-cluster.local.obleey.com";  module = "http_home" }
-        target { name = "kubeseal";  address = "https://kubeseal.talos-cluster.local.obleey.com";  module = "http_home" }
-        target { name = "longhorn";  address = "https://longhorn.talos-cluster.local.obleey.com";  module = "http_home" }
-        target { name = "plex";      address = "https://plex.talos-cluster.local.obleey.com";      module = "http_home" }
-        target { name = "prowlarr";  address = "https://prowlarr.talos-cluster.local.obleey.com";  module = "http_home" }
-        target { name = "qb";        address = "https://qb.talos-cluster.local.obleey.com";        module = "http_home" }
-        target { name = "radarr";    address = "https://radarr.talos-cluster.local.obleey.com";    module = "http_home" }
-        target { name = "seerr";     address = "https://seerr.talos-cluster.local.obleey.com";     module = "http_home" }
-        target { name = "sonarr";    address = "https://sonarr.talos-cluster.local.obleey.com";    module = "http_home" }
-        target { name = "traefik";   address = "https://traefik.talos-cluster.local.obleey.com";   module = "http_home" }
+        target {
+          name    = "argocd"
+          address = "https://argocd.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "bazarr"
+          address = "https://bazarr.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "clonarr"
+          address = "https://clonarr.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "grafana"
+          address = "https://grafana.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "hub"
+          address = "https://hub.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "jellyfin"
+          address = "https://jellyfin.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "kubeseal"
+          address = "https://kubeseal.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "longhorn"
+          address = "https://longhorn.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "plex"
+          address = "https://plex.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "prowlarr"
+          address = "https://prowlarr.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "qb"
+          address = "https://qb.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "radarr"
+          address = "https://radarr.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "seerr"
+          address = "https://seerr.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "sonarr"
+          address = "https://sonarr.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "traefik"
+          address = "https://traefik.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
 
         // Home network appliances
-        target { name = "technitium"; address = "https://technitium.local.obleey.com"; module = "http_home" }
-        target { name = "truenas";    address = "https://truenas.local.obleey.com";    module = "http_home" }
+        target {
+          name    = "technitium"
+          address = "https://technitium.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "truenas"
+          address = "https://truenas.local.obleey.com"
+          module  = "http_home"
+        }
       }
 
       prometheus.scrape "blackbox" {
