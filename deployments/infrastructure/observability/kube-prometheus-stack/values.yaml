@@ -140,6 +140,8 @@ grafana:
       enabled: true
     alerting:
       enabled: false  # disable legacy alerting
+    dashboards:
+      default_home_dashboard_path: /tmp/dashboards/Infrastructure/homelab-home.json
 
 prometheus-node-exporter:
   tolerations:
