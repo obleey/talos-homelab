@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-coredns-rules
+  namespace: monitoring
+  labels:
+    grafana_alert: "1"
+data:
+  coredns-rules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: coredns
+        folder: Infrastructure
+        interval: 1m
+        rules:
+
+          - uid: coredns-panic
+            title: CoreDNS Panic
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'increase(coredns_panics_total[1m]) > 0'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 0s
+            labels:
+              severity: critical
+            annotations:
+              summary: "CoreDNS panic on {{ $labels.instance }}"
+              description: "CoreDNS has panicked {{ $value | printf \"%.0f\" }} time(s) in the last minute. DNS resolution may be degraded."
+            isPaused: false
