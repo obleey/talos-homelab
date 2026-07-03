@@ -221,3 +221,58 @@ data:
               summary: "Host software RAID insufficient drives (instance {{ $labels.instance }})"
               description: "MD RAID array {{ $labels.device }} on {{ $labels.instance }} has insufficient active drives. VALUE = {{ $value }}"
             isPaused: false
+
+          - uid: host-fs-device-error
+            title: Host Filesystem Device Error
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: |
+                    node_filesystem_device_error{
+                      fstype!~"tmpfs|overlay|squashfs|autofs|binfmt_misc|cgroup.*|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs",
+                      mountpoint!="/var/lib/longhorn"
+                    } == 1
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "node-exporter-full"
+              summary: "Filesystem device error on {{ $labels.instance }}: {{ $labels.mountpoint }} ({{ $labels.device_error }})"
+              description: "Device {{ $labels.device }} mounted at {{ $labels.mountpoint }} on {{ $labels.instance }} is reporting an error. VALUE = {{ $value }}"
+            isPaused: false
