@@ -166,6 +166,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "node-exporter-full"
+              __panelId__: "43"
               summary: "Host node overtemperature alarm (instance {{ $labels.instance }})"
               description: "Physical node temperature alarm triggered on {{ $labels.instance }}. VALUE = {{ $value }}"
             isPaused: false
@@ -273,6 +274,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "node-exporter-full"
+              __panelId__: "43"
               summary: "Filesystem device error on {{ $labels.instance }}: {{ $labels.mountpoint }} ({{ $labels.device_error }})"
               description: "Device {{ $labels.device }} mounted at {{ $labels.mountpoint }} on {{ $labels.instance }} is reporting an error. VALUE = {{ $value }}"
             isPaused: false
