@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alloy-rules
+  namespace: monitoring
+  labels:
+    grafana_alert: "1"
+data:
+  alloy-rules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: alloy
+        folder: Observability
+        interval: 1m
+        rules:
+
+          - uid: alloy-service-down
+            title: Grafana Alloy Service Down
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'count by (instance) (alloy_build_info offset 2h) unless count by (instance) (alloy_build_info)'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 0s
+            labels:
+              severity: critical
+            annotations:
+              summary: "Grafana Alloy service down (instance {{ $labels.instance }})"
+              description: "Alloy on {{ $labels.instance }} is not responding or has stopped running. VALUE = {{ $value }}"
+            isPaused: false
