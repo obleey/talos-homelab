@@ -28,10 +28,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: |
-                    100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route)
-                    / sum(rate(loki_request_duration_seconds_count[1m])) by (namespace, job, route) > 10
-                    and sum(rate(loki_request_duration_seconds_count[1m])) by (namespace, job, route) > 0
+                  expr: '100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route) / sum(rate(loki_request_duration_seconds_count[1m])) by (namespace, job, route) > 10 and sum(rate(loki_request_duration_seconds_count[1m])) by (namespace, job, route) > 0'
                   instant: true
                   refId: A
               - refId: threshold
