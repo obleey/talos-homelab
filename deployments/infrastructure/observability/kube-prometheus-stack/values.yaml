@@ -170,6 +170,12 @@ prometheus-node-exporter:
   tolerations:
     - effect: NoSchedule
       operator: Exists
+  prometheus:
+    monitor:
+      relabelings:
+        - action: replace
+          sourceLabels: [__meta_kubernetes_endpoint_node_name]
+          targetLabel: instance
   extraArgs:
     # Talos restricts block device access from containers — exclude all ephemeral
     # Kubernetes/Longhorn paths that produce spurious permission denied errors.
