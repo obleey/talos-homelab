@@ -18,6 +18,7 @@ spec:
       kind: Application
       jsonPointers:
         - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/finalizers
   syncPolicy:
     syncOptions:
       - RespectIgnoreDifferences=true
