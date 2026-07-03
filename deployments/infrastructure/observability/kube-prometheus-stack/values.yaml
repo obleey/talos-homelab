@@ -106,17 +106,15 @@ grafana:
     userKey: admin-user
     passwordKey: admin-password
   envFromSecret: grafana-slack-token
-  env:
+  envValueFrom:
     GF_AUTH_GOOGLE_CLIENT_ID:
-      valueFrom:
-        secretKeyRef:
-          name: grafana-google-oauth
-          key: client_id
+      secretKeyRef:
+        name: grafana-google-oauth
+        key: client_id
     GF_AUTH_GOOGLE_CLIENT_SECRET:
-      valueFrom:
-        secretKeyRef:
-          name: grafana-google-oauth
-          key: client_secret
+      secretKeyRef:
+        name: grafana-google-oauth
+        key: client_secret
   defaultDashboardsEnabled: false
   defaultDashboardsTimezone: browser
   sidecar:
