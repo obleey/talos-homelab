@@ -1,0 +1,223 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-docker-containers
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: Infrastructure
+data:
+  docker-containers.json: |
+    {
+      "title": "Docker Containers",
+      "uid": "docker-containers",
+      "description": "Docker container metrics from cAdvisor on TrueNAS",
+      "tags": ["docker", "cadvisor", "truenas"],
+      "timezone": "browser",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "time": {"from": "now-1h", "to": "now"},
+      "graphTooltip": 1,
+      "templating": {
+        "list": [
+          {
+            "name": "instance",
+            "label": "Instance",
+            "type": "query",
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "query": {"query": "label_values(container_last_seen, instance)", "refId": "A"},
+            "refresh": 2,
+            "sort": 1,
+            "multi": false,
+            "includeAll": false,
+            "hide": 0,
+            "current": {}
+          },
+          {
+            "name": "container",
+            "label": "Container",
+            "type": "query",
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "query": {"query": "label_values(container_last_seen{instance=\"$instance\"}, name)", "refId": "A"},
+            "refresh": 2,
+            "sort": 1,
+            "multi": true,
+            "includeAll": true,
+            "allValue": ".+",
+            "hide": 0,
+            "current": {}
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Running Containers",
+          "type": "stat",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 4, "w": 4, "x": 0, "y": 0},
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "reduceOptions": {"calcs": ["lastNotNull"]}
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "red", "value": null},
+                  {"color": "green", "value": 1}
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "prometheus"},
+              "expr": "count(container_last_seen{instance=\"$instance\", name=~\"$container\", name!=\"\"})",
+              "instant": true,
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "CPU Usage (% of system)",
+          "type": "timeseries",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 8, "w": 20, "x": 4, "y": 0},
+          "options": {
+            "tooltip": {"mode": "multi", "sort": "desc"},
+            "legend": {"displayMode": "table", "placement": "right", "calcs": ["mean", "max"]}
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "custom": {"lineWidth": 1, "fillOpacity": 5},
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 60}, {"color": "red", "value": 80}]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "prometheus"},
+              "expr": "(sum(rate(container_cpu_usage_seconds_total{instance=\"$instance\", name=~\"$container\", name!=\"\"}[5m])) by (name) / scalar(count(node_cpu_seconds_total{instance=\"$instance\", mode=\"idle\"}))) * 100",
+              "legendFormat": "{{name}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Memory Usage",
+          "type": "timeseries",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+          "options": {
+            "tooltip": {"mode": "multi", "sort": "desc"},
+            "legend": {"displayMode": "table", "placement": "right", "calcs": ["mean", "max"]}
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "custom": {"lineWidth": 1, "fillOpacity": 5}
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "prometheus"},
+              "expr": "container_memory_working_set_bytes{instance=\"$instance\", name=~\"$container\", name!=\"\"}",
+              "legendFormat": "{{name}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "Memory Usage % (limited containers only)",
+          "type": "timeseries",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+          "options": {
+            "tooltip": {"mode": "multi", "sort": "desc"},
+            "legend": {"displayMode": "table", "placement": "right", "calcs": ["mean", "max"]}
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "max": 100,
+              "custom": {"lineWidth": 1, "fillOpacity": 5},
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 70}, {"color": "red", "value": 85}]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "prometheus"},
+              "expr": "(container_memory_working_set_bytes{instance=\"$instance\", name=~\"$container\", name!=\"\"} / container_spec_memory_limit_bytes{instance=\"$instance\", name=~\"$container\", name!=\"\"} > 0) * 100",
+              "legendFormat": "{{name}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "title": "Network Received",
+          "type": "timeseries",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+          "options": {
+            "tooltip": {"mode": "multi", "sort": "desc"},
+            "legend": {"displayMode": "table", "placement": "right", "calcs": ["mean", "max"]}
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "custom": {"lineWidth": 1, "fillOpacity": 5}
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "prometheus"},
+              "expr": "sum(rate(container_network_receive_bytes_total{instance=\"$instance\", name=~\"$container\", name!=\"\"}[5m])) by (name)",
+              "legendFormat": "{{name}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "title": "Network Transmitted",
+          "type": "timeseries",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+          "options": {
+            "tooltip": {"mode": "multi", "sort": "desc"},
+            "legend": {"displayMode": "table", "placement": "right", "calcs": ["mean", "max"]}
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "custom": {"lineWidth": 1, "fillOpacity": 5}
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "prometheus"},
+              "expr": "sum(rate(container_network_transmit_bytes_total{instance=\"$instance\", name=~\"$container\", name!=\"\"}[5m])) by (name)",
+              "legendFormat": "{{name}}",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }
