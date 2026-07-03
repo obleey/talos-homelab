@@ -40,6 +40,8 @@ providers:
     enabled: true
   kubernetesIngress:
     enabled: false
+  kubernetesCRD:
+    enabled: true
 metrics:
   prometheus:
     serviceMonitor:

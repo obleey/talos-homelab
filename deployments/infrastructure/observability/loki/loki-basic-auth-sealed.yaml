@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: loki-basic-auth
+  namespace: monitoring
+spec:
+  encryptedData:
+    users: AgBLv+PEoz0zoPEY+3T5aB3pW9wmfUEvZq1/wcoVyXCDs4m0IfXp2d0h0wqQbdAC7RbZ25QeKVy5r+PFKgSS/x9gVwdNWQwii+CNNdn1x8B8oz3iEFu0EOt3afwHa/Wm9YeZ6Tq6NjlhlnXX4uJDOaBQvZjxkf2WcCbCaHzhvh2VvV+COrE8gQ53Mzu/dUFNZvKKdKnW8360gTuuHngDXXeipOY1KBGX3wfyKiKoNkEFtIUTFEb1fzKhX4s88Ebg7dyv3T/MjqDKh2bJfIePoYcYVPxRvCbssPvN7rlZ3ndotWRfVow5hGxX+D5BJJruwVUns3vQPybazAjjV8wMrpifYKkOvIeakVAeGNySbL0TG/lYMWxdyC4qI5QP0riY2nwXUvRv0GRZQPSIdKaEOHbSGhkwXWCozEChBQWV0V6VSVx/rydOTfD4XmNZueuUP2I4XRnPRL02lwkZ3uWtqsW5uJHKokBoLgACsN6IUZzsHlrkf7lhTxxl+662ntJ946G2szlTG7Ov9XDIgU6LB3amGACuysjMesh3S+ETtROFsDYoNcdGhQsNFTGEVJql/vhjWYGZeuxF2GG/0Ercqtrr8W2Qv4UQ8IGFuv2X/JQ+bsY7ipRmcUNvqZp5PQMXLWUgJzAEbJiUAXxRuSq8G94SyxUvdHnAI1hyJekQZdZpDGXvijiyScU1grGvuxrxwr6Sf/ClUGbBnClt8V4yVV/No3+lS8Ho4MN5sYzhoELrx2oryn9XEaWVP/G4B7AiYG0+AyRt4dgusG2qh5ZmEuWXAls=
+  template:
+    metadata:
+      name: loki-basic-auth
+      namespace: monitoring
