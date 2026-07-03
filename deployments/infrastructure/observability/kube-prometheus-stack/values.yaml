@@ -106,6 +106,17 @@ grafana:
     userKey: admin-user
     passwordKey: admin-password
   envFromSecret: grafana-slack-token
+  env:
+    GF_AUTH_GOOGLE_CLIENT_ID:
+      valueFrom:
+        secretKeyRef:
+          name: grafana-google-oauth
+          key: client_id
+    GF_AUTH_GOOGLE_CLIENT_SECRET:
+      valueFrom:
+        secretKeyRef:
+          name: grafana-google-oauth
+          key: client_secret
   defaultDashboardsEnabled: false
   defaultDashboardsTimezone: browser
   sidecar:
@@ -142,6 +153,16 @@ grafana:
       enabled: false  # disable legacy alerting
     dashboards:
       default_home_dashboard_path: /tmp/dashboards/Kubernetes/Infrastructure/homelab-home.json
+    auth.google:
+      enabled: true
+      client_id: ${GF_AUTH_GOOGLE_CLIENT_ID}
+      client_secret: ${GF_AUTH_GOOGLE_CLIENT_SECRET}
+      scopes: openid email profile
+      auth_url: https://accounts.google.com/o/oauth2/v2/auth
+      token_url: https://oauth2.googleapis.com/token
+      api_url: https://openidconnect.googleapis.com/v1/userinfo
+      allowed_emails: miha.oblishar@gmail.com
+      auto_login: false
     date_formats:
       full_date: DD.MM.YYYY HH:mm:ss
       used_in_range: DD.MM.YYYY HH:mm
