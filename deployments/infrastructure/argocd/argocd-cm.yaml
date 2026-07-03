@@ -28,6 +28,11 @@ data:
   resource.customizations.ignoreDifferences.argoproj.io_Application: |
     jqPathExpressions:
       - .metadata.annotations["argocd.argoproj.io/tracking-id"]
+  resource.customizations.ignoreDifferences.gateway.networking.k8s.io_HTTPRoute: |
+    jqPathExpressions:
+      - .spec.rules[].backendRefs[].group
+      - .spec.rules[].backendRefs[].kind
+      - .spec.rules[].backendRefs[].weight
   resource.customizations.ignoreResourceUpdates.all: |
     jsonPointers:
       - /status
