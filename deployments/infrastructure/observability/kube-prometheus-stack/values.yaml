@@ -152,9 +152,9 @@ prometheus-node-exporter:
     - effect: NoSchedule
       operator: Exists
   extraArgs:
-    # Talos restricts block device access from containers, causing spurious
-    # device_error="permission denied" for Longhorn's XFS partition.
-    - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run|var/lib/longhorn)($|/)
+    # Talos restricts block device access from containers — exclude all ephemeral
+    # Kubernetes/Longhorn paths that produce spurious permission denied errors.
+    - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run|var/lib/kubelet/.+|var/lib/longhorn)($|/)
 
 kube-state-metrics:
   metricLabelsAllowlist:
