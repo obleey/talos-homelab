@@ -44,6 +44,10 @@ spec:
       kind: Setting
       jsonPointers:
         - /value
+    - group: longhorn.io
+      kind: BackupTarget
+      jsonPointers:
+        - /spec
   syncPolicy:
     automated:
       prune: true
@@ -51,3 +55,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true
