@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: traefik-recording-rules
+  namespace: monitoring
+  labels:
+    app: kube-prometheus-stack
+    release: kps
+spec:
+  groups:
+    - name: traefik.recording
+      interval: 60s
+      rules:
+        # Extracts a clean "service" label from Gateway API router names.
+        # Router format: httproute-NS-NAME-gw-traefik-...-ep-websecure-0-HASH@kubernetesgateway
+        # Result service label: NS-NAME (e.g. monitoring-grafana, argocd-argocd)
+        - record: traefik_route_info
+          expr: >
+            label_replace(
+              traefik_router_requests_total,
+              "service", "$1",
+              "router", "httproute-(.+)-gw-traefik-.*@kubernetesgateway"
+            )

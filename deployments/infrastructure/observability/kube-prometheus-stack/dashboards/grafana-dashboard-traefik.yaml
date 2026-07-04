@@ -1646,18 +1646,18 @@ data:
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "definition": "label_values(label_replace(traefik_service_requests_total{instance=~\"$instance\",service!=\"traefik\"}, \"service\", \"$1\", \"service\", \"([^@]+)@.*\") or label_replace(traefik_router_requests_total{instance=~\"$instance\"}, \"service\", \"$1\", \"router\", \"httproute-(.+)-gw-traefik-.*@kubernetesgateway\"), service)",
+            "definition": "label_values({__name__=~\"traefik_service_requests_total|traefik_route_info\",instance=~\"$instance\"}, service)",
             "hide": 0,
             "includeAll": true,
             "multi": false,
             "name": "service",
             "options": [],
             "query": {
-              "query": "label_values(label_replace(traefik_service_requests_total{instance=~\"$instance\",service!=\"traefik\"}, \"service\", \"$1\", \"service\", \"([^@]+)@.*\") or label_replace(traefik_router_requests_total{instance=~\"$instance\"}, \"service\", \"$1\", \"router\", \"httproute-(.+)-gw-traefik-.*@kubernetesgateway\"), service)",
+              "query": "label_values({__name__=~\"traefik_service_requests_total|traefik_route_info\",instance=~\"$instance\"}, service)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 2,
-            "regex": "",
+            "regex": "/^(?!traefik$)([^@]+)(?:@.*)?$/",
             "skipUrlSync": false,
             "sort": 1,
             "type": "query"
