@@ -1,5 +1,0 @@
-managementURL: https://netbird.obleey.com
-netbirdAPI:
-  keyFromSecret:
-    key: NB_API_KEY
-    name: netbird-mgmt-api-key
