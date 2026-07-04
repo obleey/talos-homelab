@@ -1,14 +1,30 @@
 alloy:
   configMap:
     content: |
-      // Discover all pods via Kubernetes API
+      // ============================================================
+      // Kubernetes pod log collection (per-node)
+      // ============================================================
+
       discovery.kubernetes "pods" {
         role = "pod"
       }
 
-      // Relabel pod metadata into log labels
       discovery.relabel "pod_logs" {
         targets = discovery.kubernetes.pods.targets
+
+        // Each DaemonSet pod only collects logs from pods on its own node
+        rule {
+          source_labels = ["__meta_kubernetes_pod_node_name"]
+          action        = "keep"
+          regex         = env("NODE_NAME")
+        }
+
+        // Drop containers that have not started yet
+        rule {
+          source_labels = ["__meta_kubernetes_pod_phase"]
+          action        = "drop"
+          regex         = "Pending"
+        }
 
         rule {
           source_labels = ["__meta_kubernetes_namespace"]
@@ -22,8 +38,14 @@ alloy:
           source_labels = ["__meta_kubernetes_pod_container_name"]
           target_label  = "container"
         }
+        // app label: prefer app.kubernetes.io/name, fall back to pod name
         rule {
           source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+          target_label  = "app"
+        }
+        rule {
+          source_labels = ["app", "__meta_kubernetes_pod_name"]
+          regex         = ";(.*)"
           target_label  = "app"
         }
         rule {
@@ -32,27 +54,60 @@ alloy:
         }
         rule {
           source_labels = ["__meta_kubernetes_pod_node_name"]
+          target_label  = "host"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_node_name"]
           target_label  = "instance"
         }
         rule {
-          source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_name"]
+          source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_label_app_kubernetes_io_name"]
           separator     = "/"
           target_label  = "job"
         }
       }
 
-      // Stream logs via Kubernetes API — no hostPath needed, works on Talos
       loki.source.kubernetes "pods" {
         targets    = discovery.relabel.pod_logs.output
         forward_to = [loki.write.default.receiver]
       }
 
-      // Ship to Loki
+      // ============================================================
+      // Kubernetes events (cluster-wide; clustering ensures only
+      // one Alloy instance writes them at a time)
+      // ============================================================
+
+      loki.source.kubernetes_events "events" {
+        job_name   = "kubernetes-events"
+        log_format = "json"
+        forward_to = [loki.write.default.receiver]
+      }
+
+      // ============================================================
+      // Remote endpoint
+      // ============================================================
+
       loki.write "default" {
         endpoint {
           url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
         }
       }
+
+  extraEnv:
+    - name: NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+  clustering:
+    enabled: true
 
 controller:
   type: daemonset
@@ -60,12 +115,11 @@ controller:
     - effect: NoSchedule
       operator: Exists
 
-# RBAC needed for loki.source.kubernetes to read pod logs via API
 rbac:
   create: true
 
 clusterRole:
   rules:
     - apiGroups: [""]
-      resources: [nodes, nodes/proxy, services, endpoints, pods, pods/log]
+      resources: [nodes, nodes/proxy, services, endpoints, pods, pods/log, events, namespaces]
       verbs: [get, list, watch]
