@@ -46,3 +46,6 @@ metrics:
   prometheus:
     serviceMonitor:
       enabled: true
+      relabelings:
+        - targetLabel: instance
+          replacement: cluster
