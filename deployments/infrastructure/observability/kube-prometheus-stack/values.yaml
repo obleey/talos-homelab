@@ -54,6 +54,7 @@ defaultRules:
 
 prometheus:
   prometheusSpec:
+    enableAdminAPI: true
     enableRemoteWriteReceiver: true
     retention: 30d
     storageSpec:
