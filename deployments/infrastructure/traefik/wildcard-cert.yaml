@@ -11,4 +11,3 @@ spec:
   dnsNames:
     - "*.talos-cluster.local.obleey.com"
     - "*.local.obleey.com"
-    - "*.obleey.com"
