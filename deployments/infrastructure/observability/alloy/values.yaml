@@ -60,6 +60,20 @@ alloy:
           source_labels = ["__meta_kubernetes_pod_node_name"]
           target_label  = "instance"
         }
+        // Deployment name: strip the ReplicaSet hash suffix (e.g. alloy-7d9f8b6c5 → alloy)
+        rule {
+          source_labels = ["__meta_kubernetes_pod_controller_kind", "__meta_kubernetes_pod_controller_name"]
+          regex         = "ReplicaSet;(.+)-[a-z0-9]{9,10}"
+          target_label  = "deployment"
+          replacement   = "${1}"
+        }
+        // StatefulSet / DaemonSet / Job: use controller name as-is
+        rule {
+          source_labels = ["__meta_kubernetes_pod_controller_kind", "__meta_kubernetes_pod_controller_name"]
+          regex         = "(StatefulSet|DaemonSet|Job);(.+)"
+          target_label  = "deployment"
+          replacement   = "${2}"
+        }
         rule {
           source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_label_app_kubernetes_io_name"]
           separator     = "/"
