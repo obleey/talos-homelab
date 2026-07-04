@@ -1,0 +1,15 @@
+apiVersion: netbird.io/v1
+kind: NBRoutingPeer
+metadata:
+  name: cluster-routing-peer
+  namespace: netbird
+spec:
+  replicas: 1
+---
+apiVersion: netbird.io/v1
+kind: NBRoutingPeer
+metadata:
+  name: talos-homelab
+  namespace: netbird
+spec:
+  replicas: 1
