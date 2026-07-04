@@ -17,78 +17,90 @@ alloy:
 
         // Kubernetes cluster services
         target {
-          name    = "https://argocd.talos-cluster.local.obleey.com"
+          name    = "argocd"
           address = "https://argocd.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://bazarr.talos-cluster.local.obleey.com"
+          name    = "bazarr"
           address = "https://bazarr.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://clonarr.talos-cluster.local.obleey.com"
+          name    = "clonarr"
           address = "https://clonarr.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://grafana.talos-cluster.local.obleey.com"
+          name    = "grafana"
           address = "https://grafana.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://hub.talos-cluster.local.obleey.com"
+          name    = "hub"
           address = "https://hub.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://jellyfin.talos-cluster.local.obleey.com"
+          name    = "jellyfin"
           address = "https://jellyfin.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://kubeseal.talos-cluster.local.obleey.com"
+          name    = "kubeseal"
           address = "https://kubeseal.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://longhorn.talos-cluster.local.obleey.com"
+          name    = "longhorn"
           address = "https://longhorn.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://plex.talos-cluster.local.obleey.com"
+          name    = "plex"
           address = "https://plex.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://prowlarr.talos-cluster.local.obleey.com"
+          name    = "prowlarr"
           address = "https://prowlarr.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://qb.talos-cluster.local.obleey.com"
+          name    = "qbittorrent"
           address = "https://qb.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://radarr.talos-cluster.local.obleey.com"
+          name    = "radarr"
           address = "https://radarr.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://seerr.talos-cluster.local.obleey.com"
+          name    = "seerr"
           address = "https://seerr.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://sonarr.talos-cluster.local.obleey.com"
+          name    = "sonarr"
           address = "https://sonarr.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
-          name    = "https://traefik.talos-cluster.local.obleey.com"
+          name    = "traefik"
           address = "https://traefik.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+
+        // Home network appliances
+        target {
+          name    = "technitium"
+          address = "https://technitium.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "truenas"
+          address = "https://truenas.local.obleey.com"
           module  = "http_home"
         }
 
@@ -101,18 +113,6 @@ alloy:
         target {
           name    = "tilenhudrap"
           address = "https://tilenhudrap.com"
-          module  = "http_home"
-        }
-
-        // Home network appliances
-        target {
-          name    = "https://technitium.local.obleey.com"
-          address = "https://technitium.local.obleey.com"
-          module  = "http_home"
-        }
-        target {
-          name    = "https://truenas.local.obleey.com"
-          address = "https://truenas.local.obleey.com"
           module  = "http_home"
         }
       }
