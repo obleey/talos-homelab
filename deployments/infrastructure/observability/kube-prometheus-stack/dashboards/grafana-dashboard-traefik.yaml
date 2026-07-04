@@ -1406,28 +1406,6 @@ data:
       "templating": {
         "list": [
           {
-            "current": {},
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${datasource}"
-            },
-            "definition": "label_values(traefik_config_reloads_total, instance)",
-            "hide": 0,
-            "includeAll": true,
-            "multi": true,
-            "name": "instance",
-            "options": [],
-            "query": {
-              "query": "label_values(traefik_config_reloads_total, instance)",
-              "refId": "StandardVariableQuery"
-            },
-            "refresh": 2,
-            "regex": "",
-            "sort": 1,
-            "type": "query",
-            "label": "Instance"
-          },
-          {
             "current": {
               "selected": false,
               "text": "Prometheus",
@@ -1444,6 +1422,28 @@ data:
             "regex": "",
             "skipUrlSync": false,
             "type": "datasource"
+          },
+          {
+            "current": {},
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "definition": "label_values(traefik_config_reloads_total, instance)",
+            "hide": 0,
+            "includeAll": true,
+            "multi": true,
+            "name": "instance",
+            "options": [],
+            "query": {
+              "query": "label_values(traefik_config_reloads_total, instance)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "sort": 1,
+            "type": "query",
+            "label": "Instance"
           },
           {
             "current": {},
