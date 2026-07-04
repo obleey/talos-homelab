@@ -44,8 +44,11 @@ providers:
     enabled: true
 metrics:
   prometheus:
+    addServicesLabels: true
+    addEntryPointsLabels: true
+    addRoutersLabels: true
     serviceMonitor:
       enabled: true
       relabelings:
         - targetLabel: instance
-          replacement: cluster
+          replacement: talos-k8s-cluster
