@@ -92,6 +92,18 @@ alloy:
           module  = "http_home"
         }
 
+        // Helion services
+        target {
+          name    = "office-decage"
+          address = "https://office.decage.net"
+          module  = "http_home"
+        }
+        target {
+          name    = "tilenhudrap"
+          address = "https://tilenhudrap.com"
+          module  = "http_home"
+        }
+
         // Home network appliances
         target {
           name    = "https://technitium.local.obleey.com"
