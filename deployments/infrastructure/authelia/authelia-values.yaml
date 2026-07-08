@@ -43,6 +43,9 @@ configMap:
   access_control:
     default_policy: 'deny'
     rules:
+      # two_factor here bootstraps 2FA enrollment: Authelia only lets a user
+      # register a second factor device when at least one protected resource
+      # actually requires it.
       - domain: 'kubeseal.talos-cluster.local.obleey.com'
         policy: 'two_factor'
       - domain: 'traefik.talos-cluster.local.obleey.com'
