@@ -44,6 +44,12 @@ configMap:
     rules:
       - domain: 'kubeseal.talos-cluster.local.obleey.com'
         policy: 'one_factor'
+      - domain: 'traefik.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
+      - domain: 'hub.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
+      - domain: 'grafana.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
 
   session:
     cookies:
