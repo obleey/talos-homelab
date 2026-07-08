@@ -134,6 +134,10 @@ config:
             icon: kubernetes.png
             href: https://kubeseal.talos-cluster.local.obleey.com
             description: Sealed secrets UI
+        - Authelia:
+            icon: authelia.png
+            href: https://auth.talos-cluster.local.obleey.com
+            description: SSO login portal
         - Technitium:
             icon: technitium.png
             href: https://technitium.local.obleey.com

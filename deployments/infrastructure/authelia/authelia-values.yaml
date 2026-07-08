@@ -44,6 +44,51 @@ configMap:
     rules:
       - domain: 'kubeseal.talos-cluster.local.obleey.com'
         policy: 'one_factor'
+      - domain: 'traefik.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
+      - domain: 'hub.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
+      - domain: 'grafana.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
+      # arr-stack apps: their own /api/* stays protected by each app's API key
+      # and is bypassed here so service-to-service and API-key integrations
+      # aren't forced through an interactive login; only the browser UI is gated.
+      - domain: 'sonarr.talos-cluster.local.obleey.com'
+        policy: 'bypass'
+        resources:
+          - '^/api(?:/.*)?$'
+      - domain: 'sonarr.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
+      - domain: 'radarr.talos-cluster.local.obleey.com'
+        policy: 'bypass'
+        resources:
+          - '^/api(?:/.*)?$'
+      - domain: 'radarr.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
+      - domain: 'bazarr.talos-cluster.local.obleey.com'
+        policy: 'bypass'
+        resources:
+          - '^/api(?:/.*)?$'
+      - domain: 'bazarr.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
+      - domain: 'prowlarr.talos-cluster.local.obleey.com'
+        policy: 'bypass'
+        resources:
+          - '^/api(?:/.*)?$'
+      - domain: 'prowlarr.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
+      - domain: 'clonarr.talos-cluster.local.obleey.com'
+        policy: 'bypass'
+        resources:
+          - '^/api(?:/.*)?$'
+      - domain: 'clonarr.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
+      - domain: 'qb.talos-cluster.local.obleey.com'
+        policy: 'bypass'
+        resources:
+          - '^/api(?:/.*)?$'
+      - domain: 'qb.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
 
   session:
     cookies:

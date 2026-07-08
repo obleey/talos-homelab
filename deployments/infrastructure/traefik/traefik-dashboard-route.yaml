@@ -11,6 +11,12 @@ spec:
   hostnames:
     - "traefik.talos-cluster.local.obleey.com"
   rules:
-    - backendRefs:
+    - filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: authelia-forward-auth
+      backendRefs:
         - name: traefik
           port: 9000
