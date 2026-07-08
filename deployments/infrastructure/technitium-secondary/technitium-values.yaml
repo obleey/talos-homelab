@@ -25,9 +25,3 @@ persistence:
     existingClaim: technitium-secondary-config
     globalMounts:
       - path: /etc/dns
-  tls:
-    type: secret
-    name: technitium-cluster-tls
-    globalMounts:
-      - path: /etc/dns/certs
-        readOnly: true
