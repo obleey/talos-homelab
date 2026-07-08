@@ -8,7 +8,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/prophetse7en/clonarr
-          tag: v3.3.0
+          tag: v3.4.0
         env:
           TZ: Europe/Ljubljana
 
