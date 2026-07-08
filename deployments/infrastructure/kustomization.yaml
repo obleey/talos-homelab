@@ -9,6 +9,7 @@ resources:
   - metrics-server/app.yaml
   - longhorn/app.yaml
   - kubelet-serving-cert-approver/app.yaml
+  - authelia/app.yaml
   - observability/namespace.yaml
   - observability/kube-prometheus-stack/app.yaml
   - observability/loki/app.yaml

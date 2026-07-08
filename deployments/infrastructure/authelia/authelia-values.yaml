@@ -1,0 +1,71 @@
+pod:
+  kind: 'Deployment'
+
+ingress:
+  enabled: true
+  gatewayAPI:
+    enabled: true
+    parentRefs:
+      - name: traefik-gateway
+        namespace: traefik
+        sectionName: websecure
+
+persistence:
+  enabled: true
+  storageClass: longhorn
+  accessModes:
+    - ReadWriteOnce
+  size: 1Gi
+
+secret:
+  additionalSecrets:
+    authelia-secrets: {}
+    authelia-users: {}
+
+configMap:
+  server:
+    endpoints:
+      authz:
+        forward-auth:
+          implementation: 'ForwardAuth'
+          authn_strategies:
+            - name: 'HeaderProxyAuthorization'
+              schemes:
+                - 'Basic'
+            - name: 'CookieSession'
+
+  authentication_backend:
+    file:
+      enabled: true
+      path: '/secrets/authelia-users/users_database.yml'
+
+  access_control:
+    default_policy: 'deny'
+    rules:
+      - domain: 'kubeseal.talos-cluster.local.obleey.com'
+        policy: 'one_factor'
+
+  session:
+    cookies:
+      - subdomain: 'auth'
+        domain: 'talos-cluster.local.obleey.com'
+    encryption_key:
+      secret_name: 'authelia-secrets'
+      path: 'session.encryption.key'
+
+  storage:
+    local:
+      enabled: true
+    encryption_key:
+      secret_name: 'authelia-secrets'
+      path: 'storage.encryption.key'
+
+  identity_validation:
+    reset_password:
+      secret:
+        secret_name: 'authelia-secrets'
+        path: 'identity_validation.reset_password.jwt.hmac.key'
+
+  notifier:
+    filesystem:
+      enabled: true
