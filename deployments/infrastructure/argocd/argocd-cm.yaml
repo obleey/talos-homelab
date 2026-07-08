@@ -30,8 +30,10 @@ data:
     issuer: https://auth.talos-cluster.local.obleey.com
     clientID: argocd
     clientSecret: $argocd-authelia-oauth:client-secret
-    requestedScopes: ["openid", "profile", "email", "groups"]
-    requestedIDTokenClaims: {"groups": {"essential": true}}
+    cliClientID: argocd-cli
+    requestedScopes: ["openid", "email", "groups"]
+    enableUserInfoGroups: true
+    userInfoPath: /api/oidc/userinfo
   resource.customizations.ignoreDifferences.argoproj.io_Application: |
     jqPathExpressions:
       - .metadata.annotations["argocd.argoproj.io/tracking-id"]
