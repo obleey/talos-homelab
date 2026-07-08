@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: argocd-authelia-oauth
+  namespace: argocd
+spec:
+  encryptedData:
+    client-secret: AgAjki/UcbXw3pi8tDax1Od8vB1NCt7NfGx/p+AuQtxqmm71mR8AxY0cTe6ul8MFmSMtU/BM/ivjYUPVsXXZ3HRlzoig4evfwgrkvB3K/8axFn2sGRqns+cGXbLUEx3qT3+nYNZvPgevWM8H15bAhzpldSWC4eVIWjj4Y+QrLHFkyeJV2Rtcym7u2MEzYb8KK7MhY4cdaROGZkc0mF6S4gEj3T2F+9RC9up8R5bixJRbfjYnS8/F+4Yg6okB04w3x6pZqQQEtp2EyKibEuELf29hOyGBLtjzRsa9GdmI+mDxxjQNaJkvSt+o3zJ+qizO3MlTQUiWhqFgsnv4EvQDYsl8o+fH6f0DsLkr+ZlM6y9ZFlHJYn9hjQmIRaUu+yG5jqj5/GcX59QFyivL9+H4TFDyAii9ciYg2f6OkWAVXZHyk/GV7U3emOjOqez5+WJCiybrhKkzdQ9X5iY6qHJcI0R2QeQuklWD70Wf7JuSArq+z8f4w0zRkvxidRxYIZOWXmHSi6qQf8CydKLv628xHRAQve6ijfLwSJP5UyrR4cA7Umsi+mQJVzhb1v8xddWdwc3XC4agHRZ9ybPYnLgjDmhElFM6Tms+M1pxKmlTDUEMbHgG9UjOzZa/bBrWMKizMS1OTVSaLPYhqLbgmeLrOefkHN2X7QOyl+crMGqOid3c5f9GsMRJgURSRuEEHNdI+5ygBt1E9wZe4Ms1dVw/05tJdlJyGm78lpe6Vm0jYJMLKYs9bSvoDeD4Ha1jwSd8VpYTjcANyWXAKCA3P0Gh3/5j
+  template:
+    metadata:
+      name: argocd-authelia-oauth
+      namespace: argocd
