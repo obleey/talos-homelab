@@ -15,7 +15,6 @@ data:
   policy.csv: |
     g, obleey, role:admin
     g, readonly, role:readonly
-    g, admins, role:admin
   policy.default: role:readonly
   policy.matchMode: glob
   scopes: "[groups]"

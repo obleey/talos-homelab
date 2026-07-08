@@ -25,15 +25,6 @@ data:
   timeout.reconciliation: 30s
   timeout.reconciliation.jitter: 60s
   url: https://argocd.talos-cluster.local.obleey.com
-  oidc.config: |
-    name: Authelia
-    issuer: https://auth.talos-cluster.local.obleey.com
-    clientID: argocd
-    clientSecret: $argocd-authelia-oauth:client-secret
-    cliClientID: argocd-cli
-    requestedScopes: ["openid", "email", "groups"]
-    enableUserInfoGroups: true
-    userInfoPath: /api/oidc/userinfo
   resource.customizations.ignoreDifferences.argoproj.io_Application: |
     jqPathExpressions:
       - .metadata.annotations["argocd.argoproj.io/tracking-id"]
