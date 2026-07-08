@@ -43,17 +43,14 @@ configMap:
   access_control:
     default_policy: 'deny'
     rules:
-      # two_factor here bootstraps 2FA enrollment: Authelia only lets a user
-      # register a second factor device when at least one protected resource
-      # actually requires it.
       - domain: 'kubeseal.talos-cluster.local.obleey.com'
         policy: 'two_factor'
       - domain: 'traefik.talos-cluster.local.obleey.com'
-        policy: 'one_factor'
+        policy: 'two_factor'
       - domain: 'hub.talos-cluster.local.obleey.com'
-        policy: 'one_factor'
+        policy: 'two_factor'
       - domain: 'grafana.talos-cluster.local.obleey.com'
-        policy: 'one_factor'
+        policy: 'two_factor'
       # arr-stack apps: their own /api/* stays protected by each app's API key
       # and is bypassed here so service-to-service and API-key integrations
       # aren't forced through an interactive login; only the browser UI is gated.
@@ -62,37 +59,37 @@ configMap:
         resources:
           - '^/api(?:/.*)?$'
       - domain: 'sonarr.talos-cluster.local.obleey.com'
-        policy: 'one_factor'
+        policy: 'two_factor'
       - domain: 'radarr.talos-cluster.local.obleey.com'
         policy: 'bypass'
         resources:
           - '^/api(?:/.*)?$'
       - domain: 'radarr.talos-cluster.local.obleey.com'
-        policy: 'one_factor'
+        policy: 'two_factor'
       - domain: 'bazarr.talos-cluster.local.obleey.com'
         policy: 'bypass'
         resources:
           - '^/api(?:/.*)?$'
       - domain: 'bazarr.talos-cluster.local.obleey.com'
-        policy: 'one_factor'
+        policy: 'two_factor'
       - domain: 'prowlarr.talos-cluster.local.obleey.com'
         policy: 'bypass'
         resources:
           - '^/api(?:/.*)?$'
       - domain: 'prowlarr.talos-cluster.local.obleey.com'
-        policy: 'one_factor'
+        policy: 'two_factor'
       - domain: 'clonarr.talos-cluster.local.obleey.com'
         policy: 'bypass'
         resources:
           - '^/api(?:/.*)?$'
       - domain: 'clonarr.talos-cluster.local.obleey.com'
-        policy: 'one_factor'
+        policy: 'two_factor'
       - domain: 'qb.talos-cluster.local.obleey.com'
         policy: 'bypass'
         resources:
           - '^/api(?:/.*)?$'
       - domain: 'qb.talos-cluster.local.obleey.com'
-        policy: 'one_factor'
+        policy: 'two_factor'
 
   session:
     cookies:
@@ -148,6 +145,6 @@ configMap:
           response_types:
             - 'code'
           token_endpoint_auth_method: 'client_secret_post'
-          authorization_policy: 'one_factor'
+          authorization_policy: 'two_factor'
           consent_mode: 'pre-configured'
           pre_configured_consent_duration: '1 month'
