@@ -138,10 +138,22 @@ config:
             icon: authelia.png
             href: https://auth.talos-cluster.local.obleey.com
             description: SSO login portal
-        - Technitium:
+        - Technitium Primary:
             icon: technitium.png
-            href: https://technitium.local.obleey.com
-            description: DNS server
+            href: http://10.0.0.104:5380
+            description: DNS server (primary)
+            widget:
+              type: technitium
+              url: http://10.0.0.104:5380
+              key: "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}"
+        - Technitium Secondary:
+            icon: technitium.png
+            href: https://technitium-secondary.talos-cluster.local.obleey.com
+            description: DNS server (secondary)
+            widget:
+              type: technitium
+              url: http://technitium-secondary.technitium-secondary.svc.cluster.local:5380
+              key: "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}"
         - TrueNAS:
             icon: truenas.png
             href: https://truenas.local.obleey.com
