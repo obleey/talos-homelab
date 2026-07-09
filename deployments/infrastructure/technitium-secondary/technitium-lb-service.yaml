@@ -22,3 +22,7 @@ spec:
       port: 53443
       targetPort: 53443
       protocol: TCP
+    - name: admin-http
+      port: 5380
+      targetPort: 5380
+      protocol: TCP

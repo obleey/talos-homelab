@@ -7,7 +7,7 @@ controllers:
       main:
         image:
           repository: technitium/dns-server
-          tag: "15.3.0"
+          tag: '15.3.0'
         env:
           DNS_SERVER_DOMAIN: technitium-secondary
           TZ: Europe/Ljubljana
@@ -25,3 +25,16 @@ persistence:
     existingClaim: technitium-secondary-config
     globalMounts:
       - path: /etc/dns
+
+route:
+  app:
+    parentRefs:
+      - name: traefik-gateway
+        namespace: traefik
+        sectionName: websecure
+    hostnames:
+      - technitium-secondary.talos-cluster.local.obleey.com
+    rules:
+      - backendRefs:
+          - name: technitium-secondary
+            port: 5380
