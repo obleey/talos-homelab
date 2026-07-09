@@ -93,6 +93,12 @@ configMap:
           - '^/api(?:/.*)?$'
       - domain: 'qb.talos-cluster.local.obleey.com'
         policy: 'two_factor'
+      - domain: 'seerr.talos-cluster.local.obleey.com'
+        policy: 'bypass'
+        resources:
+          - '^/api(?:/.*)?$'
+      - domain: 'seerr.talos-cluster.local.obleey.com'
+        policy: 'two_factor'
 
   session:
     cookies:
