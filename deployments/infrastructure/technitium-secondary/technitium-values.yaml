@@ -9,8 +9,13 @@ controllers:
           repository: technitium/dns-server
           tag: '15.3.0'
         env:
-          DNS_SERVER_DOMAIN: technitium-secondary
+          DNS_SERVER_DOMAIN: dns02.dns.local
           TZ: Europe/Ljubljana
+      pod:
+        hostAliases:
+          - ip: 10.0.0.104
+            hostnames:
+              - dns01.dns.local
 
 service:
   app:

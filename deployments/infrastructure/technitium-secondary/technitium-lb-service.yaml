@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: technitium-secondary-dns
   namespace: technitium-secondary
+  annotations:
+    io.cilium/lb-ipam-ips: "10.0.0.201"
 spec:
   type: LoadBalancer
   selector:
