@@ -164,6 +164,7 @@ configMap:
           redirect_uris:
             - 'http://10.0.0.104:5380/sso/callback'
             - 'http://10.0.0.201:5380/sso/callback'
+            - 'https://technitium-secondary.talos-cluster.local.obleey.com/sso/callback'
           scopes:
             - 'openid'
             - 'profile'
