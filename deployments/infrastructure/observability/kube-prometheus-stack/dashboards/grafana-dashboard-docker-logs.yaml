@@ -12,10 +12,10 @@ data:
     {
       "title": "Docker Logs",
       "uid": "docker-logs",
-      "description": "Log browser for Docker containers on helion and truenas",
+      "description": "Log browser for Docker containers on non-Kubernetes hosts",
       "editable": true,
       "schemaVersion": 39,
-      "version": 1,
+      "version": 2,
       "refresh": "30s",
       "time": {"from": "now-1h", "to": "now"},
       "timezone": "browser",
@@ -27,7 +27,7 @@ data:
             "label": "Host",
             "type": "query",
             "datasource": {"type": "loki", "uid": "loki"},
-            "query": "label_values({host=~\"helion|truenas\"}, host)",
+            "query": "label_values({host!~\"talos-.*\"}, host)",
             "refresh": 2,
             "sort": 1,
             "multi": false,
@@ -48,6 +48,23 @@ data:
             "current": {}
           },
           {
+            "name": "severity",
+            "label": "Severity",
+            "type": "custom",
+            "query": ".*,error|err|fatal|critical,warn|warning,info,debug",
+            "options": [
+              {"selected": true,  "text": "All",     "value": ".*"},
+              {"selected": false, "text": "Error",   "value": "error|err|fatal|critical"},
+              {"selected": false, "text": "Warning", "value": "warn|warning"},
+              {"selected": false, "text": "Info",    "value": "info"},
+              {"selected": false, "text": "Debug",   "value": "debug"}
+            ],
+            "current": {"text": "All", "value": ".*"},
+            "multi": false,
+            "includeAll": false,
+            "hide": 0
+          },
+          {
             "name": "search",
             "label": "Search",
             "type": "textbox",
@@ -60,7 +77,7 @@ data:
         {
           "id": 1,
           "type": "logs",
-          "title": "Logs — $host / $container",
+          "title": "Logs",
           "gridPos": {"h": 22, "w": 24, "x": 0, "y": 0},
           "datasource": {"type": "loki", "uid": "loki"},
           "options": {
@@ -68,7 +85,7 @@ data:
             "enableLogDetails": true,
             "prettifyLogMessage": false,
             "showCommonLabels": false,
-            "showLabels": false,
+            "showLabels": true,
             "showTime": true,
             "sortOrder": "Descending",
             "wrapLogMessage": true
@@ -76,7 +93,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "loki", "uid": "loki"},
-              "expr": "{host=\"$host\", container=~\"$container\"} |~ \"(?i)$search\"",
+              "expr": "{host=\"$host\", container=~\"$container\"} |~ \"(?i)($severity)\" |~ \"(?i)$search\"",
               "refId": "A",
               "legendFormat": "{{container}}"
             }
@@ -86,13 +103,13 @@ data:
           "id": 2,
           "type": "timeseries",
           "title": "Log Volume",
-          "gridPos": {"h": 5, "w": 24, "x": 0, "y": 22},
+          "gridPos": {"h": 6, "w": 24, "x": 0, "y": 22},
           "datasource": {"type": "loki", "uid": "loki"},
           "fieldConfig": {
             "defaults": {
               "color": {"mode": "palette-classic"},
               "custom": {
-                "fillOpacity": 20,
+                "fillOpacity": 15,
                 "lineWidth": 1,
                 "showPoints": "never"
               },
@@ -107,7 +124,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "loki", "uid": "loki"},
-              "expr": "sum by (container) (rate({host=\"$host\", container=~\"$container\"} |~ \"(?i)$search\" [1m]))",
+              "expr": "sum by (container) (rate({host=\"$host\", container=~\"$container\"} |~ \"(?i)($severity)\" |~ \"(?i)$search\" [2m]))",
               "refId": "A",
               "legendFormat": "{{container}}"
             }
