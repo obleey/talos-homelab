@@ -28,7 +28,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'probe_success{job="blackbox"} == 0'
+                  expr: 'probe_success{job="blackbox", name!~"technitium-.*"} == 0'
                   instant: true
                   refId: A
               - refId: threshold
@@ -65,6 +65,58 @@ data:
               __panelId__: "2"
               summary: "Host unreachable: {{ $labels.instance }}"
               description: "Blackbox probe failed for {{ $labels.instance }} (target: {{ $labels.name }}). The service is not responding."
+            isPaused: false
+
+          - uid: blackbox-technitium-outage
+            title: Technitium DNS Outage
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'count(probe_success{job="blackbox", name=~"technitium-.*"} == 0) == 2'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "blackbox-http-prober"
+              __panelId__: "2"
+              summary: "Technitium DNS fully down — both instances unreachable"
+              description: "Both technitium-primary (10.0.0.104:5380) and technitium-secondary (10.0.0.201:5380) are not responding. DNS resolution for the network is down."
             isPaused: false
 
           - uid: blackbox-probe-http-failure

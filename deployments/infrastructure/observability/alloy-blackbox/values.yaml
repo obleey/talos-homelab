@@ -13,6 +13,13 @@ alloy:
             follow_redirects: true
             tls_config:
               insecure_skip_verify: true
+        http_plain:
+          prober: http
+          timeout: 10s
+          http:
+            valid_status_codes: [200, 201, 301, 302, 401, 403, 404]
+            method: GET
+            follow_redirects: true
       `
 
         // Kubernetes cluster services
@@ -92,11 +99,17 @@ alloy:
           module  = "http_home"
         }
 
-        // Home network appliances
+        // Home network appliances — probe both Technitium instances directly by IP
+        // so the probe doesn't depend on Technitium DNS being up to resolve the hostname
         target {
-          name    = "technitium"
-          address = "https://technitium.local.obleey.com"
-          module  = "http_home"
+          name    = "technitium-primary"
+          address = "http://10.0.0.104:5380"
+          module  = "http_plain"
+        }
+        target {
+          name    = "technitium-secondary"
+          address = "http://10.0.0.201:5380"
+          module  = "http_plain"
         }
         target {
           name    = "truenas"
