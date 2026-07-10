@@ -1084,8 +1084,8 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Container Log Dashboard",
+      "title": "Kubernetes Logs",
       "uid": "k8s-container-logs",
-      "version": 2,
-      "description": "Container/Pod Log Dashboard(Loki as DataSource)"
+      "version": 3,
+      "description": "Kubernetes pod/container log browser (Loki)"
     }
