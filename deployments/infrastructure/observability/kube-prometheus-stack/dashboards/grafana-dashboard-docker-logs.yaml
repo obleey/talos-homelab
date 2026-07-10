@@ -15,7 +15,7 @@ data:
       "description": "Log browser for Docker containers on non-Kubernetes hosts",
       "editable": true,
       "schemaVersion": 39,
-      "version": 3,
+      "version": 4,
       "refresh": "30s",
       "time": {"from": "now-1h", "to": "now"},
       "timezone": "browser",
@@ -27,8 +27,8 @@ data:
             "label": "Host",
             "type": "query",
             "datasource": "Loki",
-            "definition": "label_values({host!~\"talos-.*\"}, host)",
-            "query": "label_values({host!~\"talos-.*\"}, host)",
+            "definition": "label_values({host=~\".+\", host!~\"talos-.*\"}, host)",
+            "query": "label_values({host=~\".+\", host!~\"talos-.*\"}, host)",
             "refresh": 2,
             "sort": 1,
             "multi": false,
@@ -55,13 +55,13 @@ data:
             "type": "custom",
             "query": ".*,error|err|fatal|critical,warn|warning,info,debug",
             "options": [
-              {"selected": true,  "text": "All",     "value": ".*"},
+              {"selected": true,  "text": "All",     "value": ".+"},
               {"selected": false, "text": "Error",   "value": "error|err|fatal|critical"},
               {"selected": false, "text": "Warning", "value": "warn|warning"},
               {"selected": false, "text": "Info",    "value": "info"},
               {"selected": false, "text": "Debug",   "value": "debug"}
             ],
-            "current": {"text": "All", "value": ".*"},
+            "current": {"text": "All", "value": ".+"},
             "multi": false,
             "includeAll": false
           },
@@ -93,7 +93,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{host=\"$host\", container=~\"$container\"} |~ \"(?i)($severity)\" |~ \"(?i)$search\"",
+              "expr": "{host=\"$host\", container=~\"$container\"} |~ \"(?i)($severity)\" |= \"$search\"",
               "refId": "A",
               "legendFormat": "{{container}}"
             }
@@ -123,7 +123,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum by (container) (rate({host=\"$host\", container=~\"$container\"} |~ \"(?i)($severity)\" |~ \"(?i)$search\" [2m]))",
+              "expr": "sum by (container) (rate({host=\"$host\", container=~\"$container\"} |~ \"(?i)($severity)\" |= \"$search\" [2m]))",
               "refId": "A",
               "legendFormat": "{{container}}"
             }
