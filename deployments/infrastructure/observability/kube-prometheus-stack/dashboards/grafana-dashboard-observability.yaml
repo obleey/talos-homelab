@@ -15,7 +15,7 @@ data:
       "description": "Active alert overview for Loki and Grafana Alloy",
       "editable": true,
       "schemaVersion": 37,
-      "version": 2,
+      "version": 3,
       "refresh": "1m",
       "time": {
         "from": "now-6h",
@@ -132,8 +132,12 @@ data:
                     "value": null
                   },
                   {
-                    "color": "green",
+                    "color": "yellow",
                     "value": 1
+                  },
+                  {
+                    "color": "green",
+                    "value": 4
                   }
                 ]
               },
@@ -161,7 +165,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "kube_deployment_status_replicas_available{deployment=\"alloy-blackbox\"}",
+              "expr": "sum(kube_deployment_status_replicas_available{deployment=\"alloy-blackbox\"}) + sum(kube_daemonset_status_number_ready{daemonset=\"alloy\"})",
               "instant": true,
               "refId": "A"
             }
