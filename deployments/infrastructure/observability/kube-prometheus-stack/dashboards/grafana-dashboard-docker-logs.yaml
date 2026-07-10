@@ -15,7 +15,7 @@ data:
       "description": "Log browser for Docker containers on non-Kubernetes hosts",
       "editable": true,
       "schemaVersion": 39,
-      "version": 2,
+      "version": 3,
       "refresh": "30s",
       "time": {"from": "now-1h", "to": "now"},
       "timezone": "browser",
@@ -26,7 +26,8 @@ data:
             "name": "host",
             "label": "Host",
             "type": "query",
-            "datasource": {"type": "loki", "uid": "loki"},
+            "datasource": "Loki",
+            "definition": "label_values({host!~\"talos-.*\"}, host)",
             "query": "label_values({host!~\"talos-.*\"}, host)",
             "refresh": 2,
             "sort": 1,
@@ -38,7 +39,8 @@ data:
             "name": "container",
             "label": "Container",
             "type": "query",
-            "datasource": {"type": "loki", "uid": "loki"},
+            "datasource": "Loki",
+            "definition": "label_values({host=\"$host\"}, container)",
             "query": "label_values({host=\"$host\"}, container)",
             "refresh": 2,
             "sort": 1,
@@ -61,8 +63,7 @@ data:
             ],
             "current": {"text": "All", "value": ".*"},
             "multi": false,
-            "includeAll": false,
-            "hide": 0
+            "includeAll": false
           },
           {
             "name": "search",
@@ -79,7 +80,7 @@ data:
           "type": "logs",
           "title": "Logs",
           "gridPos": {"h": 22, "w": 24, "x": 0, "y": 0},
-          "datasource": {"type": "loki", "uid": "loki"},
+          "datasource": "Loki",
           "options": {
             "dedupStrategy": "none",
             "enableLogDetails": true,
@@ -92,7 +93,6 @@ data:
           },
           "targets": [
             {
-              "datasource": {"type": "loki", "uid": "loki"},
               "expr": "{host=\"$host\", container=~\"$container\"} |~ \"(?i)($severity)\" |~ \"(?i)$search\"",
               "refId": "A",
               "legendFormat": "{{container}}"
@@ -104,7 +104,7 @@ data:
           "type": "timeseries",
           "title": "Log Volume",
           "gridPos": {"h": 6, "w": 24, "x": 0, "y": 22},
-          "datasource": {"type": "loki", "uid": "loki"},
+          "datasource": "Loki",
           "fieldConfig": {
             "defaults": {
               "color": {"mode": "palette-classic"},
@@ -123,7 +123,6 @@ data:
           },
           "targets": [
             {
-              "datasource": {"type": "loki", "uid": "loki"},
               "expr": "sum by (container) (rate({host=\"$host\", container=~\"$container\"} |~ \"(?i)($severity)\" |~ \"(?i)$search\" [2m]))",
               "refId": "A",
               "legendFormat": "{{container}}"
