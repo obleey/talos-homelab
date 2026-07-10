@@ -61,8 +61,8 @@ data:
             labels:
               severity: critical
             annotations:
-              __dashboardUid__: "observability-overview"
-              __panelId__: "4"
+              __dashboardUid__: "sadlil-loki-apps-dashboard"
+              __panelId__: "6"
               summary: "Loki request errors (instance {{ $labels.instance }})"
               description: "{{ $labels.job }} / {{ $labels.route }} is experiencing {{ printf \"%.2f\" $value }}% errors. VALUE = {{ $value }}"
             isPaused: false
@@ -113,8 +113,8 @@ data:
             labels:
               severity: critical
             annotations:
-              __dashboardUid__: "observability-overview"
-              __panelId__: "4"
+              __dashboardUid__: "sadlil-loki-apps-dashboard"
+              __panelId__: "2"
               summary: "Loki request panic (instance {{ $labels.instance }})"
               description: "{{ $labels.job }} is experiencing {{ $value | humanize }} panic(s) in the last 5 minutes. VALUE = {{ $value }}"
             isPaused: false
@@ -165,8 +165,8 @@ data:
             labels:
               severity: critical
             annotations:
-              __dashboardUid__: "observability-overview"
-              __panelId__: "4"
+              __dashboardUid__: "sadlil-loki-apps-dashboard"
+              __panelId__: "6"
               summary: "Loki request latency (instance {{ $labels.instance }})"
               description: "{{ $labels.job }} / {{ $labels.route }} p99 latency is {{ printf \"%.2f\" $value }}s. VALUE = {{ $value }}"
             isPaused: false
