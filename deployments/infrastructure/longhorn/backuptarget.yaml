@@ -4,4 +4,4 @@ metadata:
   name: default
   namespace: longhorn-system
 spec:
-  backupTargetURL: ""
+  backupTargetURL: "nfs://10.0.0.104:/mnt/serve/longhorn-backups"
