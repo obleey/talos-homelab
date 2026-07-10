@@ -1,0 +1,63 @@
+fullnameOverride: scraparr
+
+controllers:
+  main:
+    type: deployment
+    containers:
+      main:
+        image:
+          repository: ghcr.io/thecfu/scraparr
+          tag: latest
+        env:
+          SONARR_URL: http://sonarr.servarr.svc.cluster.local:8989
+          RADARR_URL: http://radarr.servarr.svc.cluster.local:7878
+          PROWLARR_URL: http://prowlarr.servarr.svc.cluster.local:9696
+          BAZARR_URL: http://bazarr.servarr.svc.cluster.local:6767
+          JELLYSEERR_URL: http://seerr.servarr.svc.cluster.local:5055
+          SONARR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: homepage-secrets
+                key: HOMEPAGE_VAR_SONARR_API_KEY
+          RADARR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: homepage-secrets
+                key: HOMEPAGE_VAR_RADARR_API_KEY
+          PROWLARR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: homepage-secrets
+                key: HOMEPAGE_VAR_PROWLARR_API_KEY
+          BAZARR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: homepage-secrets
+                key: HOMEPAGE_VAR_BAZARR_API_KEY
+          JELLYSEERR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: homepage-secrets
+                key: HOMEPAGE_VAR_SEERR_API_KEY
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 7100
+
+serviceMonitor:
+  app:
+    serviceName: scraparr
+    endpoints:
+      - port: http
+        path: /metrics
+        interval: 1m

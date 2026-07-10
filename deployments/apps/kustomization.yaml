@@ -16,3 +16,4 @@ resources:
   - clonarr/app.yaml
   - autopulse/app.yaml
   - homepage/app.yaml
+  - scraparr/app.yaml
