@@ -15,47 +15,92 @@ data:
       "description": "Active alert overview for Loki and Grafana Alloy",
       "editable": true,
       "schemaVersion": 37,
-      "version": 1,
+      "version": 2,
       "refresh": "1m",
-      "time": {"from": "now-6h", "to": "now"},
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
       "panels": [
         {
           "id": 1,
           "type": "stat",
-          "title": "Loki Error Rate",
-          "gridPos": {"h": 5, "w": 8, "x": 0, "y": 0},
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "title": "Loki Ready",
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 0,
+            "y": 0
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
-              "color": {"mode": "thresholds"},
+              "color": {
+                "mode": "thresholds"
+              },
               "mappings": [
-                {"type": "value", "options": {"0": {"color": "green", "index": 0, "text": "OK"}}}
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "color": "red",
+                      "index": 0,
+                      "text": "DOWN"
+                    }
+                  }
+                },
+                {
+                  "type": "value",
+                  "options": {
+                    "1": {
+                      "color": "green",
+                      "index": 1,
+                      "text": "UP"
+                    }
+                  }
+                }
               ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
-                  {"color": "green", "value": null},
-                  {"color": "red", "value": 0.01}
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
                 ]
               },
-              "unit": "percentunit",
-              "decimals": 2,
-              "noValue": "OK"
+              "unit": "short"
             },
             "overrides": []
           },
           "options": {
             "colorMode": "background",
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "center",
             "textMode": "auto",
-            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            }
           },
           "targets": [
             {
-              "datasource": {"type": "prometheus", "uid": "prometheus"},
-              "expr": "sum(rate(loki_request_duration_seconds_count{status_code=~\"5..\"}[5m])) / sum(rate(loki_request_duration_seconds_count[5m]))",
-              "instant": false,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "min(kube_statefulset_status_replicas_ready{statefulset=\"loki\"})",
+              "instant": true,
               "refId": "A"
             }
           ]
@@ -64,16 +109,32 @@ data:
           "id": 2,
           "type": "stat",
           "title": "Alloy Instances Up",
-          "gridPos": {"h": 5, "w": 8, "x": 8, "y": 0},
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 8,
+            "y": 0
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
-              "color": {"mode": "thresholds"},
+              "color": {
+                "mode": "thresholds"
+              },
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
-                  {"color": "red", "value": null},
-                  {"color": "green", "value": 1}
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
                 ]
               },
               "unit": "short",
@@ -86,12 +147,21 @@ data:
             "graphMode": "none",
             "justifyMode": "center",
             "textMode": "auto",
-            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            }
           },
           "targets": [
             {
-              "datasource": {"type": "prometheus", "uid": "prometheus"},
-              "expr": "count(up{job=~\".*alloy.*\"} == 1) or vector(0)",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "kube_deployment_status_replicas_available{deployment=\"alloy-blackbox\"}",
               "instant": true,
               "refId": "A"
             }
@@ -100,35 +170,64 @@ data:
         {
           "id": 3,
           "type": "stat",
-          "title": "Log Ingestion Rate",
-          "gridPos": {"h": 5, "w": 8, "x": 16, "y": 0},
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "title": "Monitored Endpoints",
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 16,
+            "y": 0
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
-              "color": {"mode": "thresholds"},
+              "color": {
+                "mode": "thresholds"
+              },
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
-                  {"color": "blue", "value": null}
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "green",
+                    "value": 10
+                  }
                 ]
               },
-              "unit": "logs",
-              "noValue": "0"
+              "unit": "short"
             },
             "overrides": []
           },
           "options": {
             "colorMode": "background",
-            "graphMode": "area",
+            "graphMode": "none",
             "justifyMode": "center",
             "textMode": "auto",
-            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            }
           },
           "targets": [
             {
-              "datasource": {"type": "prometheus", "uid": "prometheus"},
-              "expr": "sum(rate(loki_distributor_lines_received_total[5m]))",
-              "instant": false,
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "count(probe_success{job=\"blackbox\"})",
+              "instant": true,
               "refId": "A"
             }
           ]
@@ -137,12 +236,19 @@ data:
           "id": 4,
           "type": "alertlist",
           "title": "Active Alerts",
-          "gridPos": {"h": 16, "w": 24, "x": 0, "y": 5},
+          "gridPos": {
+            "h": 16,
+            "w": 24,
+            "x": 0,
+            "y": 5
+          },
           "options": {
             "alertInstanceLabelFilter": "{grafana_folder=\"Observability\"}",
             "alertName": "",
             "dashboardAlerts": false,
-            "groupBy": ["alertname"],
+            "groupBy": [
+              "alertname"
+            ],
             "groupMode": "default",
             "maxItems": 50,
             "minInterval": "1m",
