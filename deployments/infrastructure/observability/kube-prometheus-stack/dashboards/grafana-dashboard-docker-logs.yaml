@@ -15,7 +15,7 @@ data:
       "description": "Log browser for Docker containers on non-Kubernetes hosts",
       "editable": true,
       "schemaVersion": 39,
-      "version": 6,
+      "version": 7,
       "refresh": "30s",
       "time": {"from": "now-1h", "to": "now"},
       "timezone": "browser",
@@ -52,16 +52,18 @@ data:
           {
             "name": "severity",
             "label": "Severity",
-            "type": "query",
-            "datasource": "Loki",
-            "definition": "label_values({host=~\".+\", host!~\"talos-.*\"} | regexp \"(?i)(?P<level>warn(?:ing)?|erro(?:r)?|info|debug|trace|fatal|critical|panic)\", level)",
-            "query": "label_values({host=~\".+\", host!~\"talos-.*\"} | regexp \"(?i)(?P<level>warn(?:ing)?|erro(?:r)?|info|debug|trace|fatal|critical|panic)\", level)",
-            "refresh": 2,
-            "sort": 1,
+            "type": "custom",
+            "query": ".*,ERRO|ERROR|fatal|critical,WARN|WARNING,INFO,DEBUG|TRACE",
+            "options": [
+              {"selected": true,  "text": "All",     "value": ".*"},
+              {"selected": false, "text": "Error",   "value": "ERRO|ERROR|fatal|critical"},
+              {"selected": false, "text": "Warning", "value": "WARN|WARNING"},
+              {"selected": false, "text": "Info",    "value": "INFO"},
+              {"selected": false, "text": "Debug",   "value": "DEBUG|TRACE"}
+            ],
+            "current": {"text": "All", "value": ".*"},
             "multi": false,
-            "includeAll": true,
-            "allValue": ".*",
-            "current": {}
+            "includeAll": false
           },
           {
             "name": "search",
