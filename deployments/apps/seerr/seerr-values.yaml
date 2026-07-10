@@ -16,6 +16,13 @@ controllers:
           tag: v3.3.0
         env:
           TZ: Europe/Ljubljana
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
 
 service:
   app:

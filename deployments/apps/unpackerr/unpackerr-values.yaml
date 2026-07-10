@@ -27,6 +27,13 @@ controllers:
               secretKeyRef:
                 name: api-tokens-sealedsecret
                 key: radarr-api-key
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
 
 persistence:
   torrents:

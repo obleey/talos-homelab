@@ -17,6 +17,12 @@ controllers:
         env:
           TZ: Europe/Ljubljana
           HOSTNAME: talos-plex
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            memory: 4Gi
 
 service:
   app:

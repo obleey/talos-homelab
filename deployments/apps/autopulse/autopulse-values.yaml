@@ -31,6 +31,13 @@ controllers:
               secretKeyRef:
                 name: autopulse-secret
                 key: JELLYFIN_TOKEN
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
 
 service:
   app:

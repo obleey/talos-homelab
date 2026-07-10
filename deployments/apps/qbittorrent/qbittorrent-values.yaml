@@ -15,6 +15,12 @@ controllers:
           TZ: Europe/Ljubljana
           WEBUI_PORT: "8080"
           TORRENTING_PORT: "30881"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
 
 persistence:
   config:

@@ -16,6 +16,12 @@ controllers:
           tag: "10.11.11.20260606-153911"
         env:
           TZ: Europe/Ljubljana
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            memory: 4Gi
 
 service:
   app:
