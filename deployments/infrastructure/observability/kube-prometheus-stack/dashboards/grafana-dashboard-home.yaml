@@ -600,6 +600,6 @@ data:
       "timezone": "browser",
       "title": "Homelab Overview",
       "uid": "homelab-home",
-      "version": 1,
+      "version": 2,
       "weekStart": ""
     }
