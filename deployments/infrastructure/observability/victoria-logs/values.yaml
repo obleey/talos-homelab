@@ -1,0 +1,16 @@
+nameOverride: vlogs
+
+server:
+  retentionPeriod: 30d
+
+  persistentVolume:
+    enabled: true
+    storageClassName: longhorn
+    size: 20Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
