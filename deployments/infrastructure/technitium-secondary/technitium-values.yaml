@@ -7,7 +7,7 @@ controllers:
       main:
         image:
           repository: technitium/dns-server
-          tag: '15.3.0'
+          tag: '15.4.0'
         env:
           DNS_SERVER_DOMAIN: dns02.dns.local
           TZ: Europe/Ljubljana
