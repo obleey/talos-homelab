@@ -12,7 +12,7 @@ resources:
   - authelia/app.yaml
   - technitium-secondary/app.yaml
   - observability/namespace.yaml
-  - observability/kube-prometheus-stack/app.yaml
-  - observability/loki/app.yaml
+  - observability/victoria-metrics-k8s-stack/app.yaml
+  - observability/victoria-logs/app.yaml
   - observability/alloy/app.yaml
   - observability/alloy-blackbox/app.yaml
