@@ -1,3 +1,5 @@
+nameOverride: vlogs
+
 server:
   retentionPeriod: 30d
 

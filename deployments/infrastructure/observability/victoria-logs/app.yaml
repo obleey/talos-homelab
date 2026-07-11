@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: victoria-logs
+  name: vlogs
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -19,6 +19,9 @@ spec:
     - repoURL: https://github.com/obleey/talos-homelab
       targetRevision: HEAD
       ref: values
+      path: deployments/infrastructure/observability/victoria-logs
+      directory:
+        exclude: "{app.yaml,values.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -28,3 +31,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true

@@ -91,7 +91,7 @@ defaultDatasources:
     - name: VictoriaLogs
       type: victoriametrics-logs-datasource
       uid: victorialogs
-      url: http://vlogs-victoria-logs-single-server.monitoring.svc.cluster.local:9428
+      url: http://vlogs-server.monitoring.svc.cluster.local:9428
       access: proxy
       isDefault: false
 
