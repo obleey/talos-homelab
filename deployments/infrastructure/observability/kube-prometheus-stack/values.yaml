@@ -206,6 +206,12 @@ kubelet:
         targetLabel: instance
 
 prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
   tolerations:
     - effect: NoSchedule
       operator: Exists
