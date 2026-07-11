@@ -71,6 +71,9 @@ vmagent:
 # No notifiers configured; Grafana unified alerting handles notifications.
 vmalert:
   enabled: true
+  spec:
+    extraArgs:
+      notifier.blackhole: "true"
 
 # Alertmanager disabled — Grafana unified alerting handles notifications
 alertmanager:
