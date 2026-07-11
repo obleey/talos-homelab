@@ -17,18 +17,34 @@ data:
       "schemaVersion": 39,
       "version": 7,
       "refresh": "30s",
-      "time": {"from": "now-1h", "to": "now"},
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
       "timezone": "browser",
-      "tags": ["docker", "logs", "loki"],
+      "tags": [
+        "docker",
+        "logs",
+        "loki"
+      ],
       "templating": {
         "list": [
           {
             "name": "host",
             "label": "Host",
             "type": "query",
-            "datasource": "Loki",
+            "datasource": {
+              "type": "loki",
+              "uid": "P8E80F9AEF21F6940"
+            },
             "definition": "label_values({host=~\".+\", host!~\"talos-.*\"}, host)",
-            "query": "label_values({host=~\".+\", host!~\"talos-.*\"}, host)",
+            "query": {
+              "label": "host",
+              "query": "label_values({host=~\".+\", host!~\"talos-.*\"}, host)",
+              "refId": "A",
+              "stream": "{host=~\".+\", host!~\"talos-.*\"}",
+              "type": 1
+            },
             "refresh": 2,
             "sort": 1,
             "multi": false,
@@ -39,9 +55,18 @@ data:
             "name": "container",
             "label": "Container",
             "type": "query",
-            "datasource": "Loki",
+            "datasource": {
+              "type": "loki",
+              "uid": "P8E80F9AEF21F6940"
+            },
             "definition": "label_values({host=\"$host\"}, container)",
-            "query": "label_values({host=\"$host\"}, container)",
+            "query": {
+              "label": "container",
+              "query": "label_values({host=\"$host\"}, container)",
+              "refId": "A",
+              "stream": "{host=\"$host\"}",
+              "type": 1
+            },
             "refresh": 2,
             "sort": 1,
             "multi": true,
@@ -55,13 +80,36 @@ data:
             "type": "custom",
             "query": ".*,ERRO|ERROR|fatal|critical,WARN|WARNING,INFO,DEBUG|TRACE",
             "options": [
-              {"selected": true,  "text": "All",     "value": ".*"},
-              {"selected": false, "text": "Error",   "value": "ERRO|ERROR|fatal|critical"},
-              {"selected": false, "text": "Warning", "value": "WARN|WARNING"},
-              {"selected": false, "text": "Info",    "value": "INFO"},
-              {"selected": false, "text": "Debug",   "value": "DEBUG|TRACE"}
+              {
+                "selected": true,
+                "text": "All",
+                "value": ".*"
+              },
+              {
+                "selected": false,
+                "text": "Error",
+                "value": "ERRO|ERROR|fatal|critical"
+              },
+              {
+                "selected": false,
+                "text": "Warning",
+                "value": "WARN|WARNING"
+              },
+              {
+                "selected": false,
+                "text": "Info",
+                "value": "INFO"
+              },
+              {
+                "selected": false,
+                "text": "Debug",
+                "value": "DEBUG|TRACE"
+              }
             ],
-            "current": {"text": "All", "value": ".*"},
+            "current": {
+              "text": "All",
+              "value": ".*"
+            },
             "multi": false,
             "includeAll": false
           },
@@ -69,7 +117,9 @@ data:
             "name": "search",
             "label": "Search",
             "type": "textbox",
-            "current": {"value": ""},
+            "current": {
+              "value": ""
+            },
             "hide": 0
           }
         ]
@@ -79,8 +129,16 @@ data:
           "id": 1,
           "type": "logs",
           "title": "Logs",
-          "gridPos": {"h": 22, "w": 24, "x": 0, "y": 0},
-          "datasource": "Loki",
+          "gridPos": {
+            "h": 22,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
           "options": {
             "showLabels": false,
             "showTime": true,
@@ -99,11 +157,21 @@ data:
           "id": 2,
           "type": "timeseries",
           "title": "Log Volume",
-          "gridPos": {"h": 6, "w": 24, "x": 0, "y": 22},
-          "datasource": "Loki",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 22
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
           "fieldConfig": {
             "defaults": {
-              "color": {"mode": "palette-classic"},
+              "color": {
+                "mode": "palette-classic"
+              },
               "custom": {
                 "fillOpacity": 15,
                 "lineWidth": 1,
@@ -114,8 +182,13 @@ data:
             "overrides": []
           },
           "options": {
-            "legend": {"displayMode": "list", "placement": "bottom"},
-            "tooltip": {"mode": "multi"}
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi"
+            }
           },
           "targets": [
             {
