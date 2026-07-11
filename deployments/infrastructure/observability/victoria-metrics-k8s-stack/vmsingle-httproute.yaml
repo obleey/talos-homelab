@@ -1,38 +1,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: vmsingle
-  namespace: monitoring
-spec:
-  parentRefs:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: traefik-gateway
-      namespace: traefik
-      sectionName: websecure
-  hostnames:
-    - "victoriametrics.talos-cluster.local.obleey.com"
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
-      filters:
-        - type: ExtensionRef
-          extensionRef:
-            group: traefik.io
-            kind: Middleware
-            name: vmsingle-basic-auth
-      backendRefs:
-        - name: vmsingle-vm
-          port: 8429
----
-# Keep the old hostname as an alias so external remote_write sources
-# (Alloy on other hosts, etc.) don't need reconfiguring immediately.
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: vmsingle-remote-write-compat
+  name: vmsingle-remote-write
   namespace: monitoring
 spec:
   parentRefs:
@@ -47,7 +16,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /
+            value: /api/v1/write
       filters:
         - type: ExtensionRef
           extensionRef:
