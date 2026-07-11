@@ -85,6 +85,7 @@ defaultDatasources:
       - name: VictoriaMetrics
         type: prometheus
         uid: prometheus
+        url: http://vmsingle-vm.monitoring.svc.cluster.local:8429
         access: proxy
         isDefault: true
   extra:
