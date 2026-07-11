@@ -1,0 +1,224 @@
+fullnameOverride: vm
+
+# Control plane components — disabled because Talos exposes them
+# only on the node IP; we use inlineScrapeConfig static targets instead.
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+
+# kube-proxy is disabled on this cluster (Cilium handles it)
+kubeProxy:
+  enabled: false
+
+# Keep all defaultRules — VMAlert evaluates them and writes recording rule
+# results back to VMSingle. Alertmanager is disabled so alert notifications
+# go nowhere, but recording rules (needed by dashboards) still work.
+defaultRules:
+  enabled: true
+
+# VMSingle — metrics storage, replaces Prometheus
+vmsingle:
+  enabled: true
+  spec:
+    retentionPeriod: "30d"
+    storage:
+      storageClassName: longhorn
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+
+# VMAgent — scraping engine, replaces Prometheus scrape engine.
+# selectAllByDefault picks up ServiceMonitors/PodMonitors from all namespaces.
+vmagent:
+  enabled: true
+  spec:
+    selectAllByDefault: true
+    scrapeInterval: 30s
+    # Static scrape targets for control plane components that cannot be
+    # reached via ServiceMonitor (Talos restricts endpoint access).
+    inlineScrapeConfig: |
+      - job_name: kube-etcd
+        scheme: http
+        static_configs:
+          - targets: ['10.0.0.160:2381']
+            labels:
+              node: talos-control-plane-1
+      - job_name: kube-scheduler
+        scheme: https
+        tls_config:
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        static_configs:
+          - targets: ['10.0.0.160:10259']
+            labels:
+              node: talos-control-plane-1
+      - job_name: kube-controller-manager
+        scheme: https
+        tls_config:
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        static_configs:
+          - targets: ['10.0.0.160:10257']
+            labels:
+              node: talos-control-plane-1
+
+# VMAlert — evaluates VMRule CRDs for recording rules.
+# No notifiers configured; Grafana unified alerting handles notifications.
+vmalert:
+  enabled: true
+
+# Alertmanager disabled — Grafana unified alerting handles notifications
+alertmanager:
+  enabled: false
+
+# Grafana datasource provisioning
+defaultDatasources:
+  victoriametrics:
+    datasources:
+      # uid kept as "prometheus" so all existing dashboards and alert
+      # ConfigMaps that reference datasourceUid: prometheus continue to work.
+      - name: VictoriaMetrics
+        type: prometheus
+        uid: prometheus
+        access: proxy
+        isDefault: true
+  extra:
+    - name: VictoriaLogs
+      type: victoriametrics-logs-datasource
+      uid: victorialogs
+      url: http://vlogs-victoria-logs-single-server.monitoring.svc.cluster.local:9428
+      access: proxy
+      isDefault: false
+
+grafana:
+  deploymentStrategy:
+    type: Recreate
+  admin:
+    existingSecret: kps-grafana
+    userKey: admin-user
+    passwordKey: admin-password
+  envFromSecret: grafana-slack-token
+  envValueFrom:
+    GF_AUTH_GOOGLE_CLIENT_ID:
+      secretKeyRef:
+        name: grafana-google-oauth
+        key: client_id
+    GF_AUTH_GOOGLE_CLIENT_SECRET:
+      secretKeyRef:
+        name: grafana-google-oauth
+        key: client_secret
+    GF_AUTH_GENERIC_OAUTH_CLIENT_ID:
+      secretKeyRef:
+        name: grafana-authelia-oauth
+        key: client_id
+    GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+      secretKeyRef:
+        name: grafana-authelia-oauth
+        key: client_secret
+  defaultDashboardsEnabled: false
+  defaultDashboardsTimezone: browser
+  plugins:
+    - victoriametrics-logs-datasource
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
+      folderAnnotation: grafana_folder
+      defaultFolderName: "Kubernetes"
+      provider:
+        foldersFromFilesStructure: true
+    datasources:
+      enabled: true
+    alerts:
+      enabled: true
+      searchNamespace: ALL
+      label: grafana_alert
+      labelValue: "1"
+  persistence:
+    enabled: true
+    storageClassName: longhorn
+    size: 2Gi
+  grafana.ini:
+    server:
+      root_url: https://grafana.talos-cluster.local.obleey.com
+    unified_alerting:
+      enabled: true
+    alerting:
+      enabled: false
+    dashboards:
+      default_home_dashboard_path: /tmp/dashboards/Kubernetes/Infrastructure/homelab-home.json
+    auth.google:
+      enabled: true
+      client_id: ${GF_AUTH_GOOGLE_CLIENT_ID}
+      client_secret: ${GF_AUTH_GOOGLE_CLIENT_SECRET}
+      scopes: openid email profile
+      auth_url: https://accounts.google.com/o/oauth2/v2/auth
+      token_url: https://oauth2.googleapis.com/token
+      api_url: https://openidconnect.googleapis.com/v1/userinfo
+      allowed_emails: miha.oblishar@gmail.com
+      auto_login: false
+    auth.generic_oauth:
+      enabled: true
+      name: Authelia
+      client_id: ${GF_AUTH_GENERIC_OAUTH_CLIENT_ID}
+      client_secret: ${GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
+      scopes: openid profile email groups
+      auth_url: https://auth.talos-cluster.local.obleey.com/api/oidc/authorization
+      token_url: https://auth.talos-cluster.local.obleey.com/api/oidc/token
+      api_url: https://auth.talos-cluster.local.obleey.com/api/oidc/userinfo
+      role_attribute_path: "contains(groups[*], 'admins') && 'Admin' || 'Viewer'"
+      role_attribute_strict: false
+      allow_sign_up: true
+      auto_login: true
+    date_formats:
+      full_date: DD.MM.YYYY HH:mm:ss
+      used_in_range: DD.MM.YYYY HH:mm
+      week_start: monday
+
+kubelet:
+  vmScrape:
+    spec:
+      relabelings:
+        - action: replace
+          sourceLabels: [__metrics_path__]
+          targetLabel: metrics_path
+        - action: replace
+          sourceLabels: [__meta_kubernetes_node_name]
+          targetLabel: instance
+      cAdvisorMetricRelabelings:
+        - action: replace
+          sourceLabels: [__metrics_path__]
+          targetLabel: metrics_path
+        - action: replace
+          sourceLabels: [__meta_kubernetes_node_name]
+          targetLabel: instance
+
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
+  tolerations:
+    - effect: NoSchedule
+      operator: Exists
+  prometheus:
+    monitor:
+      relabelings:
+        - action: replace
+          sourceLabels: [__meta_kubernetes_endpoint_node_name]
+          targetLabel: instance
+  extraArgs:
+    - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run|var/lib/kubelet/.+|var/lib/longhorn)($|/)
+
+kube-state-metrics:
+  metricLabelsAllowlist:
+    - pods=[*]
+    - deployments=[*]
+    - statefulsets=[*]

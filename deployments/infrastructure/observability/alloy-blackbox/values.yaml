@@ -157,7 +157,7 @@ alloy:
 
       prometheus.remote_write "prometheus" {
         endpoint {
-          url = "http://kps-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+          url = "http://vmsingle-vm.monitoring.svc.cluster.local:8429/api/v1/write"
         }
       }
 

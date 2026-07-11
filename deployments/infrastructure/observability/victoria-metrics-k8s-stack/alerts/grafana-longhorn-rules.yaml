@@ -1,0 +1,481 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-longhorn-rules
+  namespace: monitoring
+  labels:
+    grafana_alert: "1"
+data:
+  longhorn-rules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: longhorn
+        folder: Infrastructure
+        interval: 1m
+        rules:
+
+          - uid: longhorn-volume-faulted
+            title: Longhorn Volume Faulted
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'longhorn_volume_robustness{state="faulted"} == 1'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 0s
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "ozk-lh-mon"
+              __panelId__: "16"
+              summary: "Longhorn volume faulted ({{ $labels.pvc_namespace }}/{{ $labels.pvc }})"
+              description: "Volume {{ $labels.volume }} (PVC {{ $labels.pvc_namespace }}/{{ $labels.pvc }}) on node {{ $labels.node }} is faulted and inaccessible."
+            isPaused: false
+
+          - uid: longhorn-volume-degraded
+            title: Longhorn Volume Degraded
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'longhorn_volume_robustness{state="degraded"} == 1'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "ozk-lh-mon"
+              __panelId__: "15"
+              summary: "Longhorn volume degraded ({{ $labels.pvc_namespace }}/{{ $labels.pvc }})"
+              description: "Volume {{ $labels.volume }} (PVC {{ $labels.pvc_namespace }}/{{ $labels.pvc }}) on node {{ $labels.node }} is degraded — a replica is missing or rebuilding."
+            isPaused: false
+
+          - uid: longhorn-node-not-ready
+            title: Longhorn Node Not Ready
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'longhorn_node_status{condition="ready"} == 0'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "ozk-lh-mon"
+              __panelId__: "22"
+              summary: "Longhorn node not ready ({{ $labels.node }})"
+              description: "Longhorn node {{ $labels.node }} has been not ready for 5 minutes. Volumes with replicas on this node may be at risk."
+            isPaused: false
+
+          - uid: longhorn-disk-not-ready
+            title: Longhorn Disk Not Ready
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'longhorn_disk_status{condition="ready"} == 0'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "ozk-lh-mon"
+              __panelId__: "32"
+              summary: "Longhorn disk not ready ({{ $labels.node }}/{{ $labels.disk }})"
+              description: "Disk {{ $labels.disk }} on node {{ $labels.node }} is not ready. Longhorn cannot schedule replicas to this disk."
+            isPaused: false
+
+          - uid: longhorn-disk-space-warning
+            title: Longhorn Disk Space Warning
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: '(longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes) * 100 > 85'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "ozk-lh-mon"
+              __panelId__: "32"
+              summary: "Longhorn disk almost full ({{ $labels.node }}/{{ $labels.disk }})"
+              description: "Disk {{ $labels.disk }} on node {{ $labels.node }} is over 85% full. VALUE = {{ $value | humanize }}%"
+            isPaused: false
+
+          - uid: longhorn-disk-space-critical
+            title: Longhorn Disk Space Critical
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: '(longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes) * 100 > 95'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 2m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "ozk-lh-mon"
+              __panelId__: "32"
+              summary: "Longhorn disk critically full ({{ $labels.node }}/{{ $labels.disk }})"
+              description: "Disk {{ $labels.disk }} on node {{ $labels.node }} is over 95% full. New replicas may fail to schedule. VALUE = {{ $value | humanize }}%"
+            isPaused: false
+
+          - uid: longhorn-backup-failed
+            title: Longhorn Backup Failed
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'longhorn_backup_state == 2'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 0s
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "ozk-lh-mon"
+              summary: "Longhorn backup failed ({{ $labels.volume }})"
+              description: "Backup {{ $labels.backup }} for volume {{ $labels.volume }} is in error state. Check the Longhorn UI for the failure reason."
+            isPaused: false
+
+          - uid: longhorn-backup-target-unreachable
+            title: Longhorn Backup Target Unreachable
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'longhorn_backup_target_backup_volume_count < 1'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "ozk-lh-mon"
+              summary: "Longhorn backup target unreachable"
+              description: "The Longhorn NFS backup target reports 0 accessible backup volumes. TrueNAS may be down or the NFS share is unreachable (10.0.0.104:/mnt/serve/longhorn-backups)."
+            isPaused: false
+
+          - uid: longhorn-backup-overdue
+            title: Longhorn Volume Backup Overdue
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: '(time() - longhorn_volume_last_backup_at) > 90000'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 0s
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "ozk-lh-mon"
+              summary: "Longhorn backup overdue ({{ $labels.pvc }})"
+              description: "Volume {{ $labels.pvc }} ({{ $labels.pvc_namespace }}) has not had a successful backup in over 25 hours. Last backup was reported from node {{ $labels.node }}."
+            isPaused: false

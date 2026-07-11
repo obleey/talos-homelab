@@ -1,0 +1,230 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-certmanager-rules
+  namespace: monitoring
+  labels:
+    grafana_alert: "1"
+data:
+  certmanager-rules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: cert-manager
+        folder: Infrastructure
+        interval: 5m
+        rules:
+
+          - uid: certmgr-absent
+            title: Cert-Manager Absent
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # absent() returns 1 when cert-manager is not being scraped
+                  expr: 'absent(up{job="cert-manager"})'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Cert-Manager is not being scraped"
+              description: "Cert-Manager has disappeared from Prometheus targets. Certificate renewals may be failing silently."
+            isPaused: false
+
+          - uid: certmgr-cert-not-ready
+            title: Cert-Manager Certificate Not Ready
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: >-
+                    max by (name, exported_namespace, namespace, condition) (
+                      certmanager_certificate_ready_status{condition!="True"} == 1
+                    )
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 10m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "blackbox-http-prober"
+              __panelId__: "2"
+              summary: "Certificate {{ $labels.name }} is not ready"
+              description: "Certificate {{ $labels.name }} in namespace {{ $labels.exported_namespace }} has condition {{ $labels.condition }}. TLS may be broken for the affected service."
+            isPaused: false
+
+          - uid: certmgr-cert-expiring
+            title: Cert-Manager Certificate Expiring Soon
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # Returns remaining seconds for certs expiring within 21 days (positive value)
+                  expr: >-
+                    avg by (exported_namespace, namespace, name) (
+                      certmanager_certificate_expiration_timestamp_seconds - time()
+                    ) < (21 * 24 * 3600)
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 1h
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "blackbox-http-prober"
+              __panelId__: "2"
+              summary: "Certificate {{ $labels.name }} expires in < 21 days"
+              description: "Certificate {{ $labels.name }} in namespace {{ $labels.exported_namespace }} expires in {{ $value | printf \"%.0f\" | humanizeDuration }}. Check cert-manager renewal."
+            isPaused: false
+
+          - uid: certmgr-acme-rate-limit
+            title: Cert-Manager Hitting ACME Rate Limits
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'sum by (host) (rate(certmanager_acme_client_request_count{status="429"}[5m])) > 0'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "blackbox-http-prober"
+              __panelId__: "2"
+              summary: "Cert-Manager hitting ACME rate limits for {{ $labels.host }}"
+              description: "Cert-Manager is receiving 429 responses from the ACME server for {{ $labels.host }}. Certificate renewals will be delayed. Wait before retrying."
+            isPaused: false

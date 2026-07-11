@@ -1,0 +1,380 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-argocd-rules
+  namespace: monitoring
+  labels:
+    grafana_alert: "1"
+data:
+  argocd-rules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: argocd
+        folder: Infrastructure
+        interval: 1m
+        rules:
+
+          - uid: argocd-app-out-of-sync
+            title: ArgoCD App Out Of Sync
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'argocd_app_info{sync_status="OutOfSync"} == 1'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              __panelId__: "106"
+              summary: "ArgoCD app out of sync ({{ $labels.name }})"
+              description: "App {{ $labels.name }} in project {{ $labels.project }} has been OutOfSync for 15 minutes. Dest: {{ $labels.dest_namespace }}."
+            isPaused: false
+
+          - uid: argocd-app-sync-failed
+            title: ArgoCD App Sync Failed
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'increase(argocd_app_sync_total{phase!="Succeeded",dry_run="false"}[10m]) > 0'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 0s
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              __panelId__: "73"
+              summary: "ArgoCD app sync failed ({{ $labels.name }})"
+              description: "App {{ $labels.name }} in project {{ $labels.project }} had a failed sync in the last 10 minutes (phase: {{ $labels.phase }})."
+            isPaused: false
+
+          - uid: argocd-app-degraded
+            title: ArgoCD App Degraded
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'argocd_app_info{health_status="Degraded"} == 1'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              __panelId__: "105"
+              summary: "ArgoCD app degraded ({{ $labels.name }})"
+              description: "App {{ $labels.name }} in project {{ $labels.project }} has been Degraded for 5 minutes. Dest: {{ $labels.dest_namespace }}."
+            isPaused: false
+
+          - uid: argocd-app-missing
+            title: ArgoCD App Missing
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'argocd_app_info{health_status="Missing"} == 1'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 0s
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              __panelId__: "105"
+              summary: "ArgoCD app missing ({{ $labels.name }})"
+              description: "App {{ $labels.name }} in project {{ $labels.project }} has resources that are Missing from the cluster. Dest: {{ $labels.dest_namespace }}."
+            isPaused: false
+
+          - uid: argocd-app-not-healthy
+            title: ArgoCD App Not Healthy
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'argocd_app_info{health_status!~"Healthy|Progressing|Suspended"} == 1'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              __panelId__: "105"
+              summary: "ArgoCD app not healthy ({{ $labels.name }})"
+              description: "App {{ $labels.name }} in project {{ $labels.project }} has been {{ $labels.health_status }} for 15 minutes. Dest: {{ $labels.dest_namespace }}."
+            isPaused: false
+
+          - uid: argocd-app-autosync-disabled
+            title: ArgoCD App Auto-Sync Disabled
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'argocd_app_info{autosync_enabled="false"} == 1'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 1h
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              __panelId__: "75"
+              summary: "ArgoCD app auto-sync disabled ({{ $labels.name }})"
+              description: "App {{ $labels.name }} in project {{ $labels.project }} has had auto-sync disabled for over 1 hour. This may indicate a manual intervention that was not re-enabled."
+            isPaused: false
+
+          - uid: argocd-not-running
+            title: ArgoCD Application Controller Down
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'absent(argocd_app_info) == 1'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              __panelId__: "75"
+              summary: "ArgoCD application controller is down"
+              description: "No argocd_app_info metrics are being received. The ArgoCD application controller may be down or metrics scraping has failed."
+            isPaused: false

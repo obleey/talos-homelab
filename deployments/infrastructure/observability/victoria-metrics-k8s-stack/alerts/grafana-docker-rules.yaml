@@ -1,0 +1,216 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-docker-rules
+  namespace: monitoring
+  labels:
+    grafana_alert: '1'
+data:
+  docker-rules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: docker-containers
+        folder: Infrastructure
+        interval: 1m
+        rules:
+
+          - uid: docker-container-killed
+            title: Docker Container Killed
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'time() - container_last_seen{name!="",instance="truenas"} > 60'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 0s
+            labels:
+              severity: warning
+            annotations:
+              summary: "Docker container killed ({{ $labels.name }})"
+              description: "Container {{ $labels.name }} on {{ $labels.instance }} has disappeared for more than 1 minute. VALUE = {{ $value }}s"
+            isPaused: false
+
+          - uid: docker-container-high-cpu
+            title: Docker Container High CPU Utilization
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: '(sum(rate(container_cpu_usage_seconds_total{name!="",instance="truenas"}[3m])) by (name) / scalar(count(node_cpu_seconds_total{mode="idle",instance="truenas"}))) * 100 > 80'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 2m0s
+            labels:
+              severity: warning
+            annotations:
+              summary: "Docker container high CPU ({{ $labels.name }})"
+              description: "Container {{ $labels.name }} on {{ $labels.instance }} is using more than 80% of total system CPU. VALUE = {{ $value | printf \"%.1f\" }}%"
+            isPaused: false
+
+          - uid: docker-container-high-memory
+            title: Docker Container High Memory Usage
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: '(container_memory_working_set_bytes{name!="",name!~"cadvisor|alloy|dns-server|dns01",instance="truenas"} / container_spec_memory_limit_bytes{name!="",name!~"cadvisor|alloy|dns-server|dns01",instance="truenas"} > 0) * 100 > 80'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 2m0s
+            labels:
+              severity: warning
+            annotations:
+              summary: "Docker container high memory ({{ $labels.name }})"
+              description: "Container {{ $labels.name }} on {{ $labels.instance }} is using more than 80% of its memory limit. VALUE = {{ $value | printf \"%.1f\" }}%"
+            isPaused: false
+
+          - uid: docker-container-high-throttle
+            title: Docker Container High CPU Throttle Rate
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: '(sum(increase(container_cpu_cfs_throttled_periods_total{name!="",instance="truenas"}[5m])) by (name) / sum(increase(container_cpu_cfs_periods_total{name!="",instance="truenas"}[5m])) by (name)) * 100 > 25'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m0s
+            labels:
+              severity: warning
+            annotations:
+              summary: "Docker container CPU throttled ({{ $labels.name }})"
+              description: "Container {{ $labels.name }} on {{ $labels.instance }} is being CPU-throttled more than 25% of the time. VALUE = {{ $value | printf \"%.1f\" }}%"
+            isPaused: false
