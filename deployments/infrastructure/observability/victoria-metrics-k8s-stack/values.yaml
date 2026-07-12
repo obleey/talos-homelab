@@ -6,6 +6,9 @@ defaultDashboardsEnabled: false
 grafanaDashboard:
   enabled: false
 
+syncJob:
+  enabled: false
+
 # Control plane components — disabled because Talos exposes them
 # only on the node IP; we use inlineScrapeConfig static targets instead.
 kubeEtcd:
