@@ -12,6 +12,7 @@ spec:
         # Router format: httproute-NS-NAME-gw-traefik-...-ep-websecure-0-HASH@kubernetesgateway
         # Result service label: NS-NAME (e.g. monitoring-grafana, argocd-argocd)
         - record: traefik_route_info
+          alert: ''
           expr: |-
             label_replace(
               traefik_router_requests_total,
