@@ -373,7 +373,6 @@ data:
             labels:
               severity: critical
             annotations:
-              __dashboardUid__: "ozk-lh-mon"
               summary: "Longhorn backup failed ({{ $labels.volume }})"
               description: "Backup {{ $labels.backup }} for volume {{ $labels.volume }} is in error state. Check the Longhorn UI for the failure reason."
             isPaused: false
@@ -424,7 +423,6 @@ data:
             labels:
               severity: critical
             annotations:
-              __dashboardUid__: "ozk-lh-mon"
               summary: "Longhorn backup target unreachable"
               description: "The Longhorn NFS backup target reports 0 accessible backup volumes. TrueNAS may be down or the NFS share is unreachable (10.0.0.104:/mnt/serve/longhorn-backups)."
             isPaused: false
@@ -475,7 +473,6 @@ data:
             labels:
               severity: warning
             annotations:
-              __dashboardUid__: "ozk-lh-mon"
               summary: "Longhorn backup overdue ({{ $labels.pvc }})"
               description: "Volume {{ $labels.pvc }} ({{ $labels.pvc_namespace }}) has not had a successful backup in over 25 hours. Last backup was reported from node {{ $labels.node }}."
             isPaused: false
