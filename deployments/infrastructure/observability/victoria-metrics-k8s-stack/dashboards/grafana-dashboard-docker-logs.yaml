@@ -15,7 +15,7 @@ data:
       "description": "Log browser for Docker containers on non-Kubernetes hosts",
       "editable": true,
       "schemaVersion": 39,
-      "version": 7,
+      "version": 8,
       "refresh": "30s",
       "time": {
         "from": "now-1h",
@@ -147,7 +147,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{host=\"$host\", container=~\"$container\"} | regexp \"(?i)(?P<level>warn(?:ing)?|erro(?:r)?|info|debug|trace|fatal|critical|panic)\" | level=~\"(?i)$severity\" |= \"$search\"",
+              "expr": "{host=\"$host\", container=~\"$container\"} | regexp \"(?i)(?P<level>warn(?:ing)?|erro(?:r)?|info|debug|trace|fatal|critical|panic)\" | level=~\"(?i)$severity\" | filter \"$search\"",
               "refId": "A",
               "legendFormat": "{{container}}"
             }
@@ -192,7 +192,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum by (container) (rate({host=\"$host\", container=~\"$container\"} | regexp \"(?i)(?P<level>warn(?:ing)?|erro(?:r)?|info|debug|trace|fatal|critical|panic)\" | level=~\"(?i)$severity\" |= \"$search\" [2m]))",
+              "expr": "{host=\"$host\", container=~\"$container\"} | regexp \"(?i)(?P<level>warn(?:ing)?|erro(?:r)?|info|debug|trace|fatal|critical|panic)\" | level=~\"(?i)$severity\" | filter \"$search\" | stats by (_time:$__interval, container) count() as value",
               "refId": "A",
               "legendFormat": "{{container}}"
             }

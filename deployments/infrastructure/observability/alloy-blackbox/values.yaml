@@ -20,6 +20,15 @@ alloy:
             valid_status_codes: [200, 201, 301, 302, 401, 403, 404]
             method: GET
             follow_redirects: true
+        http_strict:
+          prober: http
+          timeout: 15s
+          http:
+            valid_status_codes: [200]
+            method: GET
+            follow_redirects: true
+            tls_config:
+              insecure_skip_verify: true
       `
 
         // Kubernetes cluster services
@@ -123,10 +132,27 @@ alloy:
           address = "https://office.decage.net"
           module  = "http_home"
         }
+      }
+
+      // Helion public sites — strict 200-only, faster interval to catch PHP-FPM hangs
+      prometheus.exporter.blackbox "helion_sites" {
+        config = `
+      modules:
+        http_strict:
+          prober: http
+          timeout: 15s
+          http:
+            valid_status_codes: [200]
+            method: GET
+            follow_redirects: true
+            tls_config:
+              insecure_skip_verify: true
+      `
+
         target {
           name    = "tilenhudrap"
           address = "https://tilenhudrap.com"
-          module  = "http_home"
+          module  = "http_strict"
         }
       }
 
@@ -136,6 +162,14 @@ alloy:
         job_name        = "blackbox"
         scrape_interval = "60s"
         scrape_timeout  = "15s"
+      }
+
+      prometheus.scrape "blackbox_helion" {
+        targets         = prometheus.exporter.blackbox.helion_sites.targets
+        forward_to      = [prometheus.relabel.blackbox_labels.receiver]
+        job_name        = "blackbox"
+        scrape_interval = "30s"
+        scrape_timeout  = "20s"
       }
 
       // Fix labels: set instance = target URL, job = "blackbox"
