@@ -15,7 +15,7 @@ data:
       "description": "Pod log browser for Kubernetes workloads",
       "editable": true,
       "schemaVersion": 39,
-      "version": 2,
+      "version": 3,
       "refresh": "30s",
       "time": {
         "from": "now-1h",
@@ -125,7 +125,8 @@ data:
             {
               "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter ~\"(?i)$search\" | stats by (_time:$__interval, pod) count() as value",
               "refId": "A",
-              "legendFormat": "{{pod}}"
+              "legendFormat": "{{pod}}",
+              "queryType": "statsRange"
             }
           ]
         },
