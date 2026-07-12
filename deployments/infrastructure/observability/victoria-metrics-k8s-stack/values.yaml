@@ -184,23 +184,6 @@ grafana:
       used_in_range: DD.MM.YYYY HH:mm
       week_start: monday
 
-kubelet:
-  vmScrape:
-    spec:
-      relabelings:
-        - action: replace
-          sourceLabels: [__metrics_path__]
-          targetLabel: metrics_path
-        - action: replace
-          sourceLabels: [__meta_kubernetes_node_name]
-          targetLabel: instance
-      cAdvisorMetricRelabelings:
-        - action: replace
-          sourceLabels: [__metrics_path__]
-          targetLabel: metrics_path
-        - action: replace
-          sourceLabels: [__meta_kubernetes_node_name]
-          targetLabel: instance
 
 prometheus-node-exporter:
   resources:
