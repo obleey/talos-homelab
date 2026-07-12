@@ -15,7 +15,7 @@ data:
       "description": "Active alert overview for Loki and Grafana Alloy",
       "editable": true,
       "schemaVersion": 37,
-      "version": 3,
+      "version": 4,
       "refresh": "1m",
       "time": {
         "from": "now-6h",
@@ -99,7 +99,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "min(kube_statefulset_status_replicas_ready{statefulset=\"loki\"})",
+              "expr": "min(kube_statefulset_status_replicas_ready{statefulset=\"vlogs-server\"})",
               "instant": true,
               "refId": "A"
             }
