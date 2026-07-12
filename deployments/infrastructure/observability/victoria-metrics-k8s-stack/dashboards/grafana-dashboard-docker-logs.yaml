@@ -15,7 +15,7 @@ data:
       "description": "Log browser for Docker containers on non-Kubernetes hosts",
       "editable": true,
       "schemaVersion": 39,
-      "version": 8,
+      "version": 9,
       "refresh": "30s",
       "time": {
         "from": "now-1h",
@@ -37,10 +37,10 @@ data:
               "type": "victoriametrics-logs-datasource",
               "uid": "victorialogs"
             },
-            "definition": "label_values({host=~\".+\", host!~\"talos-.*\"}, host)",
+            "definition": "{host=~\".+\", host!~\"talos-.*\"}",
             "query": {
               "label": "host",
-              "query": "label_values({host=~\".+\", host!~\"talos-.*\"}, host)",
+              "query": "{host=~\".+\", host!~\"talos-.*\"}",
               "refId": "A",
               "stream": "{host=~\".+\", host!~\"talos-.*\"}",
               "type": 1
@@ -59,10 +59,10 @@ data:
               "type": "victoriametrics-logs-datasource",
               "uid": "victorialogs"
             },
-            "definition": "label_values({host=\"$host\"}, container)",
+            "definition": "{host=\"$host\"}",
             "query": {
               "label": "container",
-              "query": "label_values({host=\"$host\"}, container)",
+              "query": "{host=\"$host\"}",
               "refId": "A",
               "stream": "{host=\"$host\"}",
               "type": 1
