@@ -8,7 +8,7 @@ controllers:
       main:
         image:
           repository: lscr.io/linuxserver/prowlarr
-          tag: 2.4.0.5397-ls152
+          tag: 2.4.0.5397-ls153
         env:
           PUID: "1000"
           PGID: "1000"
