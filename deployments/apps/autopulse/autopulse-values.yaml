@@ -8,7 +8,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/dan-online/autopulse
-          tag: latest-sqlite@sha256:3d378a0f0a2eb6bff4744ac8a4a4678df7030ddf76773a8603194cb1a225c6eb
+          tag: latest-sqlite@sha256:a6ff266aad73e264c55d134c49137e2f95d531386652d81ea5ab0ef7c460da91
         env:
           TZ: Europe/Ljubljana
           AUTOPULSE__AUTH__USERNAME:
