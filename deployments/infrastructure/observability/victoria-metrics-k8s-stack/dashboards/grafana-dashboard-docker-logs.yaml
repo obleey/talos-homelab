@@ -15,7 +15,7 @@ data:
       "description": "Log browser for Docker containers on non-Kubernetes hosts",
       "editable": true,
       "schemaVersion": 39,
-      "version": 9,
+      "version": 10,
       "refresh": "30s",
       "time": {
         "from": "now-1h",
@@ -39,7 +39,7 @@ data:
             },
             "definition": "{host=~\".+\", host!~\"talos-.*\"}",
             "query": {
-              "label": "host",
+              "field": "host",
               "query": "{host=~\".+\", host!~\"talos-.*\"}",
               "refId": "A",
               "stream": "{host=~\".+\", host!~\"talos-.*\"}",
@@ -61,7 +61,7 @@ data:
             },
             "definition": "{host=\"$host\"}",
             "query": {
-              "label": "container",
+              "field": "container",
               "query": "{host=\"$host\"}",
               "refId": "A",
               "stream": "{host=\"$host\"}",
