@@ -1,5 +1,8 @@
 fullnameOverride: vm
 
+# Disable chart's built-in Grafana dashboards — we provision our own via ConfigMaps
+defaultDashboardsEnabled: false
+
 # Control plane components — disabled because Talos exposes them
 # only on the node IP; we use inlineScrapeConfig static targets instead.
 kubeEtcd:
@@ -155,7 +158,7 @@ grafana:
     alerting:
       enabled: false
     dashboards:
-      default_home_dashboard_path: /tmp/dashboards/Kubernetes/Infrastructure/homelab-home.json
+      default_home_dashboard_path: /var/lib/grafana/dashboards/Kubernetes/Infrastructure/homelab-home.json
     auth.google:
       enabled: true
       client_id: ${GF_AUTH_GOOGLE_CLIENT_ID}
