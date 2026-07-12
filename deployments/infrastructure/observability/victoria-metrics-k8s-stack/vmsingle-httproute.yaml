@@ -25,4 +25,4 @@ spec:
             name: vmsingle-basic-auth
       backendRefs:
         - name: vmsingle-vm
-          port: 8429
+          port: 8428
