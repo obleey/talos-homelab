@@ -107,12 +107,6 @@ defaultDatasources:
       url: http://vlogs-server.monitoring.svc.cluster.local:9428
       access: proxy
       isDefault: false
-    - name: Loki
-      type: loki
-      uid: loki
-      url: http://vlogs-server.monitoring.svc.cluster.local:9428
-      access: proxy
-      isDefault: false
 
 grafana:
   deploymentStrategy:
