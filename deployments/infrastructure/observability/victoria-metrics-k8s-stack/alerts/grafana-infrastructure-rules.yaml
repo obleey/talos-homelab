@@ -236,7 +236,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'increase(node_vmstat_oom_kill[15m])'
+                  expr: 'floor(increase(node_vmstat_oom_kill[15m]))'
                   instant: true
                   refId: A
               - refId: threshold
