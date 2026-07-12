@@ -15,7 +15,7 @@ data:
       "description": "Log browser for Docker containers on non-Kubernetes hosts",
       "editable": true,
       "schemaVersion": 39,
-      "version": 13,
+      "version": 14,
       "refresh": "30s",
       "time": {
         "from": "now-1h",
@@ -77,41 +77,24 @@ data:
           {
             "name": "severity",
             "label": "Severity",
-            "type": "custom",
-            "query": ".*,ERRO|ERROR|fatal|critical,WARN|WARNING,INFO,DEBUG|TRACE",
-            "options": [
-              {
-                "selected": true,
-                "text": "All",
-                "value": ".*"
-              },
-              {
-                "selected": false,
-                "text": "Error",
-                "value": "ERRO|ERROR|fatal|critical"
-              },
-              {
-                "selected": false,
-                "text": "Warning",
-                "value": "WARN|WARNING"
-              },
-              {
-                "selected": false,
-                "text": "Info",
-                "value": "INFO"
-              },
-              {
-                "selected": false,
-                "text": "Debug",
-                "value": "DEBUG|TRACE"
-              }
-            ],
-            "current": {
-              "text": "All",
-              "value": ".*"
+            "type": "query",
+            "datasource": {
+              "type": "victoriametrics-logs-datasource",
+              "uid": "victorialogs"
             },
+            "definition": "{host=\"$host\"}",
+            "query": {
+              "field": "level",
+              "query": "{host=\"$host\"}",
+              "refId": "A",
+              "type": "fieldValue"
+            },
+            "refresh": 2,
+            "sort": 1,
             "multi": false,
-            "includeAll": false
+            "includeAll": true,
+            "allValue": ".*",
+            "current": {}
           },
           {
             "name": "search",
@@ -147,7 +130,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{host=\"$host\", container=~\"$container\"} | filter ~\"(?i)$severity\" | filter ~\"(?i)$search\"",
+              "expr": "{host=\"$host\", container=~\"$container\"} | filter level=~\"(?i)$severity\" | filter ~\"(?i)$search\"",
               "refId": "A",
               "legendFormat": "{{container}}"
             }
@@ -192,7 +175,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{host=\"$host\", container=~\"$container\"} | filter ~\"(?i)$severity\" | filter ~\"(?i)$search\" | stats by (_time:$__interval, container) count() as value",
+              "expr": "{host=\"$host\", container=~\"$container\"} | filter level=~\"(?i)$severity\" | filter ~\"(?i)$search\" | stats by (_time:$__interval, container) count() as value",
               "refId": "A",
               "legendFormat": "{{container}}",
               "queryType": "statsRange"

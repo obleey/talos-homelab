@@ -83,7 +83,7 @@ alloy:
 
       loki.source.kubernetes "pods" {
         targets    = discovery.relabel.pod_logs.output
-        forward_to = [loki.write.default.receiver]
+        forward_to = [loki.process.level_extract.receiver]
       }
 
       // ============================================================
@@ -94,7 +94,24 @@ alloy:
       loki.source.kubernetes_events "events" {
         job_name   = "kubernetes-events"
         log_format = "json"
+        forward_to = [loki.process.level_extract.receiver]
+      }
+
+      // ============================================================
+      // Level extraction (logfmt: level=x; free-text: WARN/ERROR/etc.)
+      // ============================================================
+
+      loki.process "level_extract" {
         forward_to = [loki.write.default.receiver]
+
+        // Matches level from logfmt (level=error), free-text (WARN [...]), JSON ("level":"error")
+        stage.regex {
+          expression = `(?i)(?:^|[\s\[=("])(?P<level>trace|debug|info|warn(?:ing)?|error|fatal|critical|panic)(?:$|[\s\]=":{,])`
+        }
+
+        stage.labels {
+          values = { level = "" }
+        }
       }
 
       // ============================================================

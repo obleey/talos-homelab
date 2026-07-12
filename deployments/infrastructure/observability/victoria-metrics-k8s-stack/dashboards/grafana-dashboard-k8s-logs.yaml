@@ -15,7 +15,7 @@ data:
       "description": "Pod log browser for Kubernetes workloads",
       "editable": true,
       "schemaVersion": 39,
-      "version": 3,
+      "version": 4,
       "refresh": "30s",
       "time": {
         "from": "now-1h",
@@ -73,6 +73,28 @@ data:
             "current": {}
           },
           {
+            "name": "severity",
+            "label": "Severity",
+            "type": "query",
+            "datasource": {
+              "type": "victoriametrics-logs-datasource",
+              "uid": "victorialogs"
+            },
+            "definition": "{namespace=~\"$namespace\"}",
+            "query": {
+              "field": "level",
+              "query": "{namespace=~\"$namespace\"}",
+              "refId": "A",
+              "type": "fieldValue"
+            },
+            "refresh": 2,
+            "sort": 1,
+            "multi": false,
+            "includeAll": true,
+            "allValue": ".*",
+            "current": {}
+          },
+          {
             "name": "search",
             "label": "Search",
             "type": "textbox",
@@ -123,7 +145,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter ~\"(?i)$search\" | stats by (_time:$__interval, pod) count() as value",
+              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter level=~\"(?i)$severity\" | filter ~\"(?i)$search\" | stats by (_time:$__interval, pod) count() as value",
               "refId": "A",
               "legendFormat": "{{pod}}",
               "queryType": "statsRange"
@@ -153,7 +175,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter ~\"(?i)$search\"",
+              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter level=~\"(?i)$severity\" | filter ~\"(?i)$search\"",
               "refId": "A"
             }
           ]
