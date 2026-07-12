@@ -390,7 +390,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'longhorn_backup_target_backup_volume_count < 1'
+                  expr: 'longhorn_backup_target_backup_volume_count'
                   instant: true
                   refId: A
               - refId: threshold
@@ -401,8 +401,8 @@ data:
                 model:
                   conditions:
                     - evaluator:
-                        params: [0]
-                        type: gt
+                        params: [1]
+                        type: lt
                       operator:
                         type: and
                       query:
