@@ -15,7 +15,7 @@ data:
       "description": "Pod log browser for Kubernetes workloads",
       "editable": true,
       "schemaVersion": 39,
-      "version": 4,
+      "version": 5,
       "refresh": "30s",
       "time": {
         "from": "now-1h",
@@ -145,7 +145,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter level=~\"(?i)$severity\" | filter ~\"(?i)$search\" | stats by (_time:$__interval, pod) count() as value",
+              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter level:~\"(?i)$severity\" | filter ~\"(?i)$search\" | stats by (_time:$__interval, pod) count() as value",
               "refId": "A",
               "legendFormat": "{{pod}}",
               "queryType": "statsRange"
@@ -175,7 +175,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter level=~\"(?i)$severity\" | filter ~\"(?i)$search\"",
+              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter level:~\"(?i)$severity\" | filter ~\"(?i)$search\"",
               "refId": "A"
             }
           ]
