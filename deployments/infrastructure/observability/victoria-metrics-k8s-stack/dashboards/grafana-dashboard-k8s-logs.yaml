@@ -41,7 +41,7 @@ data:
               "field": "namespace",
               "query": "{namespace=~\".+\"}",
               "refId": "A",
-              "type": 1
+              "type": "fieldValue"
             },
             "refresh": 2,
             "sort": 1,
@@ -62,7 +62,7 @@ data:
               "field": "pod",
               "query": "{namespace=\"$namespace\"}",
               "refId": "A",
-              "type": 1
+              "type": "fieldValue"
             },
             "refresh": 2,
             "sort": 1,
@@ -84,7 +84,7 @@ data:
               "field": "container",
               "query": "{namespace=\"$namespace\", pod=~\"$pod\"}",
               "refId": "A",
-              "type": 1
+              "type": "fieldValue"
             },
             "refresh": 2,
             "sort": 1,
