@@ -12,10 +12,10 @@ data:
     {
       "title": "Kubernetes Logs",
       "uid": "k8s-container-logs",
-      "description": "Pod/container log browser for Kubernetes workloads",
+      "description": "Pod log browser for Kubernetes workloads",
       "editable": true,
       "schemaVersion": 39,
-      "version": 1,
+      "version": 2,
       "refresh": "30s",
       "time": {
         "from": "now-1h",
@@ -46,7 +46,8 @@ data:
             "refresh": 2,
             "sort": 1,
             "multi": false,
-            "includeAll": false,
+            "includeAll": true,
+            "allValue": ".+",
             "current": {}
           },
           {
@@ -57,32 +58,10 @@ data:
               "type": "victoriametrics-logs-datasource",
               "uid": "victorialogs"
             },
-            "definition": "{namespace=\"$namespace\"}",
+            "definition": "{namespace=~\"$namespace\"}",
             "query": {
               "field": "pod",
-              "query": "{namespace=\"$namespace\"}",
-              "refId": "A",
-              "type": "fieldValue"
-            },
-            "refresh": 2,
-            "sort": 1,
-            "multi": true,
-            "includeAll": true,
-            "allValue": ".+",
-            "current": {}
-          },
-          {
-            "name": "container",
-            "label": "Container",
-            "type": "query",
-            "datasource": {
-              "type": "victoriametrics-logs-datasource",
-              "uid": "victorialogs"
-            },
-            "definition": "{namespace=\"$namespace\", pod=~\"$pod\"}",
-            "query": {
-              "field": "container",
-              "query": "{namespace=\"$namespace\", pod=~\"$pod\"}",
+              "query": "{namespace=~\"$namespace\"}",
               "refId": "A",
               "type": "fieldValue"
             },
@@ -98,7 +77,7 @@ data:
             "label": "Search",
             "type": "textbox",
             "current": {
-              "value": ""
+              "value": ".*"
             },
             "hide": 0
           }
@@ -144,7 +123,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{namespace=\"$namespace\", pod=~\"$pod\", container=~\"$container\"} | filter \"$search\" | stats by (_time:$__interval, pod) count() as value",
+              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter ~\"(?i)$search\" | stats by (_time:$__interval, pod) count() as value",
               "refId": "A",
               "legendFormat": "{{pod}}"
             }
@@ -173,7 +152,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{namespace=\"$namespace\", pod=~\"$pod\", container=~\"$container\"} | filter \"$search\"",
+              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter ~\"(?i)$search\"",
               "refId": "A"
             }
           ]
