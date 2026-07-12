@@ -3,6 +3,9 @@ fullnameOverride: vm
 # Disable chart's built-in Grafana dashboards — we provision our own via ConfigMaps
 defaultDashboardsEnabled: false
 
+grafanaDashboard:
+  enabled: false
+
 # Control plane components — disabled because Talos exposes them
 # only on the node IP; we use inlineScrapeConfig static targets instead.
 kubeEtcd:
