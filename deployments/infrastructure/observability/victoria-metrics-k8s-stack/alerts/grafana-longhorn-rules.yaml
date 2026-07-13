@@ -440,7 +440,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: '(time() - longhorn_volume_last_backup_at) > 90000'
+                  expr: '(time() - longhorn_volume_last_backup_at) > 691200'
                   instant: true
                   refId: A
               - refId: threshold
