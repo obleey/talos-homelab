@@ -10,4 +10,5 @@ spec:
       rules:
         # Dashboards query oom_events_total but cAdvisor exposes container_oom_events_total.
         - record: oom_events_total
+          alert: ''
           expr: container_oom_events_total
