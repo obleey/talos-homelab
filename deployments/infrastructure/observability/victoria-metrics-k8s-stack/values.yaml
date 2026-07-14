@@ -48,6 +48,8 @@ vmagent:
   spec:
     selectAllByDefault: true
     scrapeInterval: 30s
+    externalLabels:
+      cluster: talos-homelab
     resources:
       requests:
         cpu: 50m
