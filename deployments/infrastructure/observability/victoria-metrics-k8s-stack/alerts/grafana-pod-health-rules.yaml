@@ -64,6 +64,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: k8s_views_pods
+              __panelId__: "60"
               summary: "Container OOM killed ({{ $labels.namespace }}/{{ $labels.pod }})"
               description: "Container {{ $labels.container }} in pod {{ $labels.pod }} ({{ $labels.namespace }}) was OOM killed. Increase its memory limit."
             isPaused: false
@@ -114,6 +116,8 @@ data:
             labels:
               severity: critical
             annotations:
+              __dashboardUid__: k8s_views_pods
+              __panelId__: "61"
               summary: "Container crash-looping ({{ $labels.namespace }}/{{ $labels.pod }})"
               description: "Container {{ $labels.container }} in pod {{ $labels.pod }} ({{ $labels.namespace }}) has restarted {{ $value | printf \"%.0f\" }} times in the last 15 minutes."
             isPaused: false
@@ -169,6 +173,8 @@ data:
             labels:
               severity: warning
             annotations:
+              __dashboardUid__: k8s_views_pods
+              __panelId__: "30"
               summary: "Container memory pressure ({{ $labels.namespace }}/{{ $labels.pod }})"
               description: "Container {{ $labels.container }} in pod {{ $labels.pod }} ({{ $labels.namespace }}) is using {{ $value | humanizePercentage }} of its memory limit."
             isPaused: false
