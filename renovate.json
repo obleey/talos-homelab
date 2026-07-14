@@ -8,7 +8,9 @@
   "automerge": false,
   "labels": ["renovate"],
   "helm-values": {
-    "fileMatch": ["(^|/).*values\\.yaml$"]
+    "managerFilePatterns": [
+      "/(^|/).*values\\.yaml$/"
+    ]
   },
   "kubernetes": {
     "managerFilePatterns": ["/(^|/)deployments/.+\\.yaml$/"]
@@ -105,13 +107,17 @@
     {
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/thephaseless/byparr"],
-      "updateTypes": ["digest"],
+      "matchUpdateTypes": [
+        "digest"
+      ],
       "enabled": true
     },
     {
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/dan-online/autopulse"],
-      "updateTypes": ["digest"],
+      "matchUpdateTypes": [
+        "digest"
+      ],
       "enabled": true
     }
   ]
