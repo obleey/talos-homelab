@@ -33,6 +33,12 @@ vmsingle:
   enabled: true
   spec:
     retentionPeriod: "30d"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        memory: 2Gi
     storage:
       storageClassName: longhorn
       accessModes:
@@ -227,3 +233,4 @@ kube-state-metrics:
     - pods=[*]
     - deployments=[*]
     - statefulsets=[*]
+    - daemonsets=[*]

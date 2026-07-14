@@ -44,3 +44,8 @@ data:
         group_wait: 30s
         group_interval: 5m
         repeat_interval: 4h
+        routes:
+          - receiver: slack
+            matchers:
+              - severity = critical
+            repeat_interval: 1h
