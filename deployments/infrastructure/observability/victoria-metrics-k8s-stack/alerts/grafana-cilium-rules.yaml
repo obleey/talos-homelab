@@ -378,7 +378,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'sum(rate(cilium_drop_count_total{reason!~"Policy denied"}[5m])) by (pod, reason) > 0.05'
+                  expr: 'sum(rate(cilium_drop_count_total{reason!~"Policy denied|Unsupported L3 protocol"}[5m])) by (pod, reason) > 0.05'
                   instant: true
                   refId: A
               - refId: threshold
