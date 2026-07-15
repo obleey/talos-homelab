@@ -46,6 +46,16 @@ controllers:
           limits:
             cpu: 200m
             memory: 128Mi
+        probes:
+          liveness:
+            enabled: true
+          readiness:
+            enabled: true
+          startup:
+            enabled: true
+            spec:
+              failureThreshold: 30
+              periodSeconds: 5
 
 service:
   app:

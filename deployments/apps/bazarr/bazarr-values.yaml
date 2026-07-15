@@ -20,6 +20,21 @@ controllers:
           limits:
             cpu: 500m
             memory: 512Mi
+        probes:
+          liveness:
+            enabled: true
+            type: HTTP
+            path: /
+          readiness:
+            enabled: true
+            type: HTTP
+            path: /
+          startup:
+            enabled: true
+            type: TCP
+            spec:
+              failureThreshold: 30
+              periodSeconds: 5
 
 service:
   app:

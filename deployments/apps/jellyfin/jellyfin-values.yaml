@@ -22,6 +22,21 @@ controllers:
             memory: 1Gi
           limits:
             memory: 4Gi
+        probes:
+          liveness:
+            enabled: true
+            type: HTTP
+            path: /health
+          readiness:
+            enabled: true
+            type: HTTP
+            path: /health
+          startup:
+            enabled: true
+            type: TCP
+            spec:
+              failureThreshold: 30
+              periodSeconds: 5
 
 service:
   app:
