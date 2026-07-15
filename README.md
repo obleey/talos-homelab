@@ -1,27 +1,27 @@
 # talos-homelab
 
-A production-grade homelab running on **Talos Linux** with fully declarative GitOps management via ArgoCD. Every cluster resource — from CNI configuration to media server deployments — is expressed as code, committed to git, and reconciled automatically. No SSH. No manual `kubectl apply` after bootstrap.
+A homelab running on **Talos Linux** managed entirely through GitOps with ArgoCD. Every resource in the cluster — from CNI configuration to media server deployments — is declared in this repository. No SSH, no manual `kubectl apply` after the initial bootstrap.
 
 [![Talos](https://img.shields.io/badge/OS-Talos_Linux-FF7B00?logo=linux&logoColor=white)](https://www.talos.dev)
-[![ArgoCD](https://img.shields.io/badge/GitOps-ArgoCD_10.0.0-EF7B4D?logo=argo&logoColor=white)](https://argoproj.github.io/cd/)
+[![ArgoCD](https://img.shields.io/badge/GitOps-ArgoCD_10.1.3-EF7B4D?logo=argo&logoColor=white)](https://argoproj.github.io/cd/)
 [![Cilium](https://img.shields.io/badge/CNI-Cilium_1.19.5-F8C517?logo=cilium&logoColor=black)](https://cilium.io)
-[![Traefik](https://img.shields.io/badge/Ingress-Traefik_41.0.1-24A1C1?logo=traefikproxy&logoColor=white)](https://traefik.io)
-[![cert-manager](https://img.shields.io/badge/TLS-cert--manager_v1.20.3-00B5AD)](https://cert-manager.io)
+[![Traefik](https://img.shields.io/badge/Ingress-Traefik_41.0.2-24A1C1?logo=traefikproxy&logoColor=white)](https://traefik.io)
+[![cert-manager](https://img.shields.io/badge/TLS-cert--manager_v1.21.0-00B5AD)](https://cert-manager.io)
 [![Longhorn](https://img.shields.io/badge/Storage-Longhorn_1.12.0-5F224B)](https://longhorn.io)
 [![Renovate](https://img.shields.io/badge/Dependencies-Renovate-1A86FF?logo=renovatebot&logoColor=white)](https://docs.renovatebot.com)
 
 ---
 
-## Highlights
+## How it works
 
-- **Zero-touch operations** — commit to git, ArgoCD reconciles within 30 seconds. No ad-hoc commands needed.
-- **Immutable OS** — Talos Linux manages every node via API; no SSH, no shell, no package manager.
-- **App-of-apps pattern** — a single root `Application` owns the entire cluster topology, including ArgoCD itself.
-- **Strict sync waves** — infrastructure deploys in dependency order: secrets → CNI → TLS → ingress → apps.
-- **Encrypted secrets at rest** — every `Secret` is sealed before commit; the private key never leaves the cluster.
-- **Full observability** — Prometheus + Grafana + Loki + Alloy, covering in-cluster workloads and external hosts.
-- **Automated dependency updates** — Renovate opens grouped PRs for all Helm charts and container images.
-- **External host coverage** — Hetzner VPS and TrueNAS NAS both ship metrics and logs into the cluster stack.
+Push a commit → ArgoCD detects the change within 30 seconds and reconciles the cluster. That's the entire operations loop for almost everything.
+
+A few key design decisions:
+
+- **App-of-apps** — one root `Application` (`bootstrap/talos-cluster.yaml`) owns the entire cluster topology, including ArgoCD itself. After bootstrap, ArgoCD manages its own updates from git.
+- **Sync waves** — infrastructure deploys in strict dependency order (secrets → CNI → TLS → ingress → apps), preventing race conditions during initial sync or a full cluster rebuild.
+- **Sealed Secrets** — all `Secret` values are encrypted before commit. The private key never leaves the cluster.
+- **Immutable OS** — Talos Linux exposes only an API; there is no SSH or shell access to nodes.
 
 ---
 
@@ -43,8 +43,8 @@ graph TD
         end
 
         subgraph obs["Observability  (monitoring ns)"]
-            Prometheus --- Grafana
-            Loki --- Grafana
+            VictoriaMetrics --- Grafana
+            VictoriaLogs --- Grafana
             Alloy["Alloy  DaemonSet"]
         end
 
@@ -58,8 +58,8 @@ graph TD
         truenas["truenas\nNAS + Docker"]
     end
 
-    helion & truenas -->|"Alloy remote_write"| Prometheus
-    helion & truenas -->|"Alloy log push"| Loki
+    helion & truenas -->|"Alloy remote_write"| VictoriaMetrics
+    helion & truenas -->|"Alloy log push"| VictoriaLogs
     NFS["NFS  media library"] --> apps
 ```
 
@@ -70,15 +70,15 @@ graph TD
 | Component | Version | Namespace | Role |
 | --- | --- | --- | --- |
 | [Talos Linux](https://www.talos.dev) | latest | — | Immutable OS, API-only node access |
-| [ArgoCD](https://argoproj.github.io/cd/) | 10.0.0 | `argocd` | GitOps controller, app-of-apps |
+| [ArgoCD](https://argoproj.github.io/cd/) | 10.1.3 | `argocd` | GitOps controller, app-of-apps |
 | [Cilium](https://cilium.io) | 1.19.5 | `kube-system` | CNI, L2 LoadBalancer, kube-proxy replacement |
-| [cert-manager](https://cert-manager.io) | v1.20.3 | `cert-manager` | Wildcard TLS via Cloudflare DNS-01 |
-| [Traefik](https://traefik.io) | 41.0.1 | `traefik` | Gateway API controller |
-| [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) | 2.19.0 | `kube-system` | Encrypt secrets for git storage |
+| [cert-manager](https://cert-manager.io) | v1.21.0 | `cert-manager` | Wildcard TLS via Cloudflare DNS-01 |
+| [Traefik](https://traefik.io) | 41.0.2 | `traefik` | Gateway API controller |
+| [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) | 2.19.1 | `kube-system` | Encrypt secrets for git storage |
 | [Longhorn](https://longhorn.io) | 1.12.0 | `longhorn-system` | Replicated block storage |
-| [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts) | 87.6.0 | `monitoring` | Prometheus + Grafana + node exporter |
-| [Loki](https://grafana.com/oss/loki/) | — | `monitoring` | Log aggregation (single-binary) |
-| [Grafana Alloy](https://grafana.com/oss/alloy-opentelemetry-collector/) | latest | `monitoring` | Metrics + log collector (DaemonSet + external) |
+| [VictoriaMetrics K8s Stack](https://github.com/VictoriaMetrics/helm-charts) | 0.86.0 | `monitoring` | Metrics storage, alerting, Grafana |
+| [Victoria Logs](https://victoriametrics.com/products/victorialogs/) | 0.13.8 | `monitoring` | Log aggregation |
+| [Grafana Alloy](https://grafana.com/oss/alloy-opentelemetry-collector/) | 1.10.1 | `monitoring` | Metrics + log collector (DaemonSet + external hosts) |
 | [Metrics Server](https://github.com/kubernetes-sigs/metrics-server) | v0.8.1 | `kube-system` | `kubectl top` |
 | [Renovate](https://docs.renovatebot.com) | — | — | Automated dependency PRs |
 
@@ -98,25 +98,17 @@ graph TD
 │   │   ├── longhorn/                   ← Distributed block storage
 │   │   ├── metrics-server/
 │   │   ├── observability/
-│   │   │   ├── kube-prometheus-stack/  ← Prometheus, Grafana, Alloy DaemonSet
-│   │   │   └── loki/
+│   │   │   ├── victoria-metrics-k8s-stack/  ← VMAgent, VMAlert, Grafana, dashboards, alert rules
+│   │   │   ├── victoria-logs/               ← Log aggregation
+│   │   │   ├── alloy/                       ← In-cluster collector DaemonSet
+│   │   │   └── alloy-blackbox/              ← HTTP/TCP probe exporter
 │   │   ├── sealed-secrets/
 │   │   └── traefik/                    ← Gateway API controller + wildcard TLS ref
 │   └── apps/
-│       ├── autopulse/
-│       ├── bazarr/
-│       ├── byparr/
-│       ├── clonarr/
-│       ├── homepage/
-│       ├── jellyfin/
-│       ├── kubeseal-webgui/
-│       ├── plex/
-│       ├── prowlarr/
-│       ├── qbittorrent/
-│       ├── radarr/
-│       ├── seerr/
-│       ├── sonarr/
-│       └── unpackerr/
+│       ├── appset-servarr.yaml         ← ApplicationSet managing all servarr apps
+│       ├── homepage/                   ← Cluster service dashboard
+│       ├── kubeseal-webgui/            ← Web UI for sealing secrets
+│       └── <app>/                      ← Per-app folder: values file + extra manifests
 ├── helion/                             ← Alloy config for Hetzner VPS
 ├── truenas/                            ← Alloy config for TrueNAS
 └── renovate.json
@@ -128,11 +120,11 @@ graph TD
 
 Infrastructure deploys in strict sync waves to satisfy dependencies:
 
-| Wave | Components | Reason |
+| Wave | Components | Why |
 | ---: | --- | --- |
 | `−5` | sealed-secrets | Must exist before any `SealedSecret` is applied |
 | `−4` | cilium | CNI must be running before pods can communicate |
-| `−3` | cert-manager, metrics-server | Needs networking; cert-manager begins issuing TLS |
+| `−3` | cert-manager, metrics-server | cert-manager begins issuing TLS once networking is up |
 | `−2` | traefik, longhorn | Traefik depends on the wildcard cert from cert-manager |
 | `−1` | argocd | Self-manages its own CRDs and configuration |
 | `0` | all apps | Runs after all infrastructure is healthy |
@@ -143,7 +135,7 @@ Infrastructure deploys in strict sync waves to satisfy dependencies:
 
 ### L2 LoadBalancer (Cilium)
 
-Cilium handles `LoadBalancer` services via L2 announcements — no BGP, no MetalLB required. Services get IPs from a pool on the local network, announced directly from the node holding the service.
+Cilium handles `LoadBalancer` services via L2 announcements — no BGP, no MetalLB. Services get IPs from a pool on the local network, announced directly from the node holding the service.
 
 ```yaml
 # L2 IP pool
@@ -168,50 +160,48 @@ Every service gets a hostname following the pattern:
 
 ### TLS
 
-cert-manager issues and auto-renews a wildcard certificate via Cloudflare DNS-01 challenge. The certificate is stored as a `Secret` in the `traefik` namespace and referenced directly by the Gateway listener — no annotation-based cert injection.
+cert-manager issues and auto-renews a wildcard certificate via Cloudflare DNS-01 challenge. The certificate is stored as a `Secret` in the `traefik` namespace and referenced directly by the Gateway listener.
 
 ---
 
 ## Observability
 
-### LGTM Stack
+### In-cluster stack
 
-The cluster runs a full Grafana observability stack in the `monitoring` namespace:
+The cluster runs VictoriaMetrics K8s Stack + Victoria Logs in the `monitoring` namespace:
 
 | Component | Role |
 | --- | --- |
-| **Prometheus** | Metrics store — 30-day retention, 20 Gi Longhorn PVC |
-| **Grafana** | Dashboards, unified alerting with Slack delivery, Google SSO |
-| **Loki** | Log aggregation — single-binary, receives from all Alloy agents |
+| **VMSingle** | Metrics storage — 30-day retention on a Longhorn PVC |
+| **VMAgent** | Scrapes all cluster targets; accepts `remote_write` from external hosts |
+| **VMAlert + VMAlertManager** | Evaluates alert rules; routes notifications to Slack |
+| **Victoria Logs** | Log aggregation — receives from all Alloy agents |
+| **Grafana** | Dashboards and unified alerting UI; Google SSO |
 | **Alloy (DaemonSet)** | Collects node metrics, pod logs, and cAdvisor stats in-cluster |
+| **Alloy Blackbox** | HTTP/TCP probes for all exposed services |
 
-Grafana dashboards are provisioned via ConfigMap (k8s-sidecar injection) and cover:
+Grafana dashboards are provisioned via ConfigMap and cover node health, pod lifecycle, Traefik traffic, Longhorn storage, blackbox probe status, and media app availability.
 
-- **Home** — cluster-wide health overview (default home dashboard)
-- **Traefik** — request rates, HTTP codes, latency distributions, per-service SLOs
-- **Kubernetes** — node resources, pod lifecycle, workload health
-- **Loki** — log volume and error rates by namespace
-- **Containers** — Docker stats for external hosts (helion, truenas)
-- **Infra Alerts** — custom rules for node memory, disk, and container health
+Alert rules are defined as `VMRule` resources in the repo and cover: node CPU/memory/disk, pod OOM kills and crash loops, Longhorn volume health, cert expiry, blackbox probe failures, and media app availability.
 
-Alertmanager is disabled. All alerting rules are evaluated by Grafana unified alerting with notifications sent to Slack.
+### External hosts
 
-### External Host Monitoring
+Both external hosts run Grafana Alloy as a Docker container, shipping metrics and logs into the cluster.
 
-Both external hosts run Grafana Alloy as a Docker container. Alloy ships node exporter metrics, Docker container metrics, and container logs into the in-cluster Prometheus and Loki instances.
+| Host | Description |
+| --- | --- |
+| `helion` | Hetzner VPS — public-facing services |
+| `truenas` | TrueNAS NAS — media storage, Docker apps |
 
-| Host | Description | Sends to |
-| --- | --- | --- |
-| `helion` | Hetzner VPS — public-facing services | Prometheus `remote_write`, Loki push |
-| `truenas` | TrueNAS NAS — media storage, Docker apps | Prometheus `remote_write`, Loki push |
-
-Configuration for each host lives in [`helion/`](helion/) and [`truenas/`](truenas/) at the repository root.
+Configuration lives in [`helion/`](helion/) and [`truenas/`](truenas/).
 
 ---
 
 ## Applications
 
-All apps use the [bjw-s/app-template](https://github.com/bjw-s-labs/helm-charts) Helm chart (v5.0.1) via ArgoCD multi-source Applications. Stateful apps reference existing PVCs (`existingClaim`) so data survives redeployments independently of ArgoCD sync.
+All apps use the [bjw-s/app-template](https://github.com/bjw-s-labs/helm-charts) Helm chart (v5.0.1) via ArgoCD multi-source Applications. Stateful apps reference existing PVCs (`existingClaim`) so data survives redeployments.
+
+All servarr-namespace apps are managed by a single **ApplicationSet** (`appset-servarr.yaml`) instead of individual ArgoCD Application manifests. Each app only needs a values folder in `deployments/apps/<name>/`.
 
 | App | Namespace | Description |
 | --- | --- | --- |
@@ -225,12 +215,13 @@ All apps use the [bjw-s/app-template](https://github.com/bjw-s-labs/helm-charts)
 | [Autopulse](https://github.com/dan-online/autopulse) | servarr | Triggers targeted Plex/Jellyfin scans on import |
 | [Byparr](https://github.com/thephaseless/byparr) | servarr | FlareSolverr drop-in replacement |
 | [Unpackerr](https://github.com/davidnewhall/unpackerr) | servarr | Auto-extracts completed downloads |
-| [Jellyfin](https://jellyfin.org) | media | Open-source media server |
-| [Plex](https://www.plex.tv) | media | Plex Media Server |
+| [Scraparr](https://github.com/thecfu/scraparr) | servarr | Exposes *arr app metrics for Prometheus |
+| [Jellyfin](https://jellyfin.org) | servarr | Open-source media server |
+| [Plex](https://www.plex.tv) | servarr | Plex Media Server |
 | [Homepage](https://gethomepage.dev) | homepage | Cluster service dashboard |
 | [kubeseal-webgui](https://github.com/Mahsad/kubeseal-webgui) | kubeseal-webgui | Web UI to seal new secrets |
 
-### Media Pipeline
+### Media pipeline
 
 ```text
 Seerr (requests)
@@ -240,13 +231,13 @@ Seerr (requests)
              └──► Bazarr (subtitles)              (targeted library scan)
 ```
 
-All servarr and media pods share a single NFS media library mount (`/mnt/media`). Config and state for each app live on individual Longhorn PVCs.
+All servarr and media pods share a single NFS media library mount (`/mnt/media`). Config for each app lives on individual Longhorn PVCs.
 
 ---
 
 ## Secrets Management
 
-All secrets are encrypted with [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) and committed to git. The controller's private key never leaves the cluster — if the key is lost, secrets must be resealed.
+All secrets are encrypted with [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) before being committed. The controller decrypts them in-cluster; the private key never leaves. If the key is lost, secrets must be resealed.
 
 ```text
 kubectl create secret ... --dry-run=client -o yaml
@@ -272,30 +263,40 @@ kubectl create secret generic my-secret \
 
 ## Automated Updates
 
-[Renovate](https://docs.renovatebot.com) watches all dependencies and opens grouped PRs automatically. All updates must be at least 3 days old before Renovate proposes them. Major version bumps are labelled `major-update` and are never auto-merged.
+[Renovate](https://docs.renovatebot.com) watches all dependencies and opens grouped PRs. Updates must be at least 3 days old before Renovate proposes them. Major version bumps get a `major-update` label.
 
 | Group | Tracks |
 | --- | --- |
-| Helm charts | ArgoCD, Traefik, Longhorn, cert-manager, kube-prometheus-stack, … |
-| Media stack | `linuxserver/sonarr`, `linuxserver/radarr`, `linuxserver/bazarr`, … |
-| GHCR images | Seerr, Clonarr, Autopulse, Byparr, kubeseal-webgui |
-| Docker Hub images | Unpackerr and other Docker Hub images |
+| `helm charts` | ArgoCD, Traefik, Longhorn, cert-manager, … |
+| `linuxserver images` | All `lscr.io/linuxserver/*` images (sonarr, radarr, bazarr, …) |
+| `ghcr images` | Seerr, Clonarr, Autopulse, Byparr, kubeseal-webgui |
+| `docker hub images` | Unpackerr, Plex, Jellyfin |
+| `observability stack` | victoria-metrics-k8s-stack, victoria-logs, grafana, alloy |
 
 ---
 
 ## Adding a New App
 
+### Servarr-namespace app (managed by ApplicationSet)
+
+1. Add the app name to the `generators.list.elements` array in `deployments/apps/appset-servarr.yaml`
+2. Create `deployments/apps/<name>/<name>-values.yaml` with the app-template Helm values
+3. Add any extra manifests (PVCs, SealedSecrets, HTTPRoutes) in the same folder
+
+The ApplicationSet picks up the new entry automatically on the next sync.
+
+### Standalone app (own namespace or different lifecycle)
+
 ```text
 deployments/apps/my-app/
 ├── app.yaml               ← ArgoCD Application (multi-source)
 ├── my-app-values.yaml     ← app-template Helm values
-├── httproute.yaml         ← HTTPRoute for Gateway API
 └── pvc.yaml               ← Longhorn PVC (if stateful)
 ```
 
-Then add `- path: deployments/apps/my-app` to `deployments/apps/kustomization.yaml` and push. ArgoCD picks it up within 30 seconds.
+Add `- path: deployments/apps/my-app` to `deployments/apps/kustomization.yaml` and push. ArgoCD picks it up within 30 seconds.
 
-### app.yaml template
+**`app.yaml` template:**
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -319,12 +320,9 @@ spec:
     - repoURL: https://github.com/YOUR_USER/talos-homelab
       targetRevision: HEAD
       ref: values
-      path: deployments/apps/my-app
-      directory:
-        exclude: "{app.yaml,my-app-values.yaml}"
   destination:
     server: https://kubernetes.default.svc
-    namespace: servarr
+    namespace: my-namespace
   syncPolicy:
     automated:
       prune: true
@@ -339,7 +337,7 @@ spec:
 
 ### Prerequisites
 
-- Talos cluster up with `kubeconfig` configured
+- Talos cluster running with `kubeconfig` configured
 - `helm` ≥ 3.x and `kubeseal` CLI installed
 - Cloudflare account with DNS API access
 - A git repository ArgoCD can reach
@@ -363,13 +361,6 @@ kubectl create secret generic git-creds \
   -n argocd --dry-run=client -o yaml \
   | kubeseal --format yaml \
   > deployments/infrastructure/argocd/git-creds-sealed.yaml
-
-# Slack bot token (ArgoCD notifications — optional)
-kubectl create secret generic argocd-notifications-secret \
-  --from-literal=slack-token=<SLACK_TOKEN> \
-  -n argocd --dry-run=client -o yaml \
-  | kubeseal --format yaml \
-  > deployments/infrastructure/argocd/argocd-notifications-secret-sealed.yaml
 ```
 
 #### 2. Install ArgoCD
@@ -395,13 +386,11 @@ kubectl apply -f deployments/infrastructure/argocd/git-creds-sealed.yaml
 kubectl apply -f bootstrap/talos-cluster.yaml
 ```
 
-ArgoCD reconciles the full cluster from git automatically. Sync waves ensure correct deployment order.
+ArgoCD reconciles the full cluster from git. Sync waves ensure correct deployment order.
 
 ---
 
 ## Adapting to Your Cluster
-
-Update these before deploying on your own hardware:
 
 | File | What to change |
 | --- | --- |
@@ -440,10 +429,6 @@ kubectl create secret generic my-secret \
   --from-literal=key=value \
   -n my-namespace --dry-run=client -o yaml \
   | kubeseal --format yaml > path/to/sealed.yaml
-
-# Test an ArgoCD Slack notification
-argocd admin notifications template notify app-sync-failed <app-name> \
-  --recipient slack:#deployments -n argocd
 
 # Rebuild cluster from scratch (after hardware reset)
 helm install argocd argo/argo-cd -n argocd \
