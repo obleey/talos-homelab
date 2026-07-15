@@ -27,6 +27,7 @@ service:
   dns:
     controller: main
     type: LoadBalancer
+    externalTrafficPolicy: Local
     forceRename: technitium-secondary-dns
     annotations:
       io.cilium/lb-ipam-ips: "10.0.0.201"
