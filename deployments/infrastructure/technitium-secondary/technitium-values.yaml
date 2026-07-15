@@ -20,14 +20,37 @@ controllers:
 service:
   app:
     controller: main
+    forceRename: technitium-secondary
     ports:
       http:
         port: 5380
+  dns:
+    controller: main
+    type: LoadBalancer
+    forceRename: technitium-secondary-dns
+    annotations:
+      io.cilium/lb-ipam-ips: "10.0.0.201"
+    ports:
+      dns-udp:
+        port: 53
+        protocol: UDP
+      dns-tcp:
+        port: 53
+        protocol: TCP
+      admin-https:
+        port: 53443
+        protocol: TCP
+      admin-http:
+        port: 5380
+        protocol: TCP
 
 persistence:
   config:
     type: persistentVolumeClaim
-    existingClaim: technitium-secondary-config
+    forceRename: technitium-secondary-config
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    storageClass: longhorn
     globalMounts:
       - path: /etc/dns
 
