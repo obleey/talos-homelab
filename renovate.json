@@ -30,20 +30,6 @@
     },
     {
       "matchDatasources": ["docker"],
-      "matchPackageNames": [
-        "lscr.io/linuxserver/sonarr",
-        "lscr.io/linuxserver/radarr",
-        "lscr.io/linuxserver/bazarr",
-        "lscr.io/linuxserver/prowlarr",
-        "lscr.io/linuxserver/qbittorrent"
-      ],
-      "groupName": "media stack",
-      "versioning": "loose",
-      "allowedVersions": "!/nightly|develop|beta|alpha|[0-9a-f]{6,}-/",
-      "minimumReleaseAge": "3 days"
-    },
-    {
-      "matchDatasources": ["docker"],
       "matchPackageNames": ["/lscr\\.io\\/linuxserver\\/.*/"],
       "groupName": "linuxserver images",
       "versioning": "loose",
