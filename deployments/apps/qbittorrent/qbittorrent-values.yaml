@@ -35,6 +35,24 @@ persistence:
     globalMounts:
       - path: /data/torrents
 
+service:
+  app:
+    controller: main
+    type: NodePort
+    ports:
+      webui:
+        primary: true
+        port: 8080
+        protocol: TCP
+      torrenting-tcp:
+        port: 30881
+        protocol: TCP
+        nodePort: 30881
+      torrenting-udp:
+        port: 30881
+        protocol: UDP
+        nodePort: 30881
+
 route:
   app:
     parentRefs:
