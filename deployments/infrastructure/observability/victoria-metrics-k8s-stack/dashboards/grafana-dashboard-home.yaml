@@ -530,7 +530,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "label_replace(probe_success{job=\"blackbox\"}, \"instance\", \"$1\", \"name\", \"(.+)\")",
+              "expr": "probe_success{job=\"blackbox\"}",
               "instant": true,
               "legendFormat": "{{instance}}",
               "refId": "A"
