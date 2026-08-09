@@ -28,6 +28,8 @@ spec:
       namespace: argocd
       labels:
         argocd.argoproj.io/managed-by: talos-cluster
+      annotations:
+        link.argocd.argoproj.io/external-link: "https://{{.name}}.talos-cluster.local.obleey.com"
       finalizers:
         - resources-finalizer.argocd.argoproj.io
     spec:
