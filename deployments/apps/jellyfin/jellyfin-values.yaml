@@ -16,6 +16,8 @@ controllers:
           tag: "10.11.11.20260606-153911"
         env:
           TZ: Europe/Ljubljana
+        securityContext:
+          privileged: true
         resources:
           requests:
             cpu: 500m
