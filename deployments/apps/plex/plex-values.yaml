@@ -17,6 +17,8 @@ controllers:
         env:
           TZ: Europe/Ljubljana
           HOSTNAME: talos-plex
+        securityContext:
+          privileged: true
         resources:
           requests:
             cpu: 500m
@@ -32,6 +34,11 @@ service:
         port: 32400
 
 persistence:
+  dri:
+    type: hostPath
+    hostPath: /dev/dri
+    globalMounts:
+      - path: /dev/dri
   config:
     type: persistentVolumeClaim
     existingClaim: pms-config-plex-plex-media-server-0
