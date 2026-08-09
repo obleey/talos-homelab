@@ -4,6 +4,10 @@ controllers:
   main:
     type: deployment
     strategy: Recreate
+    pod:
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
     containers:
       main:
         image:
