@@ -25,10 +25,6 @@ data:
   timeout.reconciliation: 30s
   timeout.reconciliation.jitter: 60s
   url: https://argocd.talos-cluster.local.obleey.com
-  resource.links: |
-    - url: "https://{{index .spec.hostnames 0}}"
-      title: "Open"
-      if: "len(spec.hostnames) > 0"
   resource.customizations.ignoreDifferences.argoproj.io_Application: |
     jqPathExpressions:
       - .metadata.annotations["argocd.argoproj.io/tracking-id"]
