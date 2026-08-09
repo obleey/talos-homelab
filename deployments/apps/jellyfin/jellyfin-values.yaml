@@ -46,6 +46,11 @@ service:
         port: 8096
 
 persistence:
+  dri:
+    type: hostPath
+    hostPath: /dev/dri
+    globalMounts:
+      - path: /dev/dri
   config:
     type: persistentVolumeClaim
     existingClaim: jellyfin-config
