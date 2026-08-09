@@ -10,24 +10,36 @@ spec:
         elements:
           - name: autopulse
           - name: bazarr
+            url: bazarr.talos-cluster.local.obleey.com
           - name: byparr
           - name: clonarr
+            url: clonarr.talos-cluster.local.obleey.com
           - name: jellyfin
+            url: jellyfin.talos-cluster.local.obleey.com
           - name: plex
+            url: plex.talos-cluster.local.obleey.com
           - name: prowlarr
+            url: prowlarr.talos-cluster.local.obleey.com
           - name: qbittorrent
+            url: qb.talos-cluster.local.obleey.com
           - name: radarr
+            url: radarr.talos-cluster.local.obleey.com
           - name: scraparr
           - name: seerr
+            url: seerr.talos-cluster.local.obleey.com
           - name: sonarr
+            url: sonarr.talos-cluster.local.obleey.com
           - name: unpackerr
           - name: watchstate
+            url: watchstate.talos-cluster.local.obleey.com
   template:
     metadata:
       name: "{{.name}}"
       namespace: argocd
       labels:
         argocd.argoproj.io/managed-by: talos-cluster
+      annotations:
+        link.argocd.argoproj.io/external-link: "{{if .url}}https://{{.url}}{{end}}"
       finalizers:
         - resources-finalizer.argocd.argoproj.io
     spec:
