@@ -1,0 +1,62 @@
+fullnameOverride: watchstate
+
+controllers:
+  main:
+    type: deployment
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/arabcoders/watchstate
+          tag: latest
+        env:
+          TZ: Europe/Ljubljana
+          WS_TZ: Europe/Ljubljana
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+        probes:
+          liveness:
+            enabled: true
+            type: HTTP
+            path: /
+          readiness:
+            enabled: true
+            type: HTTP
+            path: /
+          startup:
+            enabled: true
+            type: TCP
+            spec:
+              failureThreshold: 30
+              periodSeconds: 5
+
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 8080
+
+persistence:
+  config:
+    type: persistentVolumeClaim
+    existingClaim: watchstate-config
+    globalMounts:
+      - path: /config
+
+route:
+  app:
+    parentRefs:
+      - name: traefik-gateway
+        namespace: traefik
+        sectionName: websecure
+    hostnames:
+      - watchstate.talos-cluster.local.obleey.com
+    rules:
+      - backendRefs:
+          - name: watchstate
+            port: 8080

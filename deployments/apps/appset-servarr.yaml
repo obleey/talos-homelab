@@ -21,6 +21,7 @@ spec:
           - name: seerr
           - name: sonarr
           - name: unpackerr
+          - name: watchstate
   template:
     metadata:
       name: "{{.name}}"
