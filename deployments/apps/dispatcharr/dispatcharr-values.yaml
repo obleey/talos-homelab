@@ -4,9 +4,6 @@ controllers:
   main:
     type: deployment
     strategy: Recreate
-    pod:
-      nodeSelector:
-        kubernetes.io/hostname: talos-worker-1
     containers:
       main:
         image:
