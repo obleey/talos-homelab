@@ -4,6 +4,9 @@ controllers:
   main:
     type: deployment
     strategy: Recreate
+    pod:
+      nodeSelector:
+        kubernetes.io/hostname: talos-worker-1
     containers:
       main:
         image:
@@ -15,6 +18,8 @@ controllers:
           REDIS_HOST: localhost
           CELERY_BROKER_URL: redis://localhost:6379/0
           DISPATCHARR_LOG_LEVEL: info
+        securityContext:
+          privileged: true
         resources:
           requests:
             cpu: 200m
@@ -46,6 +51,11 @@ service:
         port: 9191
 
 persistence:
+  dri:
+    type: hostPath
+    hostPath: /dev/dri
+    globalMounts:
+      - path: /dev/dri
   config:
     type: persistentVolumeClaim
     existingClaim: dispatcharr-config
