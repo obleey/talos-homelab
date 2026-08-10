@@ -10,11 +10,11 @@ controllers:
           tag: latest@sha256:b44c612ef598e593346852a9a9ce92b8789e9ac8080544bdd38e125b99a2ee69
         resources:
           requests:
-            cpu: 50m
-            memory: 128Mi
+            cpu: 100m
+            memory: 256Mi
           limits:
-            cpu: 250m
-            memory: 512Mi
+            cpu: 500m
+            memory: 1Gi
         probes:
           liveness:
             enabled: true
