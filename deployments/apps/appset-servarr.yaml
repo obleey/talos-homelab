@@ -14,8 +14,6 @@ spec:
           - name: byparr
           - name: clonarr
             url: clonarr.talos-cluster.local.obleey.com
-          - name: dispatcharr
-            url: dispatcharr.talos-cluster.local.obleey.com
           - name: jellyfin
             url: jellyfin.talos-cluster.local.obleey.com
           - name: plex

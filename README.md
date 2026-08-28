@@ -212,7 +212,6 @@ All servarr-namespace apps are managed by a single **ApplicationSet** (`appset-s
 | [qBittorrent](https://www.qbittorrent.org) | servarr | Torrent client |
 | [Seerr](https://github.com/Fallenbagel/jellyseerr) | servarr | Media request and discovery UI |
 | [Clonarr](https://github.com/prophetse7en/clonarr) | servarr | TRaSH Guides profile syncer |
-| [Dispatcharr](https://github.com/dispatcharr/dispatcharr) | servarr | IPTV stream proxy, EPG and VOD manager |
 | [Autopulse](https://github.com/dan-online/autopulse) | servarr | Triggers targeted Plex/Jellyfin scans on import |
 | [Byparr](https://github.com/thephaseless/byparr) | servarr | FlareSolverr drop-in replacement |
 | [Unpackerr](https://github.com/davidnewhall/unpackerr) | servarr | Auto-extracts completed downloads |
