@@ -13,7 +13,7 @@ controllers:
       main:
         image:
           repository: jellyfin/jellyfin
-          tag: "10.11.11.20260606-153911"
+          tag: "12.0.20260908-012347"
         env:
           TZ: Europe/Ljubljana
         securityContext:
