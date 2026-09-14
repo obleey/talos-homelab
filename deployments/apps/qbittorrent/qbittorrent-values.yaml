@@ -72,12 +72,6 @@ route:
     hostnames:
       - qb.talos-cluster.local.obleey.com
     rules:
-      - filters:
-          - type: ExtensionRef
-            extensionRef:
-              group: traefik.io
-              kind: Middleware
-              name: authelia-forward-auth
         backendRefs:
           - name: qbittorrent
             port: 8080

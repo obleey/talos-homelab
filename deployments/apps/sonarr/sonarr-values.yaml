@@ -64,12 +64,6 @@ route:
     hostnames:
       - sonarr.talos-cluster.local.obleey.com
     rules:
-      - filters:
-          - type: ExtensionRef
-            extensionRef:
-              group: traefik.io
-              kind: Middleware
-              name: authelia-forward-auth
-        backendRefs:
+      - backendRefs:
           - name: sonarr
             port: 8989

@@ -9,7 +9,6 @@ resources:
   - metrics-server/app.yaml
   - longhorn/app.yaml
   - kubelet-serving-cert-approver/app.yaml
-  - authelia/app.yaml
   - technitium-secondary/app.yaml
   - observability/namespace.yaml
   - observability/victoria-metrics-k8s-stack/app.yaml

@@ -58,12 +58,6 @@ route:
     hostnames:
       - prowlarr.talos-cluster.local.obleey.com
     rules:
-      - filters:
-          - type: ExtensionRef
-            extensionRef:
-              group: traefik.io
-              kind: Middleware
-              name: authelia-forward-auth
-        backendRefs:
+      - backendRefs:
           - name: prowlarr
             port: 9696

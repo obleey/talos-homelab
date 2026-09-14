@@ -62,12 +62,6 @@ route:
     hostnames:
       - seerr.talos-cluster.local.obleey.com
     rules:
-      - filters:
-          - type: ExtensionRef
-            extensionRef:
-              group: traefik.io
-              kind: Middleware
-              name: authelia-forward-auth
-        backendRefs:
+      - backendRefs:
           - name: seerr
             port: 5055
