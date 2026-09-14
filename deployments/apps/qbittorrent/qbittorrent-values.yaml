@@ -72,6 +72,6 @@ route:
     hostnames:
       - qb.talos-cluster.local.obleey.com
     rules:
-        backendRefs:
+      - backendRefs:
           - name: qbittorrent
             port: 8080
