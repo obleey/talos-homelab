@@ -8,7 +8,7 @@ controllers:
       main:
         image:
           repository: lscr.io/linuxserver/sonarr
-          tag: 4.0.20.3014-ls326
+          tag: 4.0.20.3014-ls329
         env:
           PUID: "1000"
           PGID: "1000"
