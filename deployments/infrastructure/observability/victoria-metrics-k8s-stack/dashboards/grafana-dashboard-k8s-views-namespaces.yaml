@@ -475,7 +475,7 @@ data:
                 "type": "prometheus",
                 "uid": "${datasource}"
               },
-              "expr": "sum(kube_networkpolicy_created{namespace=~\"$namespace\", cluster=\"$cluster\"})",
+              "expr": "count(kube_networkpolicy_created{namespace=~\"$namespace\", cluster=\"$cluster\"})",
               "interval": "",
               "legendFormat": "Network Policies",
               "refId": "K"

@@ -493,7 +493,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "sum(kube_namespace_created{cluster=\"$cluster\"})",
+              "expr": "count(kube_namespace_created{cluster=\"$cluster\"})",
               "interval": "",
               "legendFormat": "Namespaces",
               "refId": "A"
@@ -623,7 +623,7 @@ data:
                 "type": "prometheus",
                 "uid": "${datasource}"
               },
-              "expr": "sum(kube_networkpolicy_created{cluster=\"$cluster\"})",
+              "expr": "count(kube_networkpolicy_created{cluster=\"$cluster\"})",
               "interval": "",
               "legendFormat": "Network Policies",
               "refId": "M"
