@@ -1,464 +1,177 @@
 # talos-homelab
 
-A homelab running on **Talos Linux** managed entirely through GitOps with ArgoCD. Every resource in the cluster — from CNI configuration to media server deployments — is declared in this repository. No SSH, no manual `kubectl apply` after the initial bootstrap.
-
-[![Talos](https://img.shields.io/badge/OS-Talos_Linux-FF7B00?logo=linux&logoColor=white)](https://www.talos.dev)
-[![ArgoCD](https://img.shields.io/badge/GitOps-ArgoCD_10.1.3-EF7B4D?logo=argo&logoColor=white)](https://argoproj.github.io/cd/)
-[![Cilium](https://img.shields.io/badge/CNI-Cilium_1.19.5-F8C517?logo=cilium&logoColor=black)](https://cilium.io)
-[![Traefik](https://img.shields.io/badge/Ingress-Traefik_41.0.2-24A1C1?logo=traefikproxy&logoColor=white)](https://traefik.io)
-[![cert-manager](https://img.shields.io/badge/TLS-cert--manager_v1.21.0-00B5AD)](https://cert-manager.io)
-[![Longhorn](https://img.shields.io/badge/Storage-Longhorn_1.12.0-5F224B)](https://longhorn.io)
-[![Renovate](https://img.shields.io/badge/Dependencies-Renovate-1A86FF?logo=renovatebot&logoColor=white)](https://docs.renovatebot.com)
-
----
-
-## How it works
-
-Push a commit → ArgoCD detects the change within 30 seconds and reconciles the cluster. That's the entire operations loop for almost everything.
-
-A few key design decisions:
-
-- **App-of-apps** — one root `Application` (`bootstrap/talos-cluster.yaml`) owns the entire cluster topology, including ArgoCD itself. After bootstrap, ArgoCD manages its own updates from git.
-- **Sync waves** — infrastructure deploys in strict dependency order (secrets → CNI → TLS → ingress → apps), preventing race conditions during initial sync or a full cluster rebuild.
-- **Sealed Secrets** — all `Secret` values are encrypted before commit. The private key never leaves the cluster.
-- **Immutable OS** — Talos Linux exposes only an API; there is no SSH or shell access to nodes.
-
----
-
-## Architecture
+A three-node [Talos Linux](https://www.talos.dev) cluster run entirely from this repository with [ArgoCD](https://argoproj.github.io/cd/). After bootstrap, every change is a commit: ArgoCD notices it and reconciles the cluster. Versions are not listed here because [Renovate](https://docs.renovatebot.com) bumps them weekly; the source of truth is each Application's `targetRevision`.
 
 ```mermaid
-graph TD
-    Git["Git Repository\nsource of truth"] -->|"webhook / 30s poll"| ArgoCD
-
-    subgraph cluster["Talos Kubernetes Cluster"]
-        ArgoCD["ArgoCD\napp-of-apps GitOps"]
-
-        subgraph infra["Infrastructure  (waves -5 to -1)"]
-            SealedSecrets["Sealed Secrets\nwave -5"]
-            Cilium["Cilium\nCNI + L2 LB  wave -4"]
-            CertManager["cert-manager\nDNS-01 TLS  wave -3"]
-            Traefik["Traefik\nGateway API  wave -2"]
-            Longhorn["Longhorn\nblock storage  wave -2"]
-        end
-
-        subgraph obs["Observability  (monitoring ns)"]
-            VictoriaMetrics --- Grafana
-            VictoriaLogs --- Grafana
-            Alloy["Alloy  DaemonSet"]
-        end
-
-        subgraph apps["Applications  (servarr + media ns)"]
-            Media["Sonarr · Radarr · Bazarr · Prowlarr\nqBittorrent · Seerr · Jellyfin · Plex"]
-        end
+graph LR
+    Git[this repo] -->|poll / webhook| ArgoCD
+    subgraph cluster [Talos cluster: control-plane-1 .160, worker-1 .161, worker-2 .162]
+        ArgoCD --> Infra[infrastructure<br/>cilium, cert-manager, traefik,<br/>longhorn, sealed-secrets]
+        ArgoCD --> Apps[app-template ApplicationSet<br/>servarr apps, homepage,<br/>technitium-secondary]
+        ArgoCD --> Obs[observability<br/>VictoriaMetrics, VictoriaLogs,<br/>Grafana, Alloy]
     end
-
-    subgraph external["External Hosts"]
-        helion["helion\nHetzner VPS"]
-        truenas["truenas\nNAS + Docker"]
-    end
-
-    helion & truenas -->|"Alloy remote_write"| VictoriaMetrics
-    helion & truenas -->|"Alloy log push"| VictoriaLogs
-    NFS["NFS  media library"] --> apps
+    TrueNAS[TrueNAS 10.0.0.104<br/>NFS, Technitium primary] --- Apps
+    TrueNAS & Helion[helion VPS] -->|metrics + logs| Obs
 ```
 
----
-
-## Stack
-
-| Component | Version | Namespace | Role |
-| --- | --- | --- | --- |
-| [Talos Linux](https://www.talos.dev) | latest | — | Immutable OS, API-only node access |
-| [ArgoCD](https://argoproj.github.io/cd/) | 10.1.3 | `argocd` | GitOps controller, app-of-apps |
-| [Cilium](https://cilium.io) | 1.19.5 | `kube-system` | CNI, L2 LoadBalancer, kube-proxy replacement |
-| [cert-manager](https://cert-manager.io) | v1.21.0 | `cert-manager` | Wildcard TLS via Cloudflare DNS-01 |
-| [Traefik](https://traefik.io) | 41.0.2 | `traefik` | Gateway API controller |
-| [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) | 2.19.1 | `kube-system` | Encrypt secrets for git storage |
-| [Longhorn](https://longhorn.io) | 1.12.0 | `longhorn-system` | Replicated block storage |
-| [VictoriaMetrics K8s Stack](https://github.com/VictoriaMetrics/helm-charts) | 0.86.0 | `monitoring` | Metrics storage, alerting, Grafana |
-| [Victoria Logs](https://victoriametrics.com/products/victorialogs/) | 0.13.8 | `monitoring` | Log aggregation |
-| [Grafana Alloy](https://grafana.com/oss/alloy-opentelemetry-collector/) | 1.10.1 | `monitoring` | Metrics + log collector (DaemonSet + external hosts) |
-| [Metrics Server](https://github.com/kubernetes-sigs/metrics-server) | v0.8.1 | `kube-system` | `kubectl top` |
-| [Renovate](https://docs.renovatebot.com) | — | — | Automated dependency PRs |
-
----
-
-## Repository Layout
+## Layout
 
 ```text
-.
-├── bootstrap/
-│   └── talos-cluster.yaml              ← root ArgoCD Application — applied ONCE
-├── deployments/
-│   ├── infrastructure/
-│   │   ├── argocd/                     ← ArgoCD (self-manages after bootstrap)
-│   │   ├── cert-manager/               ← Cloudflare DNS-01 issuer + wildcard cert
-│   │   ├── cilium/                     ← CNI, L2 LB pool, L2 announcement policy
-│   │   ├── longhorn/                   ← Distributed block storage
-│   │   ├── metrics-server/
-│   │   ├── observability/
-│   │   │   ├── victoria-metrics-k8s-stack/  ← VMAgent, VMAlert, Grafana, dashboards, alert rules
-│   │   │   ├── victoria-logs/               ← Log aggregation
-│   │   │   ├── alloy/                       ← In-cluster collector DaemonSet
-│   │   │   └── alloy-blackbox/              ← HTTP/TCP probe exporter
-│   │   ├── sealed-secrets/
-│   │   └── traefik/                    ← Gateway API controller + wildcard TLS ref
-│   └── apps/
-│       ├── appset-servarr.yaml         ← ApplicationSet managing all servarr apps
-│       ├── homepage/                   ← Cluster service dashboard
-│       ├── kubeseal-webgui/            ← Web UI for sealing secrets
-│       └── <app>/                      ← Per-app folder: values file + extra manifests
-├── helion/                             ← Alloy config for Hetzner VPS
-├── truenas/                            ← Alloy config for TrueNAS
-└── renovate.json
+bootstrap/talos-cluster.yaml   root Application (applied once); owns everything under deployments/
+deployments/
+  infrastructure/              one folder per platform component: app.yaml + values + extra manifests
+    observability/             VictoriaMetrics stack (Grafana, alert rules, dashboards), VictoriaLogs, Alloy
+  apps/
+    appset-servarr.yaml        ApplicationSet: one element per app-template app
+    _common-values.yaml        values merged under every appset app
+    <app>/<app>-values.yaml    per-app values (+ any extra manifests in the same folder)
+    servarr-credentials-sealed.yaml   API keys shared by several apps
+    starr-data.yaml            static NFS PV/PVC for the media share
+scripts/                       repo checks (lint.py, test_lint.py, render-check.py)
+docs/adr/                      decisions future changes should not undo
 ```
 
----
+## What runs
 
-## Deployment Order
+### Platform
 
-Applications are created in sync-wave order. ArgoCD does not wait for a child Application to be healthy before the next wave (no Application health customization is configured, on purpose: one degraded app would block every later wave). Waves set creation order only; dependencies settle through retries.
-
-| Wave | Components | Why |
-| ---: | --- | --- |
-| `−5` | sealed-secrets | Must exist before any `SealedSecret` is applied |
-| `−4` | cilium | CNI must be running before pods can communicate |
-| `−3` | cert-manager, metrics-server | cert-manager begins issuing TLS once networking is up |
-| `−2` | traefik, longhorn | Traefik depends on the wildcard cert from cert-manager |
-| `−1` | argocd | Self-manages its own CRDs and configuration |
-| `0` | all apps | Created after the infrastructure Applications |
-| `1`–`2` | observability | VictoriaMetrics/Logs, then Alloy |
-
----
-
-## Networking
-
-### L2 LoadBalancer (Cilium)
-
-Cilium handles `LoadBalancer` services via L2 announcements — no BGP, no MetalLB. Services get IPs from a pool on the local network, announced directly from the node holding the service.
-
-```yaml
-# L2 IP pool
-start: 10.0.0.153
-stop:  10.0.0.199
-```
-
-### Gateway API (Traefik)
-
-All services use `HTTPRoute` resources pointing at the cluster gateway. Traefik exposes two listeners:
-
-| Listener | Port | Protocol |
+| Component | Namespace | Notes |
 | --- | --- | --- |
-| `web` | 80 | HTTP → redirects to HTTPS |
-| `websecure` | 443 | HTTPS, wildcard TLS certificate |
+| Sealed Secrets | `kube-system` | Decrypts committed `SealedSecret`s; the key is backed up outside git |
+| Cilium | `kube-system` | CNI, kube-proxy replacement, L2 LoadBalancer IPs `10.0.0.200–240` |
+| cert-manager | `cert-manager` | Wildcard `*.talos-cluster.local.obleey.com` via Cloudflare DNS-01 |
+| Traefik | `traefik` | Gateway API; `websecure` (443) serves every `HTTPRoute`, `web` (80) redirects |
+| Longhorn | `longhorn-system` | Replicated volumes; daily snapshots, weekly backups to NFS on TrueNAS |
+| ArgoCD | `argocd` | Manages itself after bootstrap; config and RBAC live in `argocd-values.yaml` |
+| metrics-server, kubelet-serving-cert-approver | `kube-system` | `kubectl top`; approve kubelet serving certs |
+| kubeseal-webgui | `kubeseal-webgui` | Browser UI for sealing secrets |
 
-Every service gets a hostname following the pattern:
+### Apps (one ApplicationSet, bjw-s [app-template](https://github.com/bjw-s-labs/helm-charts))
 
-```text
-<service>.talos-cluster.local.obleey.com
-```
-
-### TLS
-
-cert-manager issues and auto-renews a wildcard certificate via Cloudflare DNS-01 challenge. The certificate is stored as a `Secret` in the `traefik` namespace and referenced directly by the Gateway listener.
-
----
-
-## Observability
-
-### In-cluster stack
-
-The cluster runs VictoriaMetrics K8s Stack + Victoria Logs in the `monitoring` namespace:
-
-| Component | Role |
-| --- | --- |
-| **VMSingle** | Metrics storage — 30-day retention on a Longhorn PVC |
-| **VMAgent** | Scrapes all cluster targets; accepts `remote_write` from external hosts |
-| **VMAlert + VMAlertManager** | Evaluates alert rules; routes notifications to Slack |
-| **Victoria Logs** | Log aggregation — receives from all Alloy agents |
-| **Grafana** | Dashboards and unified alerting UI; Google SSO |
-| **Alloy (DaemonSet)** | Collects node metrics, pod logs, and cAdvisor stats in-cluster |
-| **Alloy Blackbox** | HTTP/TCP probes for all exposed services |
-
-Grafana dashboards are provisioned via ConfigMap and cover node health, pod lifecycle, Traefik traffic, Longhorn storage, blackbox probe status, and media app availability.
-
-Alert rules are defined as `VMRule` resources in the repo and cover: node CPU/memory/disk, pod OOM kills and crash loops, Longhorn volume health, cert expiry, blackbox probe failures, and media app availability.
-
-### External hosts
-
-Both external hosts run Grafana Alloy as a Docker container, shipping metrics and logs into the cluster.
-
-| Host | Description |
-| --- | --- |
-| `helion` | Hetzner VPS — public-facing services |
-| `truenas` | TrueNAS NAS — media storage, Docker apps |
-
-Configuration lives in [`helion/`](helion/) and [`truenas/`](truenas/).
-
----
-
-## Applications
-
-All apps use the [bjw-s/app-template](https://github.com/bjw-s-labs/helm-charts) Helm chart (v5.0.1) via ArgoCD multi-source Applications. Stateful apps reference existing PVCs (`existingClaim`) so data survives redeployments.
-
-All servarr-namespace apps are managed by a single **ApplicationSet** (`appset-servarr.yaml`) instead of individual ArgoCD Application manifests. Each app only needs a values folder in `deployments/apps/<name>/`.
-
-| App | Namespace | Description |
+| App | Host | Purpose |
 | --- | --- | --- |
-| [Sonarr](https://sonarr.tv) | servarr | TV show library manager |
-| [Radarr](https://radarr.video) | servarr | Movie library manager |
-| [Bazarr](https://www.bazarr.media) | servarr | Subtitle manager |
-| [Prowlarr](https://prowlarr.com) | servarr | Unified indexer manager |
-| [qBittorrent](https://www.qbittorrent.org) | servarr | Torrent client |
-| [Seerr](https://github.com/Fallenbagel/jellyseerr) | servarr | Media request and discovery UI |
-| [Clonarr](https://github.com/prophetse7en/clonarr) | servarr | TRaSH Guides profile syncer |
-| [Autopulse](https://github.com/dan-online/autopulse) | servarr | Triggers targeted Plex/Jellyfin scans on import |
-| [Byparr](https://github.com/thephaseless/byparr) | servarr | FlareSolverr drop-in replacement |
-| [Unpackerr](https://github.com/davidnewhall/unpackerr) | servarr | Auto-extracts completed downloads |
-| [Scraparr](https://github.com/thecfu/scraparr) | servarr | Exposes *arr app metrics for Prometheus |
-| [Jellyfin](https://jellyfin.org) | servarr | Open-source media server |
-| [Plex](https://www.plex.tv) | servarr | Plex Media Server |
-| [Homepage](https://gethomepage.dev) | homepage | Cluster service dashboard |
-| [kubeseal-webgui](https://github.com/Mahsad/kubeseal-webgui) | kubeseal-webgui | Web UI to seal new secrets |
+| Sonarr, Radarr, Prowlarr, Bazarr | `<name>.` | TV, movies, indexers, subtitles |
+| qBittorrent | `qb.` | Downloads |
+| Unpackerr | `unpackerr.` | Extracts finished downloads (web UI on 5656) |
+| Seerr | `seerr.` | Requests |
+| Plex, Jellyfin | `<name>.` | Media servers |
+| Clonarr, WatchState | `<name>.` | TRaSH profile sync, watch-state sync |
+| Autopulse, Byparr, Scraparr | — | Targeted library scans, Cloudflare solver, *arr metrics |
+| Homepage | `hub.` | Start page; tiles come from `HTTPRoute` annotations |
+| technitium-secondary | `technitium-secondary.` | Secondary DNS (`dns02`), LoadBalancer `10.0.0.201` |
 
-### Media pipeline
+All hosts are under `talos-cluster.local.obleey.com`. The servarr apps share one NFS share (`starr-data`, mounted with a `subPath`) and each has its own Longhorn `<name>-config` volume.
 
-```text
-Seerr (requests)
-  └──► Sonarr / Radarr ──► qBittorrent ──► Unpackerr (extract)
-             │                                    │
-             └──► Prowlarr (indexers)      Autopulse ──► Plex / Jellyfin
-             └──► Bazarr (subtitles)              (targeted library scan)
-```
+### Observability (`monitoring`)
 
-All servarr and media pods share a single NFS media library mount (`/mnt/media`). Config for each app lives on individual Longhorn PVCs.
+- **Metrics:** VMSingle (30 days) scraped by VMAgent; Talos nodes, kube-state-metrics, ServiceMonitors from every chart. The external hosts `helion` and `truenas` push to `prometheus.talos-cluster.local.obleey.com`.
+- **Logs:** VictoriaLogs (30 days). Alloy runs as a DaemonSet, ships pod logs and Kubernetes events, and redacts API keys, tokens and passwords before they leave the node. External hosts push to `loki.talos-cluster.local.obleey.com`.
+- **Probes:** `alloy-blackbox` probes every served hostname (the lint enforces it).
+- **Alerting:** Grafana-managed rules provisioned from ConfigMaps in `victoria-metrics-k8s-stack/alerts/`, sent to Slack `#monitoring`. VMAlert only evaluates the chart's recording rules; its notifier is a blackhole on purpose.
+- **Dashboards:** ConfigMaps in `victoria-metrics-k8s-stack/dashboards/`, vendored rather than fetched from grafana.com ([ADR 0001](docs/adr/0001-vendor-grafana-dashboards.md)).
 
----
+## Conventions
 
-## Secrets Management
+- **Sync waves set creation order only:** sealed-secrets `-5`, cilium `-4`, cert-manager and metrics-server `-3`, traefik and longhorn `-2`, argocd `-1`, apps `0`, metrics and logs `1`, Alloy `2`. ArgoCD does not wait for health between waves (deliberately: one degraded app would block the rest); dependencies settle through retries.
+- **Cluster-critical Applications have no cascade-delete finalizer** (sealed-secrets, cilium, cert-manager, argocd, longhorn), so deleting the Application never deletes the component.
+- **Each namespace is created exactly once:** a `Namespace` manifest or `CreateNamespace=true`, never both.
+- **Config volumes are never pruned:** `_common-values.yaml` marks them `Prune=false,Delete=false`.
+- **Shared credentials live once:** API keys used by several apps (homepage widgets, scraparr, unpackerr, autopulse) are keys in `servarr-credentials`; consumers read them with `secretKeyRef`.
+- **Homepage tiles are route annotations** (`gethomepage.dev/*` on the `HTTPRoute`, or under `route.app.annotations` in app-template values). Only things without a route (TrueNAS, Technitium primary) are in homepage's `services.yaml`. Set `gethomepage.dev/pod-selector` when the pods aren't labelled `app.kubernetes.io/name=<route name>`.
+- **Alert rules:** query the raw metric and put the comparison in the threshold (`lt 1` for "down"); use `$values.A.Value` in text (Grafana's `$value` is a string of all results); a `__dashboardUid__` always comes with a `__panelId__`.
 
-All secrets are encrypted with [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) before being committed. The controller decrypts them in-cluster; the private key never leaves. If the key is lost, secrets must be resealed.
+## Checks
 
-```text
-kubectl create secret ... --dry-run=client -o yaml
-    │
-    └──► kubeseal  ──►  SealedSecret  (safe to commit)
-                              │
-              sealed-secrets controller decrypts in-cluster
-                              │
-                        Secret (available to pods)
-```
+| Script | Runs in | What it catches |
+| --- | --- | --- |
+| `scripts/lint.py` | pre-commit, CI | YAML that doesn't parse or has duplicate keys; served hostnames without a probe (and probes for unserved hosts); `secretKeyRef` keys missing from their SealedSecret; undefined `HOMEPAGE_VAR_*`; `*.svc.cluster.local:<port>` disagreeing with the appset; alerts that can never fire, use `$value` or unknown template functions; alert dashboard links to missing dashboards or panels; the Application conventions above |
+| `scripts/test_lint.py` | pre-commit, CI | Breaks a copy of the repo once per check and asserts the check fires |
+| `scripts/render-check.py` | CI | `helm template` for every chart Application and appset element, plus `kubectl kustomize deployments` |
 
-**Sealing a new secret:**
+The scripts share `scripts/repo.py`, which reads the repo once. They need Python 3 and PyYAML (`render-check.py` also needs `helm` and `kubectl`). Enable the hook once per clone:
 
 ```bash
-kubectl create secret generic my-secret \
-  --from-literal=key=value \
-  -n my-namespace \
-  --dry-run=client -o yaml \
-  | kubeseal --format yaml > deployments/apps/my-app/my-secret-sealed.yaml
+git config core.hooksPath .githooks
 ```
 
----
+## Adding an app
 
-## Automated Updates
+**App-template app (most apps):**
 
-[Renovate](https://docs.renovatebot.com) watches all dependencies and opens grouped PRs. Updates must be at least 3 days old before Renovate proposes them. Major version bumps get a `major-update` label.
+1. Add an element to `deployments/apps/appset-servarr.yaml`: `name`; `port` if it has a web UI (the appset then creates the Service port and the route `<host>.talos-cluster.local.obleey.com`); `host` if the subdomain differs from the name; `namespace` if it doesn't belong in `servarr` (add a `namespace.yaml` to its folder).
+2. Create `deployments/apps/<name>/<name>-values.yaml`. `_common-values.yaml` is merged underneath: TZ, startup-probe timing, and a 1Gi Longhorn `/config` volume (override `persistence.config.size`, or `persistence.config.enabled: false` when stateless). Mount the media share with `existingClaim: starr-data` and a `subPath`. Add homepage annotations under `route.app.annotations` (see `sonarr-values.yaml`). app-template runs values through `tpl`, so write homepage placeholders as `'{{ "{{HOMEPAGE_VAR_X}}" }}'`.
+3. Add a blackbox target for the hostname in `observability/alloy-blackbox/values.yaml`.
+4. Put extra manifests (SealedSecrets, PVCs) in the same folder; the appset applies them.
 
-| Group | Tracks |
-| --- | --- |
-| `helm charts` | ArgoCD, Traefik, Longhorn, cert-manager, … |
-| `linuxserver images` | All `lscr.io/linuxserver/*` images (sonarr, radarr, bazarr, …) |
-| `ghcr images` | Seerr, Clonarr, Autopulse, Byparr, kubeseal-webgui |
-| `docker hub images` | Unpackerr, Plex, Jellyfin |
-| `observability stack` | victoria-metrics-k8s-stack, victoria-logs, grafana, alloy |
+**Standalone Application** (own chart or lifecycle): a folder with `app.yaml` (two sources: the chart, and this repo as `ref: values`), the values file and any manifests, listed in `deployments/infrastructure/kustomization.yaml` or `deployments/apps/kustomization.yaml`. Copy an existing one such as `kubeseal-webgui/app.yaml`.
 
----
+## Secrets
 
-## Adding a New App
-
-### App-template app (managed by ApplicationSet)
-
-1. Add `{name, port}` to `generators.list.elements` in `deployments/apps/appset-servarr.yaml` (`host` only if the subdomain differs from the name; omit `port` for apps without a web UI; `namespace` only if it doesn't live in `servarr`, plus a `namespace.yaml` in its folder, as technitium-secondary does). The ApplicationSet injects the service port and the gateway route at `<host>.talos-cluster.local.obleey.com`.
-2. Create `deployments/apps/<name>/<name>-values.yaml` with the app-specific app-template values. `deployments/apps/_common-values.yaml` is merged underneath (TZ, startup probe timing, and a 1Gi Longhorn `/config` PVC named `<name>-config` that ArgoCD never prunes; override `persistence.config.size`, or set `persistence.config.enabled: false` for stateless apps), and the NAS share is mounted with `existingClaim: starr-data` plus a `subPath`. For a homepage tile, add `gethomepage.dev/*` annotations under `route.app.annotations` (see `sonarr-values.yaml`).
-3. Add a target for the hostname in `deployments/infrastructure/observability/alloy-blackbox/values.yaml`.
-4. Add any extra manifests (PVCs, SealedSecrets) in the same folder.
-
-The pre-commit hook runs `scripts/lint.py`, which fails when the repo contradicts itself: YAML that doesn't parse or has duplicate keys, a served hostname without a probe target (or the reverse), a `secretKeyRef` key missing from its SealedSecret, a `HOMEPAGE_VAR_*` homepage doesn't define, a `*.svc.cluster.local:<port>` that disagrees with the appset, an alert that can never fire or uses `$value`/unknown template functions, a dangling alert dashboard link, and the Application conventions (no cascade-delete finalizer on cluster-critical apps; each namespace comes from exactly one of a Namespace manifest or `CreateNamespace=true`). `scripts/test_lint.py` proves each check fires by breaking a copy of the repo. Both need only Python 3 and PyYAML. Enable the hook once per clone with `git config core.hooksPath .githooks`.
-
-### Standalone app (own namespace or different lifecycle)
-
-```text
-deployments/apps/my-app/
-├── app.yaml               ← ArgoCD Application (multi-source)
-├── my-app-values.yaml     ← app-template Helm values
-└── pvc.yaml               ← Longhorn PVC (if stateful)
+```bash
+kubectl create secret generic my-secret -n my-namespace \
+  --from-literal=key=value --dry-run=client -o yaml \
+  | kubeseal --context talos-homelab_production \
+      --controller-namespace kube-system --controller-name sealed-secrets-controller \
+      --format yaml > deployments/apps/my-app/my-secret-sealed.yaml
 ```
 
-Add `- path: deployments/apps/my-app` to `deployments/apps/kustomization.yaml` and push. ArgoCD picks it up within 30 seconds.
+To add or rotate one key in an existing SealedSecret, seal just that value with `kubeseal --raw --namespace <ns> --name <secret>` and replace its line under `encryptedData`; the other keys stay valid. Pods read secrets at start, so restart consumers after a rotation.
 
-**`app.yaml` template:**
-
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: my-app
-  namespace: argocd
-  labels:
-    argocd.argoproj.io/managed-by: talos-cluster
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  sources:
-    - repoURL: https://bjw-s-labs.github.io/helm-charts
-      chart: app-template
-      targetRevision: 5.0.1
-      helm:
-        valueFiles:
-          - $values/deployments/apps/my-app/my-app-values.yaml
-    - repoURL: https://github.com/YOUR_USER/talos-homelab
-      targetRevision: HEAD
-      ref: values
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: my-namespace
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-```
-
----
-
-## Outside Git
+## Outside git
 
 A rebuild needs these, and the repo does not hold them:
 
-| What | Where it lives |
+| What | Where |
 | --- | --- |
-| Talos machine configs (node names, `.160`/`.161` IPs) | Generated with `talosctl`; not in git yet |
-| `local-path` StorageClass + provisioner (jellyfin/plex cache PVCs) | Installed by hand; not in git |
-| sealed-secrets controller private key | Password manager. Without it every `*-sealed.yaml` is unreadable; see restore below |
-| NFS exports `/mnt/serve/starr-stack/data`, `/mnt/serve/longhorn-backups` | TrueNAS at `10.0.0.104` |
-| Technitium primary DNS | `10.0.0.104:5380` |
-| `*.talos-cluster.local.obleey.com` → gateway LB IP | DNS record on Technitium |
-| ArgoCD `obleey`/`readonly` passwords, homepage ArgoCD token | Set in the ArgoCD UI; token sealed into `homepage-secrets` |
+| Talos machine configs | Generated with `talosctl` |
+| Sealed-secrets private key | Password manager; without it every `*-sealed.yaml` is unreadable |
+| `local-path` StorageClass and provisioner (Plex/Jellyfin cache volumes) | Installed by hand |
+| NFS exports `/mnt/serve/starr-stack/data`, `/mnt/serve/longhorn-backups` | TrueNAS `10.0.0.104` |
+| Technitium primary (`dns01`) and the `*.talos-cluster.local.obleey.com` record pointing at the gateway | TrueNAS `10.0.0.104:5380` |
+| Technitium cluster: `dns02` registered as `10.0.0.201`; primary's Zone Transfer allowed networks `10.0.0.160–162` (secondary's traffic leaves through its node) | Technitium settings |
+| Alloy configs on `helion` and `truenas` | On those hosts |
+| ArgoCD `obleey`/`readonly` passwords; API tokens for homepage (ArgoCD, Technitium) | ArgoCD/Technitium UIs; tokens sealed into `homepage-secrets` |
 
-**Back up the sealing key** (once, and after any key rotation):
+Back up the sealing key once, and after any rotation:
 
 ```bash
 kubectl -n kube-system get secret -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-key.yaml
 # store in the password manager, then delete the file
 ```
 
-**Restore it** on a new cluster before bootstrap step 3, so the committed SealedSecrets decrypt:
+## Bootstrap and rebuild
+
+Prerequisites: a Talos cluster with a working kubeconfig, `helm`, `kubeseal`, and a Cloudflare API token for DNS-01.
 
 ```bash
+# 1. Restore the sealing key so the committed SealedSecrets decrypt
+#    (new cluster without the old key: re-seal every *-sealed.yaml instead)
 kubectl apply -f sealed-secrets-key.yaml
-kubectl -n kube-system delete pod -l app.kubernetes.io/name=sealed-secrets  # picks up the restored key
-```
 
-With a restored key, skip bootstrap step 1: the committed sealed files already match.
-
----
-
-## Bootstrap
-
-> One-time process. After this, ArgoCD manages everything from git.
-
-### Prerequisites
-
-- Talos cluster running with `kubeconfig` configured
-- `helm` ≥ 3.x and `kubeseal` CLI installed
-- Cloudflare account with DNS API access
-- A public git repository (a private one also needs an ArgoCD repository Secret: label `argocd.argoproj.io/secret-type: repository`, keys `url`, `username`, `password`)
-
-### Steps
-
-#### 1. Seal your credentials
-
-```bash
-# Cloudflare API token (cert-manager DNS-01)
-kubectl create secret generic cloudflare-api-token \
-  --from-literal=api-token=<YOUR_TOKEN> \
-  -n cert-manager --dry-run=client -o yaml \
-  | kubeseal --format yaml \
-  > deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml
-```
-
-#### 2. Install ArgoCD
-
-```bash
+# 2. Install ArgoCD with the repo's values (chart version from deployments/infrastructure/argocd/app.yaml)
 helm repo add argo https://argoproj.github.io/argo-helm
-helm repo update
 kubectl create namespace argocd
-helm install argocd argo/argo-cd \
-  -n argocd \
-  -f deployments/infrastructure/argocd/argocd-values.yaml
-```
+helm install argocd argo/argo-cd -n argocd -f deployments/infrastructure/argocd/argocd-values.yaml
 
-#### 3. Apply the root app — the last manual step
-
-```bash
+# 3. Hand the cluster to git
 kubectl apply -f bootstrap/talos-cluster.yaml
 ```
 
-ArgoCD reconciles the full cluster from git, creating Applications in sync-wave order (see [Deployment Order](#deployment-order)).
+If the sealed-secrets controller was already running when the key was applied, restart it: `kubectl -n kube-system delete pod -l app.kubernetes.io/name=sealed-secrets`.
 
----
-
-## Adapting to Your Cluster
-
-| File | What to change |
-| --- | --- |
-| `cilium/loadbalancer-pool.yaml` | L2 IP range for LoadBalancer services |
-| `cilium/l2-announcement-policy.yaml` | Network interface name (`ip link`) |
-| `cilium/cilium-values.yaml` | `k8sServiceHost` and `k8sServicePort` |
-| `cert-manager/cert-manager-cluster-issuer.yaml` | Domain and Let's Encrypt email |
-| `traefik/wildcard-cert.yaml` | Domain names |
-| `argocd/argocd-values.yaml` | ArgoCD external URL |
-| All `HTTPRoute` manifests | Hostnames |
-| All `*-values.yaml` with NFS paths | NFS server IP |
-| `bootstrap/talos-cluster.yaml` and all `app.yaml` | Your git repository URL |
-| All sealed secrets | Re-seal with your cluster's public key |
-
----
-
-## Operations Reference
+## Operations
 
 ```bash
-# App sync status
-kubectl get applications -n argocd
-
-# Resource usage
-kubectl top nodes && kubectl top pods -A
-
-# Force-refresh an app (bypass cache)
-argocd app get <app-name> --hard-refresh
-
-# Reload Grafana dashboard provisioning
-kubectl exec -n monitoring deploy/kps-grafana -c grafana -- \
-  wget -qO- --post-data='' \
-  http://localhost:3000/api/admin/provisioning/dashboards/reload
-
-# Seal a new secret
-kubectl create secret generic my-secret \
-  --from-literal=key=value \
-  -n my-namespace --dry-run=client -o yaml \
-  | kubeseal --format yaml > path/to/sealed.yaml
-
-# Rebuild cluster from scratch (after hardware reset)
-helm install argocd argo/argo-cd -n argocd \
-  -f deployments/infrastructure/argocd/argocd-values.yaml
-kubectl apply -f sealed-secrets-key.yaml   # from the password manager, see Outside Git
-kubectl apply -f bootstrap/talos-cluster.yaml
-# ArgoCD restores full cluster state from git
+kubectl -n argocd get applications                       # sync and health of everything
+kubectl -n argocd annotate application <app> argocd.argoproj.io/refresh=hard --overwrite   # re-read git now
+kubectl -n servarr rollout restart deploy/homepage       # homepage config is mounted with subPath: restart after changes
 ```
 
----
+Things that have bitten before:
+
+- **Grafana alert provisioning is all-or-nothing:** one invalid rule makes every reload fail, and earlier rule versions keep running. Rules deleted from the files stay in Grafana unless listed under `deleteRules` in `alerts/grafana-alerting.yaml`.
+- **Renaming an Application or moving it between the root app and the appset:** remove the live Application's finalizer first, or pruning the old one deletes the workload.
+- **Pod selectors are immutable:** a chart change that alters them needs the old Deployment deleted once (ArgoCD recreates it).
 
 ## License
 
