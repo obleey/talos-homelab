@@ -22,6 +22,12 @@ controllers:
               secretKeyRef:
                 name: servarr-credentials
                 key: sonarr-api-key
+          # user:pass, hashed in memory at startup; locks the password field in the UI
+          UN_WEBSERVER_UI_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: unpackerr-ui
+                key: ui-password
           UN_RADARR_0_API_KEY:
             valueFrom:
               secretKeyRef:

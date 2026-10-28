@@ -1,0 +1,14 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: unpackerr-ui
+  namespace: servarr
+spec:
+  encryptedData:
+    ui-password: AgAM2NBwy5uDrxbwPQQR0/DbW41qOgPe9nQds6n2UwBeA+lsocwXComfLeV7rPH+SGx8VM/ngatYvvXOTHWq0Xlo+p16E3dRHJ5PArXYDxHk3+pi6yyf6j4XanwXTJ0PSMELSGmoPhyImpdVd/OTmBEJJZCNTKgxp8dJ6YXqyLucUvFxEo6e8MWDH1Ehiqj6Qr1ze+QQLfKKrgvEa2QngHvJw/0RmvxwPiHNueepIdMVgs14Olorfsk72aLY0RUJBXOzHUpe5GILl1QzgLrtD5OkweaG9mvo77yAB4z0erXhZOqGM20kv0HbSPgjAT6ArN+QpGTr9mC4X2PN0ZlZsBlIasZ8WHYEZCPsDfoGO3Kq3OjWVk569saJII92UgUDAmxy4U3tfPV0kmCdA7+Rj6trPFpP2ao4hmnqa2qXA1zyg3Vug6PWmBJu2VTRQZWzrWQgB8yhOo6SYaRF8HRCxQavJagodw4lbEHpzoFzE3XIHGbesFdItK/gTdYUZoHVVkl8shwdLCWN1vv7u6B+Czt3DMu3ZzBXk5BotcGbkPATo/UMKfKrqbDaoLcZPOudfL2LjUxmYf63YUHA6EvYOCzjwphJa/bYU1//pOLrlifcVEKlAS5XxzGhSBBPDliwosSwKNyMW4J4KZ4W2Az5cKomKT14fJIYvZPWOhWpU5YfFc9ph6Ne90KKQLcKp80JFVKsObsbLXPqp3gvdCJJeyOsBTBU4A==
+  template:
+    metadata:
+      name: unpackerr-ui
+      namespace: servarr
+    type: Opaque
