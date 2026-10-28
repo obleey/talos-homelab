@@ -1,5 +1,8 @@
 controllers:
   main:
+    pod:
+      # app-template defaults this to false; discovery needs the SA token
+      automountServiceAccountToken: true
     containers:
       main:
         image:
