@@ -73,6 +73,11 @@ alloy:
           module  = "http_home"
         }
         target {
+          name    = "loki"
+          address = "https://loki.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
           name    = "plex"
           address = "https://plex.talos-cluster.local.obleey.com"
           module  = "http_home"
@@ -80,6 +85,11 @@ alloy:
         target {
           name    = "prowlarr"
           address = "https://prowlarr.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "prometheus"
+          address = "https://prometheus.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
         target {
@@ -105,6 +115,16 @@ alloy:
         target {
           name    = "traefik"
           address = "https://traefik.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "unpackerr"
+          address = "https://unpackerr.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
+          name    = "watchstate"
+          address = "https://watchstate.talos-cluster.local.obleey.com"
           module  = "http_home"
         }
 

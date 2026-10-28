@@ -10,29 +10,30 @@ spec:
         elements:
           - name: autopulse
           - name: bazarr
-            url: bazarr.talos-cluster.local.obleey.com
+            port: 6767
           - name: byparr
           - name: clonarr
-            url: clonarr.talos-cluster.local.obleey.com
+            port: 6060
           - name: jellyfin
-            url: jellyfin.talos-cluster.local.obleey.com
+            port: 8096
           - name: plex
-            url: plex.talos-cluster.local.obleey.com
+            port: 32400
           - name: prowlarr
-            url: prowlarr.talos-cluster.local.obleey.com
+            port: 9696
           - name: qbittorrent
-            url: qb.talos-cluster.local.obleey.com
+            port: 8080
+            host: qb
           - name: radarr
-            url: radarr.talos-cluster.local.obleey.com
+            port: 7878
           - name: scraparr
           - name: seerr
-            url: seerr.talos-cluster.local.obleey.com
+            port: 5055
           - name: sonarr
-            url: sonarr.talos-cluster.local.obleey.com
+            port: 8989
           - name: unpackerr
-            url: unpackerr.talos-cluster.local.obleey.com
+            port: 5656
           - name: watchstate
-            url: watchstate.talos-cluster.local.obleey.com
+            port: 8080
   template:
     metadata:
       name: "{{.name}}"
@@ -40,7 +41,7 @@ spec:
       labels:
         argocd.argoproj.io/managed-by: talos-cluster
       annotations:
-        link.argocd.argoproj.io/external-link: "{{if .url}}https://{{.url}}{{end}}"
+        link.argocd.argoproj.io/external-link: "{{if .port}}https://{{.host | default .name}}.talos-cluster.local.obleey.com{{end}}"
       finalizers:
         - resources-finalizer.argocd.argoproj.io
     spec:
@@ -52,6 +53,28 @@ spec:
           helm:
             valueFiles:
               - "$values/deployments/apps/{{.name}}/{{.name}}-values.yaml"
+            # an element with a port gets its service port and gateway route from here
+            values: |
+              {{- if .port }}
+              service:
+                app:
+                  controller: main
+                  ports:
+                    http:
+                      port: {{ .port }}
+              route:
+                app:
+                  parentRefs:
+                    - name: traefik-gateway
+                      namespace: traefik
+                      sectionName: websecure
+                  hostnames:
+                    - {{ .host | default .name }}.talos-cluster.local.obleey.com
+                  rules:
+                    - backendRefs:
+                        - name: {{ .name }}
+                          port: {{ .port }}
+              {{- end }}
         - repoURL: https://github.com/obleey/talos-homelab
           targetRevision: HEAD
           ref: values

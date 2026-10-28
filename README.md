@@ -279,11 +279,12 @@ kubectl create secret generic my-secret \
 
 ### Servarr-namespace app (managed by ApplicationSet)
 
-1. Add the app name to the `generators.list.elements` array in `deployments/apps/appset-servarr.yaml`
-2. Create `deployments/apps/<name>/<name>-values.yaml` with the app-template Helm values
-3. Add any extra manifests (PVCs, SealedSecrets, HTTPRoutes) in the same folder
+1. Add `{name, port}` to `generators.list.elements` in `deployments/apps/appset-servarr.yaml` (`host` only if the subdomain differs from the name; omit `port` for apps without a web UI). The ApplicationSet injects the service port and the gateway route at `<host>.talos-cluster.local.obleey.com`.
+2. Create `deployments/apps/<name>/<name>-values.yaml` with the app-specific app-template values. For a homepage tile, add `gethomepage.dev/*` annotations under `route.app.annotations` (see `sonarr-values.yaml`).
+3. Add a target for the hostname in `deployments/infrastructure/observability/alloy-blackbox/values.yaml`.
+4. Add any extra manifests (PVCs, SealedSecrets) in the same folder.
 
-The ApplicationSet picks up the new entry automatically on the next sync.
+`scripts/check-routes.sh` runs as a pre-commit hook and fails when a hostname has no probe target. Enable it once per clone with `git config core.hooksPath .githooks`.
 
 ### Standalone app (own namespace or different lifecycle)
 

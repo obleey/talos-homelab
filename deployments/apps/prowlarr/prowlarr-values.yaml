@@ -35,13 +35,6 @@ controllers:
               failureThreshold: 30
               periodSeconds: 5
 
-service:
-  app:
-    controller: main
-    ports:
-      http:
-        port: 9696
-
 persistence:
   config:
     type: persistentVolumeClaim
@@ -49,15 +42,16 @@ persistence:
     globalMounts:
       - path: /config
 
+# hostname, port and gateway come from appset-servarr.yaml; annotations are tpl'd, so homepage {{VARS}} are escaped
 route:
   app:
-    parentRefs:
-      - name: traefik-gateway
-        namespace: traefik
-        sectionName: websecure
-    hostnames:
-      - prowlarr.talos-cluster.local.obleey.com
-    rules:
-      - backendRefs:
-          - name: prowlarr
-            port: 9696
+    annotations:
+      gethomepage.dev/enabled: 'true'
+      gethomepage.dev/group: 'Media Management'
+      gethomepage.dev/name: 'Prowlarr'
+      gethomepage.dev/icon: 'prowlarr.png'
+      gethomepage.dev/description: 'Indexers'
+      gethomepage.dev/weight: '300'
+      gethomepage.dev/widget.type: 'prowlarr'
+      gethomepage.dev/widget.url: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.app.ports.http.port }}'
+      gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}" }}'

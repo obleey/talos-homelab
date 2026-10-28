@@ -35,13 +35,6 @@ controllers:
               failureThreshold: 30
               periodSeconds: 5
 
-service:
-  app:
-    controller: main
-    ports:
-      http:
-        port: 6767
-
 persistence:
   config:
     type: persistentVolumeClaim
@@ -55,15 +48,16 @@ persistence:
     globalMounts:
       - path: /data
 
+# hostname, port and gateway come from appset-servarr.yaml; annotations are tpl'd, so homepage {{VARS}} are escaped
 route:
   app:
-    parentRefs:
-      - name: traefik-gateway
-        namespace: traefik
-        sectionName: websecure
-    hostnames:
-      - bazarr.talos-cluster.local.obleey.com
-    rules:
-      - backendRefs:
-          - name: bazarr
-            port: 6767
+    annotations:
+      gethomepage.dev/enabled: 'true'
+      gethomepage.dev/group: 'Media Management'
+      gethomepage.dev/name: 'Bazarr'
+      gethomepage.dev/icon: 'bazarr.png'
+      gethomepage.dev/description: 'Subtitles'
+      gethomepage.dev/weight: '400'
+      gethomepage.dev/widget.type: 'bazarr'
+      gethomepage.dev/widget.url: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.app.ports.http.port }}'
+      gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_BAZARR_API_KEY}}" }}'

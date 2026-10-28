@@ -36,13 +36,6 @@ controllers:
             cpu: 250m
             memory: 256Mi
 
-service:
-  app:
-    controller: main
-    ports:
-      http:
-        port: 5656
-
 persistence:
   # web UI saves rewrite /config/unpackerr.conf, so it must be writable and persistent
   config:
@@ -73,15 +66,13 @@ configMaps:
       UN_FILE_MODE: "0644"
       UN_DIR_MODE: "0755"
 
+# hostname, port and gateway come from appset-servarr.yaml; annotations are tpl'd, so homepage {{VARS}} are escaped
 route:
   app:
-    parentRefs:
-      - name: traefik-gateway
-        namespace: traefik
-        sectionName: websecure
-    hostnames:
-      - unpackerr.talos-cluster.local.obleey.com
-    rules:
-      - backendRefs:
-          - name: unpackerr
-            port: 5656
+    annotations:
+      gethomepage.dev/enabled: 'true'
+      gethomepage.dev/group: 'Downloads'
+      gethomepage.dev/name: 'Unpackerr'
+      gethomepage.dev/icon: 'unpackerr.png'
+      gethomepage.dev/description: 'Archive extractor'
+      gethomepage.dev/weight: '200'

@@ -38,13 +38,6 @@ controllers:
               failureThreshold: 30
               periodSeconds: 5
 
-service:
-  app:
-    controller: main
-    ports:
-      http:
-        port: 8080
-
 persistence:
   config:
     type: persistentVolumeClaim
@@ -52,15 +45,13 @@ persistence:
     globalMounts:
       - path: /config
 
+# hostname, port and gateway come from appset-servarr.yaml; annotations are tpl'd, so homepage {{VARS}} are escaped
 route:
   app:
-    parentRefs:
-      - name: traefik-gateway
-        namespace: traefik
-        sectionName: websecure
-    hostnames:
-      - watchstate.talos-cluster.local.obleey.com
-    rules:
-      - backendRefs:
-          - name: watchstate
-            port: 8080
+    annotations:
+      gethomepage.dev/enabled: 'true'
+      gethomepage.dev/group: 'Media Management'
+      gethomepage.dev/name: 'WatchState'
+      gethomepage.dev/icon: 'mdi-sync'
+      gethomepage.dev/description: 'Watch state sync'
+      gethomepage.dev/weight: '700'

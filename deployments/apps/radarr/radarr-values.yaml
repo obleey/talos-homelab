@@ -35,13 +35,6 @@ controllers:
               failureThreshold: 30
               periodSeconds: 5
 
-service:
-  app:
-    controller: main
-    ports:
-      http:
-        port: 7878
-
 persistence:
   config:
     type: persistentVolumeClaim
@@ -55,15 +48,16 @@ persistence:
     globalMounts:
       - path: /data
 
+# hostname, port and gateway come from appset-servarr.yaml; annotations are tpl'd, so homepage {{VARS}} are escaped
 route:
   app:
-    parentRefs:
-      - name: traefik-gateway
-        namespace: traefik
-        sectionName: websecure
-    hostnames:
-      - radarr.talos-cluster.local.obleey.com
-    rules:
-      - backendRefs:
-          - name: radarr
-            port: 7878
+    annotations:
+      gethomepage.dev/enabled: 'true'
+      gethomepage.dev/group: 'Media Management'
+      gethomepage.dev/name: 'Radarr'
+      gethomepage.dev/icon: 'radarr.png'
+      gethomepage.dev/description: 'Movies'
+      gethomepage.dev/weight: '100'
+      gethomepage.dev/widget.type: 'radarr'
+      gethomepage.dev/widget.url: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.app.ports.http.port }}'
+      gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_RADARR_API_KEY}}" }}'

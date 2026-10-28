@@ -40,13 +40,6 @@ controllers:
               failureThreshold: 30
               periodSeconds: 5
 
-service:
-  app:
-    controller: main
-    ports:
-      http:
-        port: 8096
-
 persistence:
   dri:
     type: hostPath
@@ -70,15 +63,18 @@ persistence:
     globalMounts:
       - path: /data/media
 
+# hostname, port and gateway come from appset-servarr.yaml; annotations are tpl'd, so homepage {{VARS}} are escaped
 route:
   app:
-    parentRefs:
-      - name: traefik-gateway
-        namespace: traefik
-        sectionName: websecure
-    hostnames:
-      - jellyfin.talos-cluster.local.obleey.com
-    rules:
-      - backendRefs:
-          - name: jellyfin
-            port: 8096
+    annotations:
+      gethomepage.dev/enabled: 'true'
+      gethomepage.dev/group: 'Media Servers'
+      gethomepage.dev/name: 'Jellyfin'
+      gethomepage.dev/icon: 'jellyfin.png'
+      gethomepage.dev/description: 'Media server'
+      gethomepage.dev/weight: '200'
+      gethomepage.dev/widget.type: 'jellyfin'
+      gethomepage.dev/widget.url: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.app.ports.http.port }}'
+      gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}" }}'
+      gethomepage.dev/widget.enableBlocks: 'true'
+      gethomepage.dev/widget.enableNowPlaying: 'true'
