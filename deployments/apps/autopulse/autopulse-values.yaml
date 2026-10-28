@@ -52,11 +52,6 @@ service:
         port: 2875
 
 persistence:
-  config:
-    type: persistentVolumeClaim
-    existingClaim: autopulse-config
-    globalMounts:
-      - path: /config
   autopulse-config:
     type: configMap
     name: autopulse-config

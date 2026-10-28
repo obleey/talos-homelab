@@ -68,3 +68,7 @@ serviceMonitor:
       - port: http
         path: /metrics
         interval: 1m
+
+persistence:
+  config:
+    enabled: false

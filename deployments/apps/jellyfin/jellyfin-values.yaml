@@ -35,21 +35,21 @@ controllers:
             type: TCP
 
 persistence:
+  config:
+    size: 10Gi
+  cache:
+    type: persistentVolumeClaim
+    forceRename: jellyfin-cache
+    storageClass: local-path
+    accessMode: ReadWriteOnce
+    size: 20Gi
+    globalMounts:
+      - path: /cache
   dri:
     type: hostPath
     hostPath: /dev/dri
     globalMounts:
       - path: /dev/dri
-  config:
-    type: persistentVolumeClaim
-    existingClaim: jellyfin-config
-    globalMounts:
-      - path: /config
-  cache:
-    type: persistentVolumeClaim
-    existingClaim: jellyfin-cache
-    globalMounts:
-      - path: /cache
   media:
     type: persistentVolumeClaim
     existingClaim: starr-data

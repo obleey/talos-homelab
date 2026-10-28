@@ -25,10 +25,7 @@ controllers:
 
 persistence:
   config:
-    type: persistentVolumeClaim
-    existingClaim: clonarr-config
-    globalMounts:
-      - path: /config
+    size: 5Gi
 
 # hostname, port and gateway come from appset-servarr.yaml; annotations are tpl'd, so homepage {{VARS}} are escaped
 route:

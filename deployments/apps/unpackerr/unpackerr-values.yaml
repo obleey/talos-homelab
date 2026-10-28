@@ -36,14 +36,8 @@ controllers:
             memory: 256Mi
 
 persistence:
-  # web UI saves rewrite /config/unpackerr.conf, so it must be writable and persistent
   config:
-    type: persistentVolumeClaim
-    accessMode: ReadWriteOnce
-    size: 1Gi
-    retain: true
-    globalMounts:
-      - path: /config
+    forceRename: unpackerr
   torrents:
     type: persistentVolumeClaim
     existingClaim: starr-data

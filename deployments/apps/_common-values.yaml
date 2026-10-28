@@ -11,3 +11,19 @@ controllers:
             spec:
               failureThreshold: 30
               periodSeconds: 5
+
+persistence:
+  # Longhorn config volume for every app; explicit name because the chart drops the -config
+  # suffix when an app has a single PVC. Apps without state set `config.enabled: false`.
+  config:
+    type: persistentVolumeClaim
+    forceRename: "{{ .Release.Name }}-config"
+    # explicit: the live PVCs recorded it, and dropping it is an immutable-field change
+    storageClass: longhorn
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    annotations:
+      # never prune or cascade-delete app data
+      argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    globalMounts:
+      - path: /config

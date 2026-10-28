@@ -28,11 +28,6 @@ controllers:
             enabled: true
 
 persistence:
-  config:
-    type: persistentVolumeClaim
-    existingClaim: qbittorrent-config
-    globalMounts:
-      - path: /config
   torrents:
     type: persistentVolumeClaim
     existingClaim: starr-data

@@ -25,26 +25,30 @@ controllers:
             memory: 4Gi
 
 persistence:
+  config:
+    forceRename: pms-config-plex-plex-media-server-0
+    size: 20Gi
+  cache:
+    type: persistentVolumeClaim
+    forceRename: plex-cache
+    storageClass: local-path
+    accessMode: ReadWriteOnce
+    size: 20Gi
+    globalMounts:
+      - path: /caches
+  transcode:
+    type: persistentVolumeClaim
+    forceRename: plex-transcode
+    storageClass: local-path
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    globalMounts:
+      - path: /transcodes
   dri:
     type: hostPath
     hostPath: /dev/dri
     globalMounts:
       - path: /dev/dri
-  config:
-    type: persistentVolumeClaim
-    existingClaim: pms-config-plex-plex-media-server-0
-    globalMounts:
-      - path: /config
-  cache:
-    type: persistentVolumeClaim
-    existingClaim: plex-cache
-    globalMounts:
-      - path: /caches
-  transcode:
-    type: persistentVolumeClaim
-    existingClaim: plex-transcode
-    globalMounts:
-      - path: /transcodes
   data:
     type: persistentVolumeClaim
     existingClaim: starr-data

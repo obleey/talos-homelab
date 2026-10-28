@@ -31,11 +31,6 @@ controllers:
             type: TCP
 
 persistence:
-  config:
-    type: persistentVolumeClaim
-    existingClaim: radarr-config
-    globalMounts:
-      - path: /config
   data:
     type: persistentVolumeClaim
     existingClaim: starr-data

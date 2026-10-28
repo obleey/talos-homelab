@@ -35,8 +35,6 @@ controllers:
 
 persistence:
   config:
-    type: persistentVolumeClaim
-    existingClaim: seerr-config
     globalMounts:
       - path: /app/config
 

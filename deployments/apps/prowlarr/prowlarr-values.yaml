@@ -30,13 +30,6 @@ controllers:
             enabled: true
             type: TCP
 
-persistence:
-  config:
-    type: persistentVolumeClaim
-    existingClaim: prowlarr-config
-    globalMounts:
-      - path: /config
-
 # hostname, port and gateway come from appset-servarr.yaml; annotations are tpl'd, so homepage {{VARS}} are escaped
 route:
   app:
