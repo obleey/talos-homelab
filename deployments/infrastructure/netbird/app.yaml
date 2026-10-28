@@ -6,7 +6,8 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: oci://ghcr.io/netbirdio/helm-charts/netbird-operator
+    - repoURL: oci://ghcr.io/netbirdio/helm-charts
+      chart: netbird-operator
       targetRevision: 0.8.0
       helm:
         valueFiles:
