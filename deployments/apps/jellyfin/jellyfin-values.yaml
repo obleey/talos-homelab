@@ -72,3 +72,5 @@ route:
       gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}" }}'
       gethomepage.dev/widget.enableBlocks: 'true'
       gethomepage.dev/widget.enableNowPlaying: 'true'
+      # Jellyfin >= 10.12 API: no /emby prefix, key sent as a header instead of ?api_key=
+      gethomepage.dev/widget.version: '2'
