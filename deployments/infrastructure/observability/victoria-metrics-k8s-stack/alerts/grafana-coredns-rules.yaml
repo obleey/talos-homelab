@@ -62,6 +62,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "k8s_system_coredns"
+              __panelId__: "25"
               summary: "CoreDNS panic on {{ $labels.instance }}"
               description: "CoreDNS has panicked {{ $values.A.Value | printf \"%.0f\" }} time(s) in the last minute. DNS resolution may be degraded."
             isPaused: false

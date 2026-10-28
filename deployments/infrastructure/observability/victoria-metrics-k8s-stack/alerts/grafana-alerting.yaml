@@ -9,6 +9,13 @@ data:
   alerting.yaml: |
     apiVersion: 1
 
+    # provisioning never removes a rule that left its file; these watched metrics this cluster doesn't expose
+    deleteRules:
+      - {orgId: 1, uid: cilium-operator-ipam-exhausted}
+      - {orgId: 1, uid: etcd-http-errors-critical}
+      - {orgId: 1, uid: host-raid-insufficient}
+      - {orgId: 1, uid: traefik-service-down}
+
     contactPoints:
       - orgId: 1
         name: slack

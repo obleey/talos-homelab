@@ -90,7 +90,7 @@ FILTER_TO_ZERO = re.compile(r"(==|<=|<)\s*-?0(\.0+)?\s*$")
 
 
 def alerts(repo):
-    uids, errors = repo.dashboard_uids(), []
+    boards, errors = repo.dashboards(), []
     for path, rule in repo.alert_rules():
         where = f"{path}: {rule.get('uid')}"
         exprs = [d["model"]["expr"] for d in rule.get("data", []) if "expr" in d.get("model", {})]
@@ -101,9 +101,13 @@ def alerts(repo):
                 errors.append(f"{where}: query filters to values <= 0 but fires on > 0, so it never fires; "
                               "query the raw metric and use an lt threshold")
         annotations = rule.get("annotations") or {}
-        uid = annotations.get("__dashboardUid__")
-        if uid and uid not in uids:
+        uid, panel = annotations.get("__dashboardUid__"), annotations.get("__panelId__")
+        if bool(uid) != bool(panel):
+            errors.append(f"{where}: Grafana rejects the whole provisioning reload unless __dashboardUid__ and __panelId__ come together")
+        elif uid and uid not in boards:
             errors.append(f"{where}: __dashboardUid__ {uid} matches no dashboard")
+        elif uid and int(panel) not in boards[uid]:
+            errors.append(f"{where}: __panelId__ {panel} is not a panel of dashboard {uid}")
         # Grafana sends the raw template when it fails to render; these are the two ways that has happened here
         for text in annotations.values():
             if re.search(r"\$value\b(?!s)", text):

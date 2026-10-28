@@ -75,13 +75,15 @@ class Repo:
                 rules += [(path, r) for g in groups for r in g.get("rules", [])]
         return rules
 
-    def dashboard_uids(self):
-        uids = set()
+    def dashboards(self):
+        """{dashboard uid: set of panel ids, rows' nested panels included}."""
+        boards = {}
         for path, d in self.kind("ConfigMap"):
             for name, body in (d.get("data") or {}).items():
                 if name.endswith(".json"):
-                    uids.add(json.loads(body).get("uid"))
-        return uids
+                    j = json.loads(body)
+                    boards[j.get("uid")] = {p.get("id") for p in walk(j.get("panels", [])) if "type" in p}
+        return boards
 
 
 def walk(node):

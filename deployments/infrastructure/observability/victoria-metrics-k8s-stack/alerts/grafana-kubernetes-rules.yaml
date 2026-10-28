@@ -114,6 +114,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "k8s_views_nodes"
+              __panelId__: "13"
               summary: "Kubernetes Node memory pressure ({{ $labels.node }})"
               description: "Node {{ $labels.node }} has MemoryPressure condition set. VALUE = {{ $values.A.Value }}"
             isPaused: false
@@ -275,6 +276,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "k8s_views_pods"
+              __panelId__: "63"
               summary: "Kubernetes Pod not healthy ({{ $labels.namespace }}/{{ $labels.pod }})"
               description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-running state for more than 15 minutes. VALUE = {{ $values.A.Value }}"
             isPaused: false
@@ -326,6 +328,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "k8s_views_ns"
+              __panelId__: "83"
               summary: "Kubernetes StatefulSet down ({{ $labels.namespace }}/{{ $labels.statefulset }})"
               description: "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} went down. VALUE = {{ $values.A.Value }}"
             isPaused: false
@@ -377,6 +380,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "k8s_views_ns"
+              __panelId__: "8"
               summary: "Kubernetes Deployment generation mismatch ({{ $labels.namespace }}/{{ $labels.deployment }})"
               description: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has failed but has not been rolled back. VALUE = {{ $values.A.Value }}"
             isPaused: false
@@ -428,6 +432,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "k8s_views_ns"
+              __panelId__: "83"
               summary: "Kubernetes StatefulSet generation mismatch ({{ $labels.namespace }}/{{ $labels.statefulset }})"
               description: "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has failed but has not been rolled back. VALUE = {{ $values.A.Value }}"
             isPaused: false
@@ -479,6 +484,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "k8s_views_ns"
+              __panelId__: "83"
               summary: "Kubernetes DaemonSet misscheduled ({{ $labels.namespace }}/{{ $labels.daemonset }})"
               description: "Some Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} are running where they are not supposed to run. VALUE = {{ $values.A.Value }}"
             isPaused: false
@@ -530,6 +536,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "k8s_views_ns"
+              __panelId__: "5"
               summary: "Kubernetes CronJob failing ({{ $labels.namespace }}/{{ $labels.cronjob }})"
               description: "CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is failing (last schedule is newer than last success and no active runs). VALUE = {{ $values.A.Value }}"
             isPaused: false
@@ -581,6 +588,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "k8s_views_ns"
+              __panelId__: "5"
               summary: "Kubernetes Job slow completion ({{ $labels.namespace }}/{{ $labels.job_name }})"
               description: "Kubernetes Job {{ $labels.namespace }}/{{ $labels.job_name }} did not complete in time. VALUE = {{ $values.A.Value }}"
             isPaused: false
@@ -748,6 +756,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "k8s_system_apisrv"
+              __panelId__: "50"
               summary: "Kubernetes API server errors ({{ $labels.instance }})"
               description: "Kubernetes API server is experiencing {{ $values.A.Value | humanize }}% 5xx error rate on {{ $labels.instance }}."
             isPaused: false
@@ -799,6 +808,7 @@ data:
               severity: critical
             annotations:
               __dashboardUid__: "k8s_system_apisrv"
+              __panelId__: "50"
               summary: "Kubernetes API client errors ({{ $labels.instance }}/{{ $labels.job }})"
               description: "Kubernetes API client on {{ $labels.instance }} is experiencing {{ $values.A.Value | humanize }}% 4xx/5xx error rate."
             isPaused: false

@@ -34,6 +34,8 @@ CASES = [
      "blackbox-ssl-expired: $value is a string"),
     (f"{ALERTS}/grafana-blackbox-rules.yaml", "has expired {{ $values.A.Value }} days", "has expired {{ $values.A.Value | abs }} days",
      "template function 'abs' does not exist"),
+    (f"{ALERTS}/grafana-coredns-rules.yaml", '__panelId__: "25"', 'note: "25"', "coredns-panic: Grafana rejects the whole provisioning reload"),
+    (f"{ALERTS}/grafana-coredns-rules.yaml", '__panelId__: "25"', '__panelId__: "999"', "__panelId__ 999 is not a panel of dashboard k8s_system_coredns"),
 ]
 
 assert lint(ROOT) == [], lint(ROOT)
