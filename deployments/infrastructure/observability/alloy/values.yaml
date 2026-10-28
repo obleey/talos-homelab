@@ -104,6 +104,13 @@ alloy:
       loki.process "level_extract" {
         forward_to = [loki.write.default.receiver]
 
+        // Redact credentials apps print in URLs/headers (homepage logs ?api_key=, *arr ?apikey=).
+        // Only the captured value is replaced; kubectl logs on the node still shows the raw line.
+        stage.replace {
+          expression = `(?i)(?:api_?key|access_token|token|password|x-api-key)(?:=|:\s*|"\s*:\s*")([^&\s"',;]+)`
+          replace    = "<redacted>"
+        }
+
         // Matches level from logfmt (level=error), free-text (WARN [...]), JSON ("level":"error")
         stage.regex {
           expression = `(?i)(?:^|[\s\[=("])(?P<level>trace|debug|info|warn(?:ing)?|error|fatal|critical|panic)(?:$|[\s\]=":{,])`
