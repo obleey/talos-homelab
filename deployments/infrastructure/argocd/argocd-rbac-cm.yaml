@@ -9,8 +9,6 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-rbac-cm
     app.kubernetes.io/part-of: argocd
-  annotations:
-    argocd.argoproj.io/managed-by: talos-cluster
 data:
   policy.csv: |
     g, obleey, role:admin

@@ -1,2 +1,4 @@
 #!/bin/sh
-exec scripts/check-routes.sh
+set -e
+scripts/check-routes.sh
+scripts/check-conventions.py

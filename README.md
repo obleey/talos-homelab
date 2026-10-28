@@ -118,7 +118,7 @@ graph TD
 
 ## Deployment Order
 
-Infrastructure deploys in strict sync waves to satisfy dependencies:
+Applications are created in sync-wave order. ArgoCD does not wait for a child Application to be healthy before the next wave (no Application health customization is configured, on purpose: one degraded app would block every later wave). Waves set creation order only; dependencies settle through retries.
 
 | Wave | Components | Why |
 | ---: | --- | --- |
@@ -127,7 +127,8 @@ Infrastructure deploys in strict sync waves to satisfy dependencies:
 | `−3` | cert-manager, metrics-server | cert-manager begins issuing TLS once networking is up |
 | `−2` | traefik, longhorn | Traefik depends on the wildcard cert from cert-manager |
 | `−1` | argocd | Self-manages its own CRDs and configuration |
-| `0` | all apps | Runs after all infrastructure is healthy |
+| `0` | all apps | Created after the infrastructure Applications |
+| `1`–`2` | observability | VictoriaMetrics/Logs, then Alloy |
 
 ---
 
@@ -284,7 +285,7 @@ kubectl create secret generic my-secret \
 3. Add a target for the hostname in `deployments/infrastructure/observability/alloy-blackbox/values.yaml`.
 4. Add any extra manifests (PVCs, SealedSecrets) in the same folder.
 
-`scripts/check-routes.sh` runs as a pre-commit hook and fails when a hostname has no probe target. Enable it once per clone with `git config core.hooksPath .githooks`.
+The pre-commit hook runs `scripts/check-routes.sh` (every hostname has a probe target) and `scripts/check-conventions.py` (no cascade-delete finalizer on cluster-critical apps; each namespace comes from exactly one of a Namespace manifest or `CreateNamespace=true`). Enable it once per clone with `git config core.hooksPath .githooks`.
 
 ### Standalone app (own namespace or different lifecycle)
 

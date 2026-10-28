@@ -3,12 +3,8 @@ kind: Application
 metadata:
   name: longhorn
   namespace: argocd
-  labels:
-    argocd.argoproj.io/managed-by: talos-cluster
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
@@ -28,10 +24,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
   ignoreDifferences:
-    - group: argoproj.io
-      kind: Application
-      jsonPointers:
-        - /metadata/finalizers
     - group: longhorn.io
       kind: Node
       jsonPointers:
@@ -49,6 +41,5 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
       - ServerSideApply=true
       - RespectIgnoreDifferences=true

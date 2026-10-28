@@ -38,8 +38,6 @@ spec:
     metadata:
       name: "{{.name}}"
       namespace: argocd
-      labels:
-        argocd.argoproj.io/managed-by: talos-cluster
       annotations:
         link.argocd.argoproj.io/external-link: "{{if .port}}https://{{.host | default .name}}.talos-cluster.local.obleey.com{{end}}"
       finalizers:
