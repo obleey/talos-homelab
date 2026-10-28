@@ -63,7 +63,7 @@ for path, doc in Repo().docs:
             helm_cfg = src.get("helm") or {}
             files = [f.replace("{{.name}}", el["name"]) for f in helm_cfg.get("valueFiles", [])]
             values = go_template(helm_cfg.get("values", ""), el)
-            helm_template(f"{path} ({el['name']})", el["name"], tmpl["spec"]["destination"]["namespace"], src, files, values)
+            helm_template(f"{path} ({el['name']})", el["name"], el.get("namespace", "servarr"), src, files, values)
 
 run("kustomize deployments/", ["kubectl", "kustomize", "deployments"])
 

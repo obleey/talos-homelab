@@ -1,5 +1,3 @@
-fullnameOverride: technitium-secondary
-
 controllers:
   main:
     type: deployment
@@ -10,7 +8,6 @@ controllers:
           tag: '15.6.2'
         env:
           DNS_SERVER_DOMAIN: dns02.dns.local
-          TZ: Europe/Ljubljana
     pod:
       hostAliases:
         - ip: 10.0.0.104
@@ -19,11 +16,8 @@ controllers:
 
 service:
   app:
-    controller: main
     forceRename: technitium-secondary
-    ports:
-      http:
-        port: 5380
+  # stable LAN address for DNS and the cluster link to dns01 (Technitium cluster node IP)
   dns:
     controller: main
     type: LoadBalancer
@@ -47,11 +41,6 @@ service:
 
 persistence:
   config:
-    type: persistentVolumeClaim
-    forceRename: technitium-secondary-config
-    accessMode: ReadWriteOnce
-    size: 1Gi
-    storageClass: longhorn
     globalMounts:
       - path: /etc/dns
 
@@ -65,15 +54,5 @@ route:
       gethomepage.dev/description: 'DNS server (secondary)'
       gethomepage.dev/weight: '150'
       gethomepage.dev/widget.type: 'technitium'
-      gethomepage.dev/widget.url: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:5380'
+      gethomepage.dev/widget.url: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.app.ports.http.port }}'
       gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}" }}'
-    parentRefs:
-      - name: traefik-gateway
-        namespace: traefik
-        sectionName: websecure
-    hostnames:
-      - technitium-secondary.talos-cluster.local.obleey.com
-    rules:
-      - backendRefs:
-          - name: technitium-secondary
-            port: 5380

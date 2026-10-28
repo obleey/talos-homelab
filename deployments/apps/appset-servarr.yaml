@@ -33,6 +33,9 @@ spec:
             port: 5055
           - name: sonarr
             port: 8989
+          - name: technitium-secondary
+            port: 5380
+            namespace: technitium-secondary
           - name: unpackerr
             port: 5656
           - name: watchstate
@@ -85,7 +88,7 @@ spec:
             exclude: "{app.yaml,{{.name}}-values.yaml}"
       destination:
         server: https://kubernetes.default.svc
-        namespace: servarr
+        namespace: '{{.namespace | default "servarr"}}'
       syncPolicy:
         automated:
           prune: true
