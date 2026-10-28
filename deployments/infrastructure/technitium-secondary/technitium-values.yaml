@@ -57,6 +57,16 @@ persistence:
 
 route:
   app:
+    annotations:
+      gethomepage.dev/enabled: 'true'
+      gethomepage.dev/group: 'Infrastructure'
+      gethomepage.dev/name: 'Technitium Secondary'
+      gethomepage.dev/icon: 'technitium.png'
+      gethomepage.dev/description: 'DNS server (secondary)'
+      gethomepage.dev/weight: '150'
+      gethomepage.dev/widget.type: 'technitium'
+      gethomepage.dev/widget.url: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:5380'
+      gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}" }}'
     parentRefs:
       - name: traefik-gateway
         namespace: traefik

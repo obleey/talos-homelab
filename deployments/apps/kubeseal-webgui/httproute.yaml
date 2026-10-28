@@ -3,6 +3,13 @@ kind: HTTPRoute
 metadata:
   name: kubeseal-webgui
   namespace: kubeseal-webgui
+  annotations:
+    gethomepage.dev/enabled: 'true'
+    gethomepage.dev/group: 'Infrastructure'
+    gethomepage.dev/name: 'Kubeseal'
+    gethomepage.dev/icon: 'kubernetes.png'
+    gethomepage.dev/description: 'Sealed secrets UI'
+    gethomepage.dev/weight: '130'
 spec:
   parentRefs:
     - name: traefik-gateway

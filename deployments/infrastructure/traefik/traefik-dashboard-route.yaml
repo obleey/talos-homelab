@@ -3,6 +3,16 @@ kind: HTTPRoute
 metadata:
   name: traefik-dashboard
   namespace: traefik
+  annotations:
+    gethomepage.dev/enabled: 'true'
+    gethomepage.dev/group: 'Infrastructure'
+    gethomepage.dev/name: 'Traefik'
+    gethomepage.dev/icon: 'traefik.png'
+    gethomepage.dev/description: 'Gateway & ingress'
+    gethomepage.dev/weight: '110'
+    gethomepage.dev/href: 'https://traefik.talos-cluster.local.obleey.com/dashboard/'
+    gethomepage.dev/widget.type: 'traefik'
+    gethomepage.dev/widget.url: 'http://traefik.traefik.svc.cluster.local:9000'
 spec:
   parentRefs:
     - name: traefik-gateway

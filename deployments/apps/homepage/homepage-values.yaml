@@ -234,55 +234,22 @@ configMaps:
             total: true
             url: https://longhorn.talos-cluster.local.obleey.com
       services.yaml: |
+        # in-cluster services come from gethomepage.dev annotations on their HTTPRoutes; only things without a route live here
         - Infrastructure:
-          - ArgoCD:
-              description: GitOps controller
-              href: https://argocd.talos-cluster.local.obleey.com
-              icon: argo-cd.png
-              widget:
-                key: '{{ "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}" }}'
-                type: argocd
-                url: https://argocd.talos-cluster.local.obleey.com
-          - Traefik:
-              description: Gateway & ingress
-              href: https://traefik.talos-cluster.local.obleey.com/dashboard/
-              icon: traefik.png
-              widget:
-                type: traefik
-                url: http://traefik.traefik.svc.cluster.local:9000
-          - Longhorn:
-              description: Distributed storage
-              href: https://longhorn.talos-cluster.local.obleey.com
-              icon: longhorn.png
-          - Kubeseal:
-              description: Sealed secrets UI
-              href: https://kubeseal.talos-cluster.local.obleey.com
-              icon: kubernetes.png
           - Technitium Primary:
               description: DNS server (primary)
               href: http://10.0.0.104:5380
               icon: technitium.png
+              weight: 140
               widget:
                 key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}" }}'
                 type: technitium
                 url: http://10.0.0.104:5380
-          - Technitium Secondary:
-              description: DNS server (secondary)
-              href: https://technitium-secondary.talos-cluster.local.obleey.com
-              icon: technitium.png
-              widget:
-                key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}" }}'
-                type: technitium
-                url: http://technitium-secondary.technitium-secondary.svc.cluster.local:5380
           - TrueNAS:
               description: Network storage
               href: https://truenas.local.obleey.com
               icon: truenas.png
-        - Monitoring:
-          - Grafana:
-              description: Dashboards & alerting
-              href: https://grafana.talos-cluster.local.obleey.com
-              icon: grafana.png
+              weight: 160
       kubernetes.yaml: |
         gateway: true
         mode: cluster

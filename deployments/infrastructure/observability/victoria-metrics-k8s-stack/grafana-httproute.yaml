@@ -3,6 +3,13 @@ kind: HTTPRoute
 metadata:
   name: grafana
   namespace: monitoring
+  annotations:
+    gethomepage.dev/enabled: 'true'
+    gethomepage.dev/group: 'Monitoring'
+    gethomepage.dev/name: 'Grafana'
+    gethomepage.dev/icon: 'grafana.png'
+    gethomepage.dev/description: 'Dashboards & alerting'
+    gethomepage.dev/weight: '100'
 spec:
   parentRefs:
     - group: gateway.networking.k8s.io
