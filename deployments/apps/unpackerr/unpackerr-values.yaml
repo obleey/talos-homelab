@@ -8,6 +8,7 @@ controllers:
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
+        fsGroup: 1000
     containers:
       main:
         image:
@@ -35,7 +36,22 @@ controllers:
             cpu: 250m
             memory: 256Mi
 
+service:
+  app:
+    controller: main
+    ports:
+      http:
+        port: 5656
+
 persistence:
+  # web UI saves rewrite /config/unpackerr.conf, so it must be writable and persistent
+  config:
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    retain: true
+    globalMounts:
+      - path: /config
   torrents:
     type: nfs
     server: 10.0.0.104
@@ -56,3 +72,16 @@ configMaps:
       UN_PARALLEL: "1"
       UN_FILE_MODE: "0644"
       UN_DIR_MODE: "0755"
+
+route:
+  app:
+    parentRefs:
+      - name: traefik-gateway
+        namespace: traefik
+        sectionName: websecure
+    hostnames:
+      - unpackerr.talos-cluster.local.obleey.com
+    rules:
+      - backendRefs:
+          - name: unpackerr
+            port: 5656

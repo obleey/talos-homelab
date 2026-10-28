@@ -30,6 +30,7 @@ spec:
           - name: sonarr
             url: sonarr.talos-cluster.local.obleey.com
           - name: unpackerr
+            url: unpackerr.talos-cluster.local.obleey.com
           - name: watchstate
             url: watchstate.talos-cluster.local.obleey.com
   template:
