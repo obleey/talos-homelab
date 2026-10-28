@@ -333,6 +333,37 @@ spec:
 
 ---
 
+## Outside Git
+
+A rebuild needs these, and the repo does not hold them:
+
+| What | Where it lives |
+| --- | --- |
+| Talos machine configs (node names, `.160`/`.161` IPs) | Generated with `talosctl`; not in git yet |
+| sealed-secrets controller private key | Password manager. Without it every `*-sealed.yaml` is unreadable; see restore below |
+| NFS exports `/mnt/serve/starr-stack/data`, `/mnt/serve/longhorn-backups` | TrueNAS at `10.0.0.104` |
+| Technitium primary DNS | `10.0.0.104:5380` |
+| `*.talos-cluster.local.obleey.com` → gateway LB IP | DNS record on Technitium |
+| ArgoCD `obleey`/`readonly` passwords, homepage ArgoCD token | Set in the ArgoCD UI; token sealed into `homepage-secrets` |
+
+**Back up the sealing key** (once, and after any key rotation):
+
+```bash
+kubectl -n kube-system get secret -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-key.yaml
+# store in the password manager, then delete the file
+```
+
+**Restore it** on a new cluster before bootstrap step 4, so the committed SealedSecrets decrypt:
+
+```bash
+kubectl apply -f sealed-secrets-key.yaml
+kubectl -n kube-system delete pod -l app.kubernetes.io/name=sealed-secrets  # picks up the restored key
+```
+
+With a restored key, skip bootstrap step 1: the committed sealed files already match.
+
+---
+
 ## Bootstrap
 
 > One-time process. After this, ArgoCD manages everything from git.
@@ -388,7 +419,7 @@ kubectl apply -f deployments/infrastructure/argocd/git-creds-sealed.yaml
 kubectl apply -f bootstrap/talos-cluster.yaml
 ```
 
-ArgoCD reconciles the full cluster from git. Sync waves ensure correct deployment order.
+ArgoCD reconciles the full cluster from git, creating Applications in sync-wave order (see [Deployment Order](#deployment-order)).
 
 ---
 
