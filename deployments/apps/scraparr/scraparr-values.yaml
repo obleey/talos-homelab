@@ -17,28 +17,28 @@ controllers:
           SONARR_API_KEY:
             valueFrom:
               secretKeyRef:
-                name: homepage-secrets
-                key: HOMEPAGE_VAR_SONARR_API_KEY
+                name: servarr-credentials
+                key: sonarr-api-key
           RADARR_API_KEY:
             valueFrom:
               secretKeyRef:
-                name: homepage-secrets
-                key: HOMEPAGE_VAR_RADARR_API_KEY
+                name: servarr-credentials
+                key: radarr-api-key
           PROWLARR_API_KEY:
             valueFrom:
               secretKeyRef:
-                name: homepage-secrets
-                key: HOMEPAGE_VAR_PROWLARR_API_KEY
+                name: servarr-credentials
+                key: prowlarr-api-key
           BAZARR_API_KEY:
             valueFrom:
               secretKeyRef:
-                name: homepage-secrets
-                key: HOMEPAGE_VAR_BAZARR_API_KEY
+                name: servarr-credentials
+                key: bazarr-api-key
           JELLYSEERR_API_KEY:
             valueFrom:
               secretKeyRef:
-                name: homepage-secrets
-                key: HOMEPAGE_VAR_SEERR_API_KEY
+                name: servarr-credentials
+                key: seerr-api-key
         resources:
           requests:
             cpu: 50m

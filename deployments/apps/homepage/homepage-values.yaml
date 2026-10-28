@@ -21,6 +21,52 @@ env:
     value: "hub.talos-cluster.local.obleey.com"
   - name: TZ
     value: "Europe/Ljubljana"
+  # shared servarr credentials; homepage-secrets keeps only the ArgoCD token
+  - name: HOMEPAGE_VAR_SONARR_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: servarr-credentials
+        key: sonarr-api-key
+  - name: HOMEPAGE_VAR_RADARR_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: servarr-credentials
+        key: radarr-api-key
+  - name: HOMEPAGE_VAR_PROWLARR_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: servarr-credentials
+        key: prowlarr-api-key
+  - name: HOMEPAGE_VAR_BAZARR_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: servarr-credentials
+        key: bazarr-api-key
+  - name: HOMEPAGE_VAR_SEERR_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: servarr-credentials
+        key: seerr-api-key
+  - name: HOMEPAGE_VAR_JELLYFIN_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: servarr-credentials
+        key: jellyfin-api-key
+  - name: HOMEPAGE_VAR_PLEX_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: servarr-credentials
+        key: plex-token
+  - name: HOMEPAGE_VAR_QBITTORRENT_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: servarr-credentials
+        key: qbittorrent-username
+  - name: HOMEPAGE_VAR_QBITTORRENT_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: servarr-credentials
+        key: qbittorrent-password
 envFrom:
   - secretRef:
       name: homepage-secrets

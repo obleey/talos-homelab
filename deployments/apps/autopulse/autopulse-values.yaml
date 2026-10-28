@@ -22,13 +22,13 @@ controllers:
           AUTOPULSE__TARGETS__PLEX__TOKEN:
             valueFrom:
               secretKeyRef:
-                name: autopulse-secret
-                key: PLEX_TOKEN
+                name: servarr-credentials
+                key: plex-token
           AUTOPULSE__TARGETS__JELLYFIN__TOKEN:
             valueFrom:
               secretKeyRef:
-                name: autopulse-secret
-                key: JELLYFIN_TOKEN
+                name: servarr-credentials
+                key: jellyfin-api-key
         resources:
           requests:
             cpu: 50m

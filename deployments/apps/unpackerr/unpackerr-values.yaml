@@ -20,12 +20,12 @@ controllers:
           UN_SONARR_0_API_KEY:
             valueFrom:
               secretKeyRef:
-                name: api-tokens-sealedsecret
+                name: servarr-credentials
                 key: sonarr-api-key
           UN_RADARR_0_API_KEY:
             valueFrom:
               secretKeyRef:
-                name: api-tokens-sealedsecret
+                name: servarr-credentials
                 key: radarr-api-key
         resources:
           requests:
