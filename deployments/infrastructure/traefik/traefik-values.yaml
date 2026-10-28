@@ -49,6 +49,8 @@ metrics:
     addRoutersLabels: true
     serviceMonitor:
       enabled: true
+      # keep traefik's own 'service' label (the router's backend) instead of the scrape target's Service name
+      honorLabels: true
       relabelings:
         - targetLabel: instance
           replacement: talos-k8s-cluster

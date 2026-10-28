@@ -11707,7 +11707,7 @@ data:
               "targets": [
                 {
                   "editorMode": "code",
-                  "expr": "node_network_up{operstate=\"up\",instance=\"$node\",job=\"$job\"}",
+                  "expr": "node_network_info{operstate=\"up\",instance=\"$node\",job=\"$job\"}",
                   "format": "time_series",
                   "hide": true,
                   "legendFormat": "{{interface}} - Operational state UP",

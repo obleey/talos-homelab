@@ -340,7 +340,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'longhorn_backup_state == 2'
+                  expr: 'longhorn_backup_state == 4'
                   instant: true
                   refId: A
               - refId: threshold

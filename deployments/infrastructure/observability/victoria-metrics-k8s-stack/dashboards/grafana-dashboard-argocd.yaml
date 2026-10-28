@@ -1196,7 +1196,7 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "sum(increase(argocd_app_k8s_request_total{namespace=~\"$namespace\",server=~\"$cluster\"}[$interval])) by (verb, resource_kind)",
+                  "expr": "sum(increase(argocd_app_k8s_request_total{namespace=~\"$namespace\"}[$interval])) by (verb, resource_kind)",
                   "format": "time_series",
                   "instant": false,
                   "intervalFactor": 1,
@@ -3524,7 +3524,7 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "sum(increase(grpc_server_handled_total{job=\"argocd-server-metrics\",grpc_service=\"settings.SettingsService\",namespace=~\"$namespace\"}[$interval])) by (grpc_code, grpc_method)",
+                  "expr": "sum(increase(grpc_server_handled_total{job=\"argocd-server-metrics\",grpc_service=\"cluster.SettingsService\",namespace=~\"$namespace\"}[$interval])) by (grpc_code, grpc_method)",
                   "format": "time_series",
                   "intervalFactor": 1,
                   "legendFormat": "{{grpc_code}},{{grpc_method}}",

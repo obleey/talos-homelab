@@ -493,7 +493,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "sum(kube_namespace_labels{cluster=\"$cluster\"})",
+              "expr": "sum(kube_namespace_created{cluster=\"$cluster\"})",
               "interval": "",
               "legendFormat": "Namespaces",
               "refId": "A"
@@ -533,7 +533,7 @@ data:
                 "type": "prometheus",
                 "uid": "${datasource}"
               },
-              "expr": "sum(kube_endpoint_info{cluster=\"$cluster\"})",
+              "expr": "sum(kube_endpointslice_info{cluster=\"$cluster\"})",
               "interval": "",
               "legendFormat": "Endpoints",
               "refId": "D"
@@ -623,7 +623,7 @@ data:
                 "type": "prometheus",
                 "uid": "${datasource}"
               },
-              "expr": "sum(kube_networkpolicy_labels{cluster=\"$cluster\"})",
+              "expr": "sum(kube_networkpolicy_created{cluster=\"$cluster\"})",
               "interval": "",
               "legendFormat": "Network Policies",
               "refId": "M"
