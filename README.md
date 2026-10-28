@@ -278,9 +278,9 @@ kubectl create secret generic my-secret \
 
 ## Adding a New App
 
-### Servarr-namespace app (managed by ApplicationSet)
+### App-template app (managed by ApplicationSet)
 
-1. Add `{name, port}` to `generators.list.elements` in `deployments/apps/appset-servarr.yaml` (`host` only if the subdomain differs from the name; omit `port` for apps without a web UI). The ApplicationSet injects the service port and the gateway route at `<host>.talos-cluster.local.obleey.com`.
+1. Add `{name, port}` to `generators.list.elements` in `deployments/apps/appset-servarr.yaml` (`host` only if the subdomain differs from the name; omit `port` for apps without a web UI; `namespace` only if it doesn't live in `servarr`, plus a `namespace.yaml` in its folder, as technitium-secondary does). The ApplicationSet injects the service port and the gateway route at `<host>.talos-cluster.local.obleey.com`.
 2. Create `deployments/apps/<name>/<name>-values.yaml` with the app-specific app-template values. `deployments/apps/_common-values.yaml` is merged underneath (TZ, startup probe timing, and a 1Gi Longhorn `/config` PVC named `<name>-config` that ArgoCD never prunes; override `persistence.config.size`, or set `persistence.config.enabled: false` for stateless apps), and the NAS share is mounted with `existingClaim: starr-data` plus a `subPath`. For a homepage tile, add `gethomepage.dev/*` annotations under `route.app.annotations` (see `sonarr-values.yaml`).
 3. Add a target for the hostname in `deployments/infrastructure/observability/alloy-blackbox/values.yaml`.
 4. Add any extra manifests (PVCs, SealedSecrets) in the same folder.
