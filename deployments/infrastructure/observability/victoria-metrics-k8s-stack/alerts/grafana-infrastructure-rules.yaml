@@ -223,6 +223,56 @@ data:
               description: 'Node {{ $labels.instance }} memory has been above 93% for 5 minutes (current: {{ printf "%.1f" $values.A.Value }}%). OOM kills imminent.'
             isPaused: false
 
+          - uid: infra-kubelet-memory-high
+            title: Kubelet Memory High
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'process_resident_memory_bytes{job="kubelet"} / 1024^3'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [2]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 1h
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kubelet on {{ $labels.instance }} uses {{ printf \"%.1f\" $values.A.Value }} GiB"
+              description: 'The kubelet on {{ $labels.instance }} holds {{ printf "%.1f" $values.A.Value }} GiB (a healthy one is ~1 GiB). Known heap leak in volume mounting; restart it with talosctl service kubelet restart (pods keep running) and plan a Kubernetes patch upgrade.'
+            isPaused: false
+
           - uid: infra-oom-kill
             title: Node OOM Kill
             condition: threshold
