@@ -10,6 +10,7 @@ spec:
       chart: netbird-operator
       targetRevision: 0.8.0
       helm:
+        releaseName: netbird-operator
         valueFiles:
           - $values/deployments/infrastructure/netbird/netbird-values.yaml
     - repoURL: https://github.com/obleey/talos-homelab
