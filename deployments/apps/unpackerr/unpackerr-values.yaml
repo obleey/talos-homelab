@@ -3,7 +3,6 @@ fullnameOverride: unpackerr
 controllers:
   main:
     type: deployment
-    strategy: Recreate
     pod:
       securityContext:
         runAsUser: 1000
@@ -46,11 +45,11 @@ persistence:
     globalMounts:
       - path: /config
   torrents:
-    type: nfs
-    server: 10.0.0.104
-    path: /mnt/serve/starr-stack/data/torrents
+    type: persistentVolumeClaim
+    existingClaim: starr-data
     globalMounts:
       - path: /data/torrents
+        subPath: torrents
 
 configMaps:
   config:

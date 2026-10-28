@@ -3,14 +3,12 @@ fullnameOverride: autopulse
 controllers:
   main:
     type: deployment
-    strategy: Recreate
     containers:
       main:
         image:
           repository: ghcr.io/dan-online/autopulse
           tag: latest-sqlite@sha256:b1d8aaf40f3710011f59ac3b77934fda9ef6c237394472677ad1b041e595d8af
         env:
-          TZ: Europe/Ljubljana
           AUTOPULSE__AUTH__USERNAME:
             valueFrom:
               secretKeyRef:
@@ -45,9 +43,6 @@ controllers:
             enabled: true
           startup:
             enabled: true
-            spec:
-              failureThreshold: 30
-              periodSeconds: 5
 
 service:
   app:
@@ -70,9 +65,8 @@ persistence:
         subPath: config.yaml
         readOnly: true
   data:
-    type: nfs
-    server: 10.0.0.104
-    path: /mnt/serve/starr-stack/data
+    type: persistentVolumeClaim
+    existingClaim: starr-data
     globalMounts:
       - path: /data
 

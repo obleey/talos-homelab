@@ -3,7 +3,6 @@ fullnameOverride: prowlarr
 controllers:
   main:
     type: deployment
-    strategy: Recreate
     containers:
       main:
         image:
@@ -12,7 +11,6 @@ controllers:
         env:
           PUID: "1000"
           PGID: "1000"
-          TZ: Europe/Ljubljana
         resources:
           requests:
             cpu: 100m
@@ -31,9 +29,6 @@ controllers:
           startup:
             enabled: true
             type: TCP
-            spec:
-              failureThreshold: 30
-              periodSeconds: 5
 
 persistence:
   config:

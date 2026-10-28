@@ -1,0 +1,13 @@
+# Defaults for every servarr app; each <app>-values.yaml is merged on top.
+controllers:
+  main:
+    containers:
+      main:
+        env:
+          TZ: Europe/Ljubljana
+        probes:
+          # timing only: apps opt in with `startup.enabled: true`
+          startup:
+            spec:
+              failureThreshold: 30
+              periodSeconds: 5

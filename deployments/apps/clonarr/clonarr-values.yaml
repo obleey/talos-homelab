@@ -3,14 +3,11 @@ fullnameOverride: clonarr
 controllers:
   main:
     type: deployment
-    strategy: Recreate
     containers:
       main:
         image:
           repository: ghcr.io/prophetse7en/clonarr
           tag: v3.5.0
-        env:
-          TZ: Europe/Ljubljana
         resources:
           requests:
             cpu: 50m
@@ -25,9 +22,6 @@ controllers:
             enabled: true
           startup:
             enabled: true
-            spec:
-              failureThreshold: 30
-              periodSeconds: 5
 
 persistence:
   config:

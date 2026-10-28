@@ -3,7 +3,6 @@ fullnameOverride: jellyfin
 controllers:
   main:
     type: deployment
-    strategy: Recreate
     pod:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -14,8 +13,6 @@ controllers:
         image:
           repository: jellyfin/jellyfin
           tag: "12.4.20261026-211555"
-        env:
-          TZ: Europe/Ljubljana
         securityContext:
           privileged: true
         resources:
@@ -36,9 +33,6 @@ controllers:
           startup:
             enabled: true
             type: TCP
-            spec:
-              failureThreshold: 30
-              periodSeconds: 5
 
 persistence:
   dri:
@@ -57,11 +51,11 @@ persistence:
     globalMounts:
       - path: /cache
   media:
-    type: nfs
-    server: 10.0.0.104
-    path: /mnt/serve/starr-stack/data/media
+    type: persistentVolumeClaim
+    existingClaim: starr-data
     globalMounts:
       - path: /data/media
+        subPath: media
 
 # hostname, port and gateway come from appset-servarr.yaml; annotations are tpl'd, so homepage {{VARS}} are escaped
 route:

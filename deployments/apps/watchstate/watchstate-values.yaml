@@ -3,7 +3,6 @@ fullnameOverride: watchstate
 controllers:
   main:
     type: deployment
-    strategy: Recreate
     pod:
       securityContext:
         runAsUser: 0
@@ -14,7 +13,6 @@ controllers:
           repository: ghcr.io/arabcoders/watchstate
           tag: v1.10.10
         env:
-          TZ: Europe/Ljubljana
           WS_TZ: Europe/Ljubljana
         resources:
           requests:
@@ -34,9 +32,6 @@ controllers:
           startup:
             enabled: true
             type: TCP
-            spec:
-              failureThreshold: 30
-              periodSeconds: 5
 
 persistence:
   config:

@@ -3,7 +3,6 @@ fullnameOverride: plex
 controllers:
   main:
     type: deployment
-    strategy: Recreate
     pod:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -15,7 +14,6 @@ controllers:
           repository: plexinc/pms-docker
           tag: "1.43.5.11079-b3b13e506"
         env:
-          TZ: Europe/Ljubljana
           HOSTNAME: talos-plex
         securityContext:
           privileged: true
@@ -48,9 +46,8 @@ persistence:
     globalMounts:
       - path: /transcodes
   data:
-    type: nfs
-    server: 10.0.0.104
-    path: /mnt/serve/starr-stack/data
+    type: persistentVolumeClaim
+    existingClaim: starr-data
     globalMounts:
       - path: /data
 

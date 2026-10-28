@@ -3,7 +3,6 @@ fullnameOverride: seerr
 controllers:
   main:
     type: deployment
-    strategy: Recreate
     pod:
       securityContext:
         fsGroup: 1000
@@ -14,8 +13,6 @@ controllers:
         image:
           repository: ghcr.io/seerr-team/seerr
           tag: v3.5.1
-        env:
-          TZ: Europe/Ljubljana
         resources:
           requests:
             cpu: 100m
@@ -35,9 +32,6 @@ controllers:
           startup:
             enabled: true
             type: TCP
-            spec:
-              failureThreshold: 30
-              periodSeconds: 5
 
 persistence:
   config:

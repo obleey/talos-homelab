@@ -1,0 +1,32 @@
+# Shared media/torrents share on the NAS; apps mount it with existingClaim: starr-data (+ subPath).
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: starr-data
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef:
+    namespace: servarr
+    name: starr-data
+  nfs:
+    server: 10.0.0.104
+    path: /mnt/serve/starr-stack/data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: starr-data
+  namespace: servarr
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  volumeName: starr-data
+  resources:
+    requests:
+      storage: 1Ti
