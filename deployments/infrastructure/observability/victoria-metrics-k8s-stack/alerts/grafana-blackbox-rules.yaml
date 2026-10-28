@@ -28,7 +28,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'probe_success{job="blackbox", name!~"technitium-.*"}'
+                  expr: 'probe_success{job="blackbox", instance!~"technitium-.*"}'
                   instant: true
                   refId: A
               - refId: threshold
@@ -64,7 +64,7 @@ data:
               __dashboardUid__: "blackbox-http-prober"
               __panelId__: "2"
               summary: "Host unreachable: {{ $labels.instance }}"
-              description: "Blackbox probe failed for {{ $labels.instance }} (target: {{ $labels.name }}). The service is not responding."
+              description: "Blackbox probe failed for {{ $labels.instance }}. The service is not responding."
             isPaused: false
 
           - uid: blackbox-technitium-outage
@@ -80,7 +80,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'count(probe_success{job="blackbox", name=~"technitium-.*"} == 0) == 2'
+                  expr: 'count(probe_success{job="blackbox", instance=~"technitium-.*"} == 0) == 2'
                   instant: true
                   refId: A
               - refId: threshold

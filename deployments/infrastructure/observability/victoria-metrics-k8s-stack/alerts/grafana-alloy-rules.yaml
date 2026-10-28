@@ -28,7 +28,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'count by (instance) (alloy_build_info offset 2h) unless count by (instance) (alloy_build_info)'
+                  expr: 'label_replace(kube_daemonset_status_number_unavailable{namespace="monitoring", daemonset="alloy"}, "workload", "$1", "daemonset", "(.*)") or label_replace(kube_deployment_status_replicas_unavailable{namespace="monitoring", deployment="alloy-blackbox"}, "workload", "$1", "deployment", "(.*)")'
                   instant: true
                   refId: A
               - refId: threshold
@@ -57,12 +57,12 @@ data:
                   type: threshold
             noDataState: OK
             execErrState: Alerting
-            for: 0s
+            for: 5m
             labels:
               severity: critical
             annotations:
               __dashboardUid__: "observability-overview"
               __panelId__: "4"
-              summary: "Grafana Alloy service down (instance {{ $labels.instance }})"
-              description: "Alloy on {{ $labels.instance }} is not responding or has stopped running. VALUE = {{ $values.A.Value }}"
+              summary: "Grafana Alloy down ({{ $labels.workload }})"
+              description: "{{ $values.A.Value }} {{ $labels.workload }} pod(s) unavailable; logs or blackbox probes are not being collected."
             isPaused: false
