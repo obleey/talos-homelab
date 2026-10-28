@@ -263,7 +263,7 @@ configMaps:
               href: http://10.0.0.104:5380
               icon: technitium.png
               widget:
-                key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_PRIMARY_API_KEY}}" }}'
+                key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}" }}'
                 type: technitium
                 url: http://10.0.0.104:5380
           - Technitium Secondary:
@@ -271,7 +271,7 @@ configMaps:
               href: https://technitium-secondary.talos-cluster.local.obleey.com
               icon: technitium.png
               widget:
-                key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_SECONDARY_API_KEY}}" }}'
+                key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}" }}'
                 type: technitium
                 url: http://technitium-secondary.technitium-secondary.svc.cluster.local:5380
           - TrueNAS:
