@@ -234,7 +234,7 @@ config:
               password: "{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}"
         - Unpackerr:
             icon: unpackerr.png
-            href: https://github.com/Unpackerr/unpackerr
+            href: https://unpackerr.talos-cluster.local.obleey.com
             description: Archive extractor
 
     - Monitoring:
