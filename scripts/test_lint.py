@@ -22,7 +22,7 @@ CASES = [
     ("deployments/infrastructure/observability/alloy-blackbox/values.yaml", "https://bazarr.", "https://bazarrx.",
      "bazarrx.talos-cluster.local.obleey.com: probed but nothing"),
     (f"{APPS}/homepage/homepage-values.yaml", "key: sonarr-api-key", "key: sonarr-api-kee", "servarr-credentials/sonarr-api-kee"),
-    (f"{APPS}/homepage/homepage-values.yaml", "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}", "{{HOMEPAGE_VAR_ARGOCD_TOKN}}",
+    ("deployments/infrastructure/argocd/argocd-httproute.yaml", "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}", "{{HOMEPAGE_VAR_ARGOCD_TOKN}}",
      "HOMEPAGE_VAR_ARGOCD_TOKN is used"),
     (f"{APPS}/unpackerr/unpackerr-values.yaml", "sonarr.servarr.svc.cluster.local:8989", "sonarr.servarr.svc.cluster.local:8988",
      "sonarr.servarr uses port 8988, the appset says 8989"),

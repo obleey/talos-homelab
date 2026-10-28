@@ -52,6 +52,8 @@ class Repo:
         apps = []
         for _, d in self.kind("ApplicationSet"):
             ns = d["spec"]["template"]["spec"]["destination"]["namespace"]
+            # '{{.namespace | default "servarr"}}' -> elements without a namespace land in servarr
+            ns = re.search(r'default "([^"]+)"', ns).group(1) if "{{" in ns else ns
             for el in d["spec"]["generators"][0]["list"]["elements"]:
                 apps.append({"host": el["name"], **el, "namespace": el.get("namespace", ns)})
         return apps
