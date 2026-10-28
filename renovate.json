@@ -63,10 +63,8 @@
     {
       "matchManagers": ["helmv3", "helm-values", "argocd"],
       "matchPackageNames": [
-        "victoria-metrics-single",
+        "victoria-metrics-k8s-stack",
         "victoria-logs-single",
-        "tempo",
-        "grafana",
         "alloy",
         "kube-state-metrics"
       ],
@@ -77,9 +75,7 @@
       "matchDatasources": ["docker"],
       "matchPackageNames": [
         "grafana/grafana",
-        "grafana/alloy",
-        "grafana/loki",
-        "grafana/tempo"
+        "grafana/alloy"
       ],
       "groupName": "observability images",
       "minimumReleaseAge": "3 days"

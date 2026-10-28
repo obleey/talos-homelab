@@ -478,7 +478,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'sum(cilium_operator_ipam_ips{type="available"}) by () <= 0'
+                  expr: 'sum(cilium_operator_ipam_ips{type="available"}) by ()'
                   instant: true
                   refId: A
               - refId: threshold
@@ -489,8 +489,8 @@ data:
                 model:
                   conditions:
                     - evaluator:
-                        params: [0]
-                        type: gt
+                        params: [1]
+                        type: lt
                       operator:
                         type: and
                       query:

@@ -20,15 +20,6 @@ alloy:
             valid_status_codes: [200, 201, 301, 302, 401, 403, 404]
             method: GET
             follow_redirects: true
-        http_strict:
-          prober: http
-          timeout: 15s
-          http:
-            valid_status_codes: [200]
-            method: GET
-            follow_redirects: true
-            tls_config:
-              insecure_skip_verify: true
       `
 
         // Kubernetes cluster services

@@ -182,7 +182,6 @@ grafana:
       api_url: https://openidconnect.googleapis.com/v1/userinfo
       allowed_emails: miha.oblishar@gmail.com
       auto_login: false
-      auto_login: false
     date_formats:
       full_date: DD.MM.YYYY HH:mm:ss
       used_in_range: DD.MM.YYYY HH:mm

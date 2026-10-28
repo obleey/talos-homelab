@@ -132,7 +132,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'longhorn_node_status{condition="ready"} == 0'
+                  expr: 'longhorn_node_status{condition="ready"}'
                   instant: true
                   refId: A
               - refId: threshold
@@ -143,8 +143,8 @@ data:
                 model:
                   conditions:
                     - evaluator:
-                        params: [0]
-                        type: gt
+                        params: [1]
+                        type: lt
                       operator:
                         type: and
                       query:
@@ -184,7 +184,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'longhorn_disk_status{condition="ready"} == 0'
+                  expr: 'longhorn_disk_status{condition="ready"}'
                   instant: true
                   refId: A
               - refId: threshold
@@ -195,8 +195,8 @@ data:
                 model:
                   conditions:
                     - evaluator:
-                        params: [0]
-                        type: gt
+                        params: [1]
+                        type: lt
                       operator:
                         type: and
                       query:
@@ -474,5 +474,5 @@ data:
               severity: warning
             annotations:
               summary: "Longhorn backup overdue ({{ $labels.pvc }})"
-              description: "Volume {{ $labels.pvc }} ({{ $labels.pvc_namespace }}) has not had a successful backup in over 25 hours. Last backup was reported from node {{ $labels.node }}."
+              description: "Volume {{ $labels.pvc }} ({{ $labels.pvc_namespace }}) has not had a successful backup in over 8 days. Last backup was reported from node {{ $labels.node }}."
             isPaused: false

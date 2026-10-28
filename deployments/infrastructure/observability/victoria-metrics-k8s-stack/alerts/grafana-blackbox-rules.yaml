@@ -28,7 +28,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'probe_success{job="blackbox", name!~"technitium-.*"} == 0'
+                  expr: 'probe_success{job="blackbox", name!~"technitium-.*"}'
                   instant: true
                   refId: A
               - refId: threshold
@@ -39,8 +39,8 @@ data:
                 model:
                   conditions:
                     - evaluator:
-                        params: [0]
-                        type: gt
+                        params: [1]
+                        type: lt
                       operator:
                         type: and
                       query:
@@ -132,7 +132,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'probe_http_status_code{job="blackbox"} <= 199 or probe_http_status_code{job="blackbox"} >= 500'
+                  expr: 'probe_http_status_code{job="blackbox"} >= 500'
                   instant: true
                   refId: A
               - refId: threshold
@@ -236,7 +236,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'round((last_over_time(probe_ssl_earliest_cert_expiry{job="blackbox"}[10m]) - time()) / 86400, 0.1) < 0'
+                  expr: 'round((last_over_time(probe_ssl_earliest_cert_expiry{job="blackbox"}[10m]) - time()) / 86400, 0.1)'
                   instant: true
                   refId: A
               - refId: threshold
@@ -248,7 +248,7 @@ data:
                   conditions:
                     - evaluator:
                         params: [0]
-                        type: gt
+                        type: lt
                       operator:
                         type: and
                       query:
