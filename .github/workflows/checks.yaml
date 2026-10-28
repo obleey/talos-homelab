@@ -1,0 +1,20 @@
+# Same checks as .githooks/pre-commit, so Renovate PRs and web edits are covered too.
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # python yq (jq syntax) + PyYAML; the runner's preinstalled yq is the incompatible Go one
+      - run: pip install yq
+      - run: scripts/check-routes.sh
+      - run: scripts/check-conventions.py
