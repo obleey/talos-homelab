@@ -340,6 +340,7 @@ A rebuild needs these, and the repo does not hold them:
 | What | Where it lives |
 | --- | --- |
 | Talos machine configs (node names, `.160`/`.161` IPs) | Generated with `talosctl`; not in git yet |
+| `local-path` StorageClass + provisioner (jellyfin/plex cache PVCs) | Installed by hand; not in git |
 | sealed-secrets controller private key | Password manager. Without it every `*-sealed.yaml` is unreadable; see restore below |
 | NFS exports `/mnt/serve/starr-stack/data`, `/mnt/serve/longhorn-backups` | TrueNAS at `10.0.0.104` |
 | Technitium primary DNS | `10.0.0.104:5380` |
