@@ -14,6 +14,9 @@ spec:
           - name: byparr
           - name: clonarr
             port: 6060
+          - name: homepage
+            port: 3000
+            host: hub
           - name: jellyfin
             port: 8096
           - name: plex

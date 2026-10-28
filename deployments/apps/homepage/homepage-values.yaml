@@ -1,210 +1,286 @@
-image:
-  repository: ghcr.io/gethomepage/homepage
-  tag: v2.7.0
-enableRbac: true
-
-serviceAccount:
-  name: homepage
-  create: true
-
-service:
+controllers:
   main:
-    ports:
-      http:
-        port: 3000
-
-controller:
-  strategy: Recreate
-
-env:
-  - name: HOMEPAGE_ALLOWED_HOSTS
-    value: "hub.talos-cluster.local.obleey.com"
-  - name: TZ
-    value: "Europe/Ljubljana"
-  # shared servarr credentials; homepage-secrets keeps only the ArgoCD token
-  - name: HOMEPAGE_VAR_SONARR_API_KEY
-    valueFrom:
-      secretKeyRef:
-        name: servarr-credentials
-        key: sonarr-api-key
-  - name: HOMEPAGE_VAR_RADARR_API_KEY
-    valueFrom:
-      secretKeyRef:
-        name: servarr-credentials
-        key: radarr-api-key
-  - name: HOMEPAGE_VAR_PROWLARR_API_KEY
-    valueFrom:
-      secretKeyRef:
-        name: servarr-credentials
-        key: prowlarr-api-key
-  - name: HOMEPAGE_VAR_BAZARR_API_KEY
-    valueFrom:
-      secretKeyRef:
-        name: servarr-credentials
-        key: bazarr-api-key
-  - name: HOMEPAGE_VAR_SEERR_API_KEY
-    valueFrom:
-      secretKeyRef:
-        name: servarr-credentials
-        key: seerr-api-key
-  - name: HOMEPAGE_VAR_JELLYFIN_API_KEY
-    valueFrom:
-      secretKeyRef:
-        name: servarr-credentials
-        key: jellyfin-api-key
-  - name: HOMEPAGE_VAR_PLEX_TOKEN
-    valueFrom:
-      secretKeyRef:
-        name: servarr-credentials
-        key: plex-token
-  - name: HOMEPAGE_VAR_QBITTORRENT_USERNAME
-    valueFrom:
-      secretKeyRef:
-        name: servarr-credentials
-        key: qbittorrent-username
-  - name: HOMEPAGE_VAR_QBITTORRENT_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: servarr-credentials
-        key: qbittorrent-password
-envFrom:
-  - secretRef:
-      name: homepage-secrets
-
+    containers:
+      main:
+        image:
+          repository: ghcr.io/gethomepage/homepage
+          tag: v2.7.0
+        env:
+          HOMEPAGE_ALLOWED_HOSTS: '{{ first .Values.route.app.hostnames }}'
+          HOMEPAGE_VAR_SONARR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: servarr-credentials
+                key: sonarr-api-key
+          HOMEPAGE_VAR_RADARR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: servarr-credentials
+                key: radarr-api-key
+          HOMEPAGE_VAR_PROWLARR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: servarr-credentials
+                key: prowlarr-api-key
+          HOMEPAGE_VAR_BAZARR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: servarr-credentials
+                key: bazarr-api-key
+          HOMEPAGE_VAR_SEERR_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: servarr-credentials
+                key: seerr-api-key
+          HOMEPAGE_VAR_JELLYFIN_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: servarr-credentials
+                key: jellyfin-api-key
+          HOMEPAGE_VAR_PLEX_TOKEN:
+            valueFrom:
+              secretKeyRef:
+                name: servarr-credentials
+                key: plex-token
+          HOMEPAGE_VAR_QBITTORRENT_USERNAME:
+            valueFrom:
+              secretKeyRef:
+                name: servarr-credentials
+                key: qbittorrent-username
+          HOMEPAGE_VAR_QBITTORRENT_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: servarr-credentials
+                key: qbittorrent-password
+        envFrom:
+        - secretRef:
+            name: homepage-secrets
+        probes:
+          liveness:
+            enabled: true
+            type: TCP
+          readiness:
+            enabled: true
+            type: TCP
+          startup:
+            enabled: true
+            type: TCP
+# cluster-wide read access for kubernetes/gateway discovery (HTTPRoute annotations on servarr apps)
+serviceAccount:
+  homepage: {}
+rbac:
+  roles:
+    homepage:
+      type: ClusterRole
+      rules:
+      - apiGroups:
+        - ''
+        resources:
+        - namespaces
+        - pods
+        - nodes
+        verbs:
+        - get
+        - list
+      - apiGroups:
+        - extensions
+        - networking.k8s.io
+        resources:
+        - ingresses
+        verbs:
+        - get
+        - list
+      - apiGroups:
+        - traefik.containo.us
+        - traefik.io
+        resources:
+        - ingressroutes
+        verbs:
+        - get
+        - list
+      - apiGroups:
+        - gateway.networking.k8s.io
+        resources:
+        - httproutes
+        - gateways
+        verbs:
+        - get
+        - list
+      - apiGroups:
+        - metrics.k8s.io
+        resources:
+        - nodes
+        - pods
+        verbs:
+        - get
+        - list
+      - apiGroups:
+        - apiextensions.k8s.io
+        resources:
+        - customresourcedefinitions/status
+        verbs:
+        - get
+  bindings:
+    homepage:
+      type: ClusterRoleBinding
+      roleRef:
+        identifier: homepage
+      subjects:
+      - identifier: homepage
 persistence:
+  # homepage keeps its config in the ConfigMap below, not on the shared /config PVC
+  config:
+    enabled: false
+  base-config:
+    type: emptyDir
+    globalMounts:
+    - path: /app/config
+  homepage-config:
+    type: configMap
+    identifier: config
+    globalMounts:
+    - path: /app/config/settings.yaml
+      subPath: settings.yaml
+    - path: /app/config/bookmarks.yaml
+      subPath: bookmarks.yaml
+    - path: /app/config/widgets.yaml
+      subPath: widgets.yaml
+    - path: /app/config/services.yaml
+      subPath: services.yaml
+    - path: /app/config/kubernetes.yaml
+      subPath: kubernetes.yaml
+    - path: /app/config/docker.yaml
+      subPath: docker.yaml
   logs:
-    enabled: true
-    type: pvc
-    mountPath: /app/config/logs
+    type: persistentVolumeClaim
+    forceRename: homepage-logs
     storageClass: longhorn
     accessMode: ReadWriteOnce
     size: 1Gi
-
-config:
-  kubernetes:
-    mode: cluster
-    gateway: true
-
-  settingsString: |
-    title: Talos Homelab
-    theme: dark
-    color: slate
-    headerStyle: clean
-    hideErrors: true
-    providers:
-      longhorn:
-        url: https://longhorn.talos-cluster.local.obleey.com
-    layout:
-      Infrastructure:
-        style: row
-        columns: 6
-      Media Servers:
-        style: row
-        columns: 2
-      Media Management:
-        style: row
-        columns: 6
-      Downloads:
-        style: row
-        columns: 2
-      Monitoring:
-        style: row
-        columns: 1
-
-  bookmarks:
-    - Developer:
-        - Github:
+    globalMounts:
+    - path: /app/config/logs
+# app-template tpl-renders values: homepage's own {{HOMEPAGE_VAR_*}} placeholders are escaped
+configMaps:
+  config:
+    data:
+      settings.yaml: |
+        title: Talos Homelab
+        theme: dark
+        color: slate
+        headerStyle: clean
+        hideErrors: true
+        providers:
+          longhorn:
+            url: https://longhorn.talos-cluster.local.obleey.com
+        layout:
+          Infrastructure:
+            style: row
+            columns: 6
+          Media Servers:
+            style: row
+            columns: 2
+          Media Management:
+            style: row
+            columns: 6
+          Downloads:
+            style: row
+            columns: 2
+          Monitoring:
+            style: row
+            columns: 1
+      bookmarks.yaml: |
+        - Developer:
+          - Github:
             - abbr: GH
               href: https://github.com/obleey
               icon: github.png
-        - Talos Homelab:
+          - Talos Homelab:
             - abbr: TH
               href: https://github.com/obleey/talos-homelab
               icon: github.png
-
-  widgets:
-    - greeting:
-        text_size: xl
-        text: Welcome back, Obleey!
-    - search:
-        provider: duckduckgo
-        target: _blank
-        focus: false
-    - datetime:
-        text_size: xl
-        locale: sl-SI
-        format:
-          timeStyle: short
-          dateStyle: short
-    - kubernetes:
-        cluster:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
-          label: talos-cluster
-        nodes:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
-    - longhorn:
-        url: https://longhorn.talos-cluster.local.obleey.com
-        expanded: true
-        total: true
-        labels: true
-        nodes: true
-
-  services:
-    - Infrastructure:
-        - ArgoCD:
-            icon: argo-cd.png
-            href: https://argocd.talos-cluster.local.obleey.com
-            description: GitOps controller
-            widget:
-              type: argocd
-              url: https://argocd.talos-cluster.local.obleey.com
-              key: "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}"
-        - Traefik:
-            icon: traefik.png
-            href: https://traefik.talos-cluster.local.obleey.com/dashboard/
-            description: Gateway & ingress
-            widget:
-              type: traefik
-              url: http://traefik.traefik.svc.cluster.local:9000
-        - Longhorn:
-            icon: longhorn.png
-            href: https://longhorn.talos-cluster.local.obleey.com
-            description: Distributed storage
-        - Kubeseal:
-            icon: kubernetes.png
-            href: https://kubeseal.talos-cluster.local.obleey.com
-            description: Sealed secrets UI
-        - Technitium Primary:
-            icon: technitium.png
-            href: http://10.0.0.104:5380
-            description: DNS server (primary)
-            widget:
-              type: technitium
-              url: http://10.0.0.104:5380
-              key: "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}"
-        - Technitium Secondary:
-            icon: technitium.png
-            href: https://technitium-secondary.talos-cluster.local.obleey.com
-            description: DNS server (secondary)
-            widget:
-              type: technitium
-              url: http://technitium-secondary.technitium-secondary.svc.cluster.local:5380
-              key: "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}"
-        - TrueNAS:
-            icon: truenas.png
-            href: https://truenas.local.obleey.com
-            description: Network storage
-
-    # Media Servers, Media Management and Downloads are discovered from gethomepage.dev/* annotations on servarr app routes
-
-    - Monitoring:
-        - Grafana:
-            icon: grafana.png
-            href: https://grafana.talos-cluster.local.obleey.com
-            description: Dashboards & alerting
+      widgets.yaml: |
+        - greeting:
+            text: Welcome back, Obleey!
+            text_size: xl
+        - search:
+            focus: false
+            provider: duckduckgo
+            target: _blank
+        - datetime:
+            format:
+              dateStyle: short
+              timeStyle: short
+            locale: sl-SI
+            text_size: xl
+        - kubernetes:
+            cluster:
+              cpu: true
+              label: talos-cluster
+              memory: true
+              show: true
+              showLabel: true
+            nodes:
+              cpu: true
+              memory: true
+              show: true
+              showLabel: true
+        - longhorn:
+            expanded: true
+            labels: true
+            nodes: true
+            total: true
+            url: https://longhorn.talos-cluster.local.obleey.com
+      services.yaml: |
+        - Infrastructure:
+          - ArgoCD:
+              description: GitOps controller
+              href: https://argocd.talos-cluster.local.obleey.com
+              icon: argo-cd.png
+              widget:
+                key: '{{ "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}" }}'
+                type: argocd
+                url: https://argocd.talos-cluster.local.obleey.com
+          - Traefik:
+              description: Gateway & ingress
+              href: https://traefik.talos-cluster.local.obleey.com/dashboard/
+              icon: traefik.png
+              widget:
+                type: traefik
+                url: http://traefik.traefik.svc.cluster.local:9000
+          - Longhorn:
+              description: Distributed storage
+              href: https://longhorn.talos-cluster.local.obleey.com
+              icon: longhorn.png
+          - Kubeseal:
+              description: Sealed secrets UI
+              href: https://kubeseal.talos-cluster.local.obleey.com
+              icon: kubernetes.png
+          - Technitium Primary:
+              description: DNS server (primary)
+              href: http://10.0.0.104:5380
+              icon: technitium.png
+              widget:
+                key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}" }}'
+                type: technitium
+                url: http://10.0.0.104:5380
+          - Technitium Secondary:
+              description: DNS server (secondary)
+              href: https://technitium-secondary.talos-cluster.local.obleey.com
+              icon: technitium.png
+              widget:
+                key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}" }}'
+                type: technitium
+                url: http://technitium-secondary.technitium-secondary.svc.cluster.local:5380
+          - TrueNAS:
+              description: Network storage
+              href: https://truenas.local.obleey.com
+              icon: truenas.png
+        - Monitoring:
+          - Grafana:
+              description: Dashboards & alerting
+              href: https://grafana.talos-cluster.local.obleey.com
+              icon: grafana.png
+      kubernetes.yaml: |
+        gateway: true
+        mode: cluster
+      docker.yaml: ""

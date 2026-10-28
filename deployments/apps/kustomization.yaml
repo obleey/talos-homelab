@@ -5,5 +5,4 @@ resources:
   - starr-data.yaml
   - servarr-credentials-sealed.yaml
   - appset-servarr.yaml
-  - homepage/app.yaml
   - kubeseal-webgui/app.yaml
