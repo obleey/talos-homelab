@@ -28,9 +28,28 @@ configs:
   cm:
     url: https://argocd.talos-cluster.local.obleey.com
     timeout.reconciliation: 30s
+    admin.enabled: false
+    accounts.obleey: login
+    accounts.obleey.enabled: "true"
+    accounts.readonly: login, apiKey
+    accounts.readonly.enabled: "true"
+    resource.links: |
+      - url: "https://{{index .spec.hostnames 0}}"
+        title: "Open"
+        if: "len(spec.hostnames) > 0"
     resource.customizations.ignoreDifferences.argoproj.io_Application: |
       jqPathExpressions:
         - .metadata.annotations["argocd.argoproj.io/tracking-id"]
+    resource.customizations.ignoreDifferences.gateway.networking.k8s.io_HTTPRoute: |
+      jqPathExpressions:
+        - .spec.rules[].backendRefs[].group
+        - .spec.rules[].backendRefs[].kind
+        - .spec.rules[].backendRefs[].weight
+  rbac:
+    policy.default: role:readonly
+    policy.csv: |
+      g, obleey, role:admin
+      g, readonly, role:readonly
 
 notifications:
   enabled: true

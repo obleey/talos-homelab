@@ -353,7 +353,7 @@ kubectl -n kube-system get secret -l sealedsecrets.bitnami.com/sealed-secrets-ke
 # store in the password manager, then delete the file
 ```
 
-**Restore it** on a new cluster before bootstrap step 4, so the committed SealedSecrets decrypt:
+**Restore it** on a new cluster before bootstrap step 3, so the committed SealedSecrets decrypt:
 
 ```bash
 kubectl apply -f sealed-secrets-key.yaml
@@ -373,7 +373,7 @@ With a restored key, skip bootstrap step 1: the committed sealed files already m
 - Talos cluster running with `kubeconfig` configured
 - `helm` ≥ 3.x and `kubeseal` CLI installed
 - Cloudflare account with DNS API access
-- A git repository ArgoCD can reach
+- A public git repository (a private one also needs an ArgoCD repository Secret: label `argocd.argoproj.io/secret-type: repository`, keys `url`, `username`, `password`)
 
 ### Steps
 
@@ -386,14 +386,6 @@ kubectl create secret generic cloudflare-api-token \
   -n cert-manager --dry-run=client -o yaml \
   | kubeseal --format yaml \
   > deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml
-
-# GitHub repository access
-kubectl create secret generic git-creds \
-  --from-literal=username=<GITHUB_USER> \
-  --from-literal=password=<GITHUB_PAT> \
-  -n argocd --dry-run=client -o yaml \
-  | kubeseal --format yaml \
-  > deployments/infrastructure/argocd/git-creds-sealed.yaml
 ```
 
 #### 2. Install ArgoCD
@@ -407,13 +399,7 @@ helm install argocd argo/argo-cd \
   -f deployments/infrastructure/argocd/argocd-values.yaml
 ```
 
-#### 3. Apply bootstrap secrets
-
-```bash
-kubectl apply -f deployments/infrastructure/argocd/git-creds-sealed.yaml
-```
-
-#### 4. Apply the root app — the last manual step
+#### 3. Apply the root app — the last manual step
 
 ```bash
 kubectl apply -f bootstrap/talos-cluster.yaml
@@ -432,7 +418,7 @@ ArgoCD reconciles the full cluster from git, creating Applications in sync-wave 
 | `cilium/cilium-values.yaml` | `k8sServiceHost` and `k8sServicePort` |
 | `cert-manager/cert-manager-cluster-issuer.yaml` | Domain and Let's Encrypt email |
 | `traefik/wildcard-cert.yaml` | Domain names |
-| `argocd/argocd-values.yaml` and `argocd-cm.yaml` | ArgoCD external URL |
+| `argocd/argocd-values.yaml` | ArgoCD external URL |
 | All `HTTPRoute` manifests | Hostnames |
 | All `*-values.yaml` with NFS paths | NFS server IP |
 | `bootstrap/talos-cluster.yaml` and all `app.yaml` | Your git repository URL |
@@ -466,7 +452,7 @@ kubectl create secret generic my-secret \
 # Rebuild cluster from scratch (after hardware reset)
 helm install argocd argo/argo-cd -n argocd \
   -f deployments/infrastructure/argocd/argocd-values.yaml
-kubectl apply -f deployments/infrastructure/argocd/git-creds-sealed.yaml
+kubectl apply -f sealed-secrets-key.yaml   # from the password manager, see Outside Git
 kubectl apply -f bootstrap/talos-cluster.yaml
 # ArgoCD restores full cluster state from git
 ```
