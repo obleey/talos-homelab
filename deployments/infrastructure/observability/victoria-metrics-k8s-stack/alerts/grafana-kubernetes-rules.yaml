@@ -774,7 +774,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: '(sum(rate(rest_client_requests_total{code=~"(4|5).."}[1m])) by (instance, job) / sum(rate(rest_client_requests_total[1m])) by (instance, job)) * 100 > 1 and sum(rate(rest_client_requests_total[1m])) by (instance, job) > 0'
+                  expr: '(sum(rate(rest_client_requests_total{code=~"(4|5)..", code!~"404|409"}[1m])) by (instance, job) / sum(rate(rest_client_requests_total[1m])) by (instance, job)) * 100 > 1 and sum(rate(rest_client_requests_total[1m])) by (instance, job) > 0'
                   instant: true
                   refId: A
               - refId: threshold
@@ -810,7 +810,7 @@ data:
               __dashboardUid__: "k8s_system_apisrv"
               __panelId__: "50"
               summary: "Kubernetes API client errors ({{ $labels.instance }}/{{ $labels.job }})"
-              description: "Kubernetes API client on {{ $labels.instance }} is experiencing {{ $values.A.Value | humanize }}% 4xx/5xx error rate."
+              description: "Kubernetes API client on {{ $labels.instance }} is experiencing {{ $values.A.Value | humanize }}% 4xx/5xx error rate (404/409 excluded: deleted objects and retried conflicts are routine)."
             isPaused: false
 
           - uid: k8s-cert-expires-soon
