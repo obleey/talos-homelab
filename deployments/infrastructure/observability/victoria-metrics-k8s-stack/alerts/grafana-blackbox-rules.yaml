@@ -168,7 +168,7 @@ data:
               __dashboardUid__: "blackbox-http-prober"
               __panelId__: "2"
               summary: "HTTP 5xx from {{ $labels.instance }}"
-              description: "HTTP probe returned a 5xx error for {{ $labels.instance }}. STATUS = {{ $value }}"
+              description: "HTTP probe returned a 5xx error for {{ $labels.instance }}. STATUS = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: blackbox-ssl-expiry-soon
@@ -220,7 +220,7 @@ data:
               __dashboardUid__: "blackbox-http-prober"
               __panelId__: "2"
               summary: "SSL certificate expiring in < 3 days: {{ $labels.instance }}"
-              description: "SSL certificate for {{ $labels.instance }} expires in {{ $value }} days."
+              description: "SSL certificate for {{ $labels.instance }} expires in {{ $values.A.Value }} days."
             isPaused: false
 
           - uid: blackbox-ssl-expired
@@ -236,7 +236,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'round((last_over_time(probe_ssl_earliest_cert_expiry{job="blackbox"}[10m]) - time()) / 86400, 0.1)'
+                  expr: 'round((time() - last_over_time(probe_ssl_earliest_cert_expiry{job="blackbox"}[10m])) / 86400, 0.1)'
                   instant: true
                   refId: A
               - refId: threshold
@@ -248,7 +248,7 @@ data:
                   conditions:
                     - evaluator:
                         params: [0]
-                        type: lt
+                        type: gt
                       operator:
                         type: and
                       query:
@@ -272,5 +272,5 @@ data:
               __dashboardUid__: "blackbox-http-prober"
               __panelId__: "2"
               summary: "SSL certificate EXPIRED: {{ $labels.instance }}"
-              description: "SSL certificate for {{ $labels.instance }} has expired {{ $value | abs }} days ago."
+              description: "SSL certificate for {{ $labels.instance }} has expired {{ $values.A.Value }} days ago."
             isPaused: false

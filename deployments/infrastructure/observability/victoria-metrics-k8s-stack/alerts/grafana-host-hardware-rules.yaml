@@ -64,7 +64,7 @@ data:
               __dashboardUid__: "node-exporter-full"
               __panelId__: "43"
               summary: "Host out of disk space (instance {{ $labels.instance }})"
-              description: "Disk {{ $labels.device }} on {{ $labels.mountpoint }} is almost full (< 10% left). VALUE = {{ $value }}"
+              description: "Disk {{ $labels.device }} on {{ $labels.mountpoint }} is almost full (< 10% left). VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: host-inodes
@@ -116,7 +116,7 @@ data:
               __dashboardUid__: "node-exporter-full"
               __panelId__: "43"
               summary: "Host out of inodes (instance {{ $labels.instance }})"
-              description: "Disk {{ $labels.device }} on {{ $labels.mountpoint }} is almost running out of available inodes (< 10% left). VALUE = {{ $value }}"
+              description: "Disk {{ $labels.device }} on {{ $labels.mountpoint }} is almost running out of available inodes (< 10% left). VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: host-overtemperature
@@ -168,7 +168,7 @@ data:
               __dashboardUid__: "node-exporter-full"
               __panelId__: "43"
               summary: "Host node overtemperature alarm (instance {{ $labels.instance }})"
-              description: "Physical node temperature alarm triggered on {{ $labels.instance }}. VALUE = {{ $value }}"
+              description: "Physical node temperature alarm triggered on {{ $labels.instance }}. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: host-raid-insufficient
@@ -220,7 +220,7 @@ data:
               __dashboardUid__: "node-exporter-full"
               __panelId__: "43"
               summary: "Host software RAID insufficient drives (instance {{ $labels.instance }})"
-              description: "MD RAID array {{ $labels.device }} on {{ $labels.instance }} has insufficient active drives. VALUE = {{ $value }}"
+              description: "MD RAID array {{ $labels.device }} on {{ $labels.instance }} has insufficient active drives. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: host-fs-device-error
@@ -276,5 +276,5 @@ data:
               __dashboardUid__: "node-exporter-full"
               __panelId__: "43"
               summary: "Filesystem device error on {{ $labels.instance }}: {{ $labels.mountpoint }} ({{ $labels.device_error }})"
-              description: "Device {{ $labels.device }} mounted at {{ $labels.mountpoint }} on {{ $labels.instance }} is reporting an error. VALUE = {{ $value }}"
+              description: "Device {{ $labels.device }} mounted at {{ $labels.mountpoint }} on {{ $labels.instance }} is reporting an error. VALUE = {{ $values.A.Value }}"
             isPaused: false

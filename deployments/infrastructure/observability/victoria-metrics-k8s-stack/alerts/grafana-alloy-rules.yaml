@@ -64,5 +64,5 @@ data:
               __dashboardUid__: "observability-overview"
               __panelId__: "4"
               summary: "Grafana Alloy service down (instance {{ $labels.instance }})"
-              description: "Alloy on {{ $labels.instance }} is not responding or has stopped running. VALUE = {{ $value }}"
+              description: "Alloy on {{ $labels.instance }} is not responding or has stopped running. VALUE = {{ $values.A.Value }}"
             isPaused: false

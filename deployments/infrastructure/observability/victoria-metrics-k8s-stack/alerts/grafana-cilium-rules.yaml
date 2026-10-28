@@ -62,7 +62,7 @@ data:
               severity: warning
             annotations:
               summary: "Cilium agent {{ $labels.pod }} cannot reach nodes"
-              description: "Cilium agent {{ $labels.pod }} cannot reach {{ $value }} node(s). Check network connectivity and node health."
+              description: "Cilium agent {{ $labels.pod }} cannot reach {{ $values.A.Value }} node(s). Check network connectivity and node health."
             isPaused: false
 
           - uid: cilium-agent-failing-controllers
@@ -112,7 +112,7 @@ data:
               severity: warning
             annotations:
               summary: "Cilium agent {{ $labels.pod }} has failing controllers"
-              description: "Cilium agent {{ $labels.pod }} has {{ $value }} failing controller(s). Check cilium-agent logs for details."
+              description: "Cilium agent {{ $labels.pod }} has {{ $values.A.Value }} failing controller(s). Check cilium-agent logs for details."
             isPaused: false
 
           - uid: cilium-agent-endpoint-failures
@@ -162,7 +162,7 @@ data:
               severity: warning
             annotations:
               summary: "Cilium agent {{ $labels.pod }} has invalid endpoints"
-              description: "Cilium agent {{ $labels.pod }} has {{ $value }} endpoint(s) in invalid state."
+              description: "Cilium agent {{ $labels.pod }} has {{ $values.A.Value }} endpoint(s) in invalid state."
             isPaused: false
 
           - uid: cilium-agent-endpoint-regen-failures

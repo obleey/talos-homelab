@@ -63,5 +63,5 @@ data:
             annotations:
               __dashboardUid__: "k8s_system_coredns"
               summary: "CoreDNS panic on {{ $labels.instance }}"
-              description: "CoreDNS has panicked {{ $value | printf \"%.0f\" }} time(s) in the last minute. DNS resolution may be degraded."
+              description: "CoreDNS has panicked {{ $values.A.Value | printf \"%.0f\" }} time(s) in the last minute. DNS resolution may be degraded."
             isPaused: false

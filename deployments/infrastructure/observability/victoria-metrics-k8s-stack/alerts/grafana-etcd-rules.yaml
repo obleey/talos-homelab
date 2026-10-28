@@ -114,7 +114,7 @@ data:
               severity: critical
             annotations:
               summary: "Etcd has even number of members (quorum at risk)"
-              description: "Etcd cluster has {{ $value }} members. An even number means quorum cannot be maintained if one more member is lost."
+              description: "Etcd cluster has {{ $values.A.Value }} members. An even number means quorum cannot be maintained if one more member is lost."
             isPaused: false
 
           - uid: etcd-grpc-errors-critical
@@ -167,7 +167,7 @@ data:
               severity: critical
             annotations:
               summary: "Etcd high gRPC error rate on {{ $labels.grpc_service }}/{{ $labels.grpc_method }}"
-              description: "Etcd gRPC error rate is {{ $value | printf \"%.1f\" }}% (threshold: 5%) for {{ $labels.grpc_service }}/{{ $labels.grpc_method }}."
+              description: "Etcd gRPC error rate is {{ $values.A.Value | printf \"%.1f\" }}% (threshold: 5%) for {{ $labels.grpc_service }}/{{ $labels.grpc_method }}."
             isPaused: false
 
           - uid: etcd-http-errors-critical
@@ -220,5 +220,5 @@ data:
               severity: critical
             annotations:
               summary: "Etcd high HTTP error rate for {{ $labels.method }}"
-              description: "Etcd HTTP {{ $labels.method }} error rate is {{ $value | printf \"%.1f\" }}% (threshold: 5%)."
+              description: "Etcd HTTP {{ $labels.method }} error rate is {{ $values.A.Value | printf \"%.1f\" }}% (threshold: 5%)."
             isPaused: false

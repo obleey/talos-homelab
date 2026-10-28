@@ -272,7 +272,7 @@ data:
               __dashboardUid__: "ozk-lh-mon"
               __panelId__: "32"
               summary: "Longhorn disk almost full ({{ $labels.node }}/{{ $labels.disk }})"
-              description: "Disk {{ $labels.disk }} on node {{ $labels.node }} is over 85% full. VALUE = {{ $value | humanize }}%"
+              description: "Disk {{ $labels.disk }} on node {{ $labels.node }} is over 85% full. VALUE = {{ $values.A.Value | humanize }}%"
             isPaused: false
 
           - uid: longhorn-disk-space-critical
@@ -324,7 +324,7 @@ data:
               __dashboardUid__: "ozk-lh-mon"
               __panelId__: "32"
               summary: "Longhorn disk critically full ({{ $labels.node }}/{{ $labels.disk }})"
-              description: "Disk {{ $labels.disk }} on node {{ $labels.node }} is over 95% full. New replicas may fail to schedule. VALUE = {{ $value | humanize }}%"
+              description: "Disk {{ $labels.disk }} on node {{ $labels.node }} is over 95% full. New replicas may fail to schedule. VALUE = {{ $values.A.Value | humanize }}%"
             isPaused: false
 
           - uid: longhorn-backup-failed

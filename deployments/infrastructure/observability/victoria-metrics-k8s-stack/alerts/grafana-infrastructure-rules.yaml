@@ -64,7 +64,7 @@ data:
               __dashboardUid__: node-exporter-full
               __panelId__: "77"
               summary: "Node {{ $labels.instance }} CPU usage is high"
-              description: 'Node {{ $labels.instance }} CPU has been above 80% for 15 minutes (current: {{ printf "%.1f" $value }}%).'
+              description: 'Node {{ $labels.instance }} CPU has been above 80% for 15 minutes (current: {{ printf "%.1f" $values.A.Value }}%).'
             isPaused: false
 
           - uid: infra-cpu-critical
@@ -116,7 +116,7 @@ data:
               __dashboardUid__: node-exporter-full
               __panelId__: "3"
               summary: "Node {{ $labels.instance }} CPU is critically high"
-              description: 'Node {{ $labels.instance }} CPU has been above 95% for 5 minutes (current: {{ printf "%.1f" $value }}%).'
+              description: 'Node {{ $labels.instance }} CPU has been above 95% for 5 minutes (current: {{ printf "%.1f" $values.A.Value }}%).'
             isPaused: false
 
           - uid: infra-memory-high
@@ -168,7 +168,7 @@ data:
               __dashboardUid__: node-exporter-full
               __panelId__: "78"
               summary: "Node {{ $labels.instance }} memory usage is high"
-              description: 'Node {{ $labels.instance }} memory has been above 85% for 10 minutes (current: {{ printf "%.1f" $value }}%). MemAvailable includes reclaimable cache.'
+              description: 'Node {{ $labels.instance }} memory has been above 85% for 10 minutes (current: {{ printf "%.1f" $values.A.Value }}%). MemAvailable includes reclaimable cache.'
             isPaused: false
 
           - uid: infra-memory-critical
@@ -220,7 +220,7 @@ data:
               __dashboardUid__: node-exporter-full
               __panelId__: "24"
               summary: "Node {{ $labels.instance }} memory is critically high"
-              description: 'Node {{ $labels.instance }} memory has been above 93% for 5 minutes (current: {{ printf "%.1f" $value }}%). OOM kills imminent.'
+              description: 'Node {{ $labels.instance }} memory has been above 93% for 5 minutes (current: {{ printf "%.1f" $values.A.Value }}%). OOM kills imminent.'
             isPaused: false
 
           - uid: infra-oom-kill
@@ -272,7 +272,7 @@ data:
               __dashboardUid__: node-exporter-full
               __panelId__: "24"
               summary: "OOM kill on node {{ $labels.instance }}"
-              description: 'Node {{ $labels.instance }} had {{ printf "%.0f" $value }} OOM kill(s) in the last 15 minutes. A process was killed due to memory exhaustion.'
+              description: 'Node {{ $labels.instance }} had {{ printf "%.0f" $values.A.Value }} OOM kill(s) in the last 15 minutes. A process was killed due to memory exhaustion.'
             isPaused: false
 
           - uid: infra-high-load
@@ -324,7 +324,7 @@ data:
               __dashboardUid__: node-exporter-full
               __panelId__: "155"
               summary: "Node {{ $labels.instance }} load average is high"
-              description: 'Node {{ $labels.instance }} 15m load average is {{ printf "%.2f" $value }}x the number of CPU cores and has been sustained for 15 minutes.'
+              description: 'Node {{ $labels.instance }} 15m load average is {{ printf "%.2f" $values.A.Value }}x the number of CPU cores and has been sustained for 15 minutes.'
             isPaused: false
 
           - uid: infra-disk-saturation

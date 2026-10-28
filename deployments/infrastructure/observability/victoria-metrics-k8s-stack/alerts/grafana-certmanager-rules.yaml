@@ -174,7 +174,7 @@ data:
               __dashboardUid__: "blackbox-http-prober"
               __panelId__: "2"
               summary: "Certificate {{ $labels.name }} expires in < 21 days"
-              description: "Certificate {{ $labels.name }} in namespace {{ $labels.exported_namespace }} expires in {{ $value | printf \"%.0f\" | humanizeDuration }}. Check cert-manager renewal."
+              description: "Certificate {{ $labels.name }} in namespace {{ $labels.exported_namespace }} expires in {{ $values.A.Value | printf \"%.0f\" | humanizeDuration }}. Check cert-manager renewal."
             isPaused: false
 
           - uid: certmgr-acme-rate-limit

@@ -62,7 +62,7 @@ data:
               severity: warning
             annotations:
               summary: "Docker container killed ({{ $labels.name }})"
-              description: "Container {{ $labels.name }} on {{ $labels.instance }} has disappeared for more than 1 minute. VALUE = {{ $value }}s"
+              description: "Container {{ $labels.name }} on {{ $labels.instance }} has disappeared for more than 1 minute. VALUE = {{ $values.A.Value }}s"
             isPaused: false
 
           - uid: docker-container-high-cpu
@@ -112,7 +112,7 @@ data:
               severity: warning
             annotations:
               summary: "Docker container high CPU ({{ $labels.name }})"
-              description: "Container {{ $labels.name }} on {{ $labels.instance }} is using more than 80% of total system CPU. VALUE = {{ $value | printf \"%.1f\" }}%"
+              description: "Container {{ $labels.name }} on {{ $labels.instance }} is using more than 80% of total system CPU. VALUE = {{ $values.A.Value | printf \"%.1f\" }}%"
             isPaused: false
 
           - uid: docker-container-high-memory
@@ -162,7 +162,7 @@ data:
               severity: warning
             annotations:
               summary: "Docker container high memory ({{ $labels.name }})"
-              description: "Container {{ $labels.name }} on {{ $labels.instance }} is using more than 80% of its memory limit. VALUE = {{ $value | printf \"%.1f\" }}%"
+              description: "Container {{ $labels.name }} on {{ $labels.instance }} is using more than 80% of its memory limit. VALUE = {{ $values.A.Value | printf \"%.1f\" }}%"
             isPaused: false
 
           - uid: docker-container-high-throttle
@@ -212,5 +212,5 @@ data:
               severity: warning
             annotations:
               summary: "Docker container CPU throttled ({{ $labels.name }})"
-              description: "Container {{ $labels.name }} on {{ $labels.instance }} is being CPU-throttled more than 25% of the time. VALUE = {{ $value | printf \"%.1f\" }}%"
+              description: "Container {{ $labels.name }} on {{ $labels.instance }} is being CPU-throttled more than 25% of the time. VALUE = {{ $values.A.Value | printf \"%.1f\" }}%"
             isPaused: false

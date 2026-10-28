@@ -64,7 +64,7 @@ data:
               __dashboardUid__: "3138fa155d5915769fbded898ac09fd9"
               __panelId__: "1"
               summary: "Kubernetes Node not ready ({{ $labels.node }})"
-              description: "Node {{ $labels.node }} has been unready for more than 10 minutes. VALUE = {{ $value }}"
+              description: "Node {{ $labels.node }} has been unready for more than 10 minutes. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: k8s-node-memory-pressure
@@ -115,7 +115,7 @@ data:
             annotations:
               __dashboardUid__: "k8s_views_nodes"
               summary: "Kubernetes Node memory pressure ({{ $labels.node }})"
-              description: "Node {{ $labels.node }} has MemoryPressure condition set. VALUE = {{ $value }}"
+              description: "Node {{ $labels.node }} has MemoryPressure condition set. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: k8s-node-disk-pressure
@@ -167,7 +167,7 @@ data:
               __dashboardUid__: "node-exporter-full"
               __panelId__: "43"
               summary: "Kubernetes Node disk pressure ({{ $labels.node }})"
-              description: "Node {{ $labels.node }} has DiskPressure condition set. VALUE = {{ $value }}"
+              description: "Node {{ $labels.node }} has DiskPressure condition set. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: k8s-node-network-unavailable
@@ -219,7 +219,7 @@ data:
               __dashboardUid__: "3138fa155d5915769fbded898ac09fd9"
               __panelId__: "1"
               summary: "Kubernetes Node network unavailable ({{ $labels.node }})"
-              description: "Node {{ $labels.node }} has NetworkUnavailable condition set. VALUE = {{ $value }}"
+              description: "Node {{ $labels.node }} has NetworkUnavailable condition set. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
       - orgId: 1
@@ -276,7 +276,7 @@ data:
             annotations:
               __dashboardUid__: "k8s_views_pods"
               summary: "Kubernetes Pod not healthy ({{ $labels.namespace }}/{{ $labels.pod }})"
-              description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-running state for more than 15 minutes. VALUE = {{ $value }}"
+              description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-running state for more than 15 minutes. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: k8s-statefulset-down
@@ -327,7 +327,7 @@ data:
             annotations:
               __dashboardUid__: "k8s_views_ns"
               summary: "Kubernetes StatefulSet down ({{ $labels.namespace }}/{{ $labels.statefulset }})"
-              description: "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} went down. VALUE = {{ $value }}"
+              description: "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} went down. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: k8s-deployment-gen-mismatch
@@ -378,7 +378,7 @@ data:
             annotations:
               __dashboardUid__: "k8s_views_ns"
               summary: "Kubernetes Deployment generation mismatch ({{ $labels.namespace }}/{{ $labels.deployment }})"
-              description: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has failed but has not been rolled back. VALUE = {{ $value }}"
+              description: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has failed but has not been rolled back. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: k8s-statefulset-gen-mismatch
@@ -429,7 +429,7 @@ data:
             annotations:
               __dashboardUid__: "k8s_views_ns"
               summary: "Kubernetes StatefulSet generation mismatch ({{ $labels.namespace }}/{{ $labels.statefulset }})"
-              description: "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has failed but has not been rolled back. VALUE = {{ $value }}"
+              description: "StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has failed but has not been rolled back. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: k8s-daemonset-misscheduled
@@ -480,7 +480,7 @@ data:
             annotations:
               __dashboardUid__: "k8s_views_ns"
               summary: "Kubernetes DaemonSet misscheduled ({{ $labels.namespace }}/{{ $labels.daemonset }})"
-              description: "Some Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} are running where they are not supposed to run. VALUE = {{ $value }}"
+              description: "Some Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} are running where they are not supposed to run. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: k8s-cronjob-failing
@@ -531,7 +531,7 @@ data:
             annotations:
               __dashboardUid__: "k8s_views_ns"
               summary: "Kubernetes CronJob failing ({{ $labels.namespace }}/{{ $labels.cronjob }})"
-              description: "CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is failing (last schedule is newer than last success and no active runs). VALUE = {{ $value }}"
+              description: "CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is failing (last schedule is newer than last success and no active runs). VALUE = {{ $values.A.Value }}"
             isPaused: false
 
           - uid: k8s-job-slow-completion
@@ -582,7 +582,7 @@ data:
             annotations:
               __dashboardUid__: "k8s_views_ns"
               summary: "Kubernetes Job slow completion ({{ $labels.namespace }}/{{ $labels.job_name }})"
-              description: "Kubernetes Job {{ $labels.namespace }}/{{ $labels.job_name }} did not complete in time. VALUE = {{ $value }}"
+              description: "Kubernetes Job {{ $labels.namespace }}/{{ $labels.job_name }} did not complete in time. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
       - orgId: 1
@@ -640,7 +640,7 @@ data:
               __dashboardUid__: "919b92a8e8041bd567af9edab12c840c"
               __panelId__: "1"
               summary: "Kubernetes Volume full in four days ({{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }})"
-              description: "Volume {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is predicted to fill within 4 days based on current growth rate. VALUE = {{ $value | humanize }}"
+              description: "Volume {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is predicted to fill within 4 days based on current growth rate. VALUE = {{ $values.A.Value | humanize }}"
             isPaused: false
 
           - uid: k8s-pv-error
@@ -692,7 +692,7 @@ data:
               __dashboardUid__: "919b92a8e8041bd567af9edab12c840c"
               __panelId__: "1"
               summary: "Kubernetes PersistentVolume error ({{ $labels.persistentvolume }})"
-              description: "PersistentVolume {{ $labels.persistentvolume }} is in bad state: {{ $labels.phase }}. VALUE = {{ $value }}"
+              description: "PersistentVolume {{ $labels.persistentvolume }} is in bad state: {{ $labels.phase }}. VALUE = {{ $values.A.Value }}"
             isPaused: false
 
       - orgId: 1
@@ -749,7 +749,7 @@ data:
             annotations:
               __dashboardUid__: "k8s_system_apisrv"
               summary: "Kubernetes API server errors ({{ $labels.instance }})"
-              description: "Kubernetes API server is experiencing {{ $value | humanize }}% 5xx error rate on {{ $labels.instance }}."
+              description: "Kubernetes API server is experiencing {{ $values.A.Value | humanize }}% 5xx error rate on {{ $labels.instance }}."
             isPaused: false
 
           - uid: k8s-apiclient-errors
@@ -800,7 +800,7 @@ data:
             annotations:
               __dashboardUid__: "k8s_system_apisrv"
               summary: "Kubernetes API client errors ({{ $labels.instance }}/{{ $labels.job }})"
-              description: "Kubernetes API client on {{ $labels.instance }} is experiencing {{ $value | humanize }}% 4xx/5xx error rate."
+              description: "Kubernetes API client on {{ $labels.instance }} is experiencing {{ $values.A.Value | humanize }}% 4xx/5xx error rate."
             isPaused: false
 
           - uid: k8s-cert-expires-soon
@@ -852,5 +852,5 @@ data:
               __dashboardUid__: "3138fa155d5915769fbded898ac09fd9"
               __panelId__: "1"
               summary: "Kubernetes client certificate expires soon"
-              description: "A client certificate used to authenticate to the apiserver is expiring in less than 24 hours. VALUE = {{ $value }}"
+              description: "A client certificate used to authenticate to the apiserver is expiring in less than 24 hours. VALUE = {{ $values.A.Value }}"
             isPaused: false
