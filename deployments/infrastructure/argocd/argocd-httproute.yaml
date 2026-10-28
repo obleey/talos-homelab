@@ -5,6 +5,7 @@ metadata:
   namespace: argocd
   annotations:
     gethomepage.dev/enabled: 'true'
+    gethomepage.dev/pod-selector: 'app.kubernetes.io/name=argocd-server'
     gethomepage.dev/group: 'Infrastructure'
     gethomepage.dev/name: 'ArgoCD'
     gethomepage.dev/icon: 'argo-cd.png'

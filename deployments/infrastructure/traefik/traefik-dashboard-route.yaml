@@ -5,6 +5,7 @@ metadata:
   namespace: traefik
   annotations:
     gethomepage.dev/enabled: 'true'
+    gethomepage.dev/pod-selector: 'app.kubernetes.io/name=traefik'
     gethomepage.dev/group: 'Infrastructure'
     gethomepage.dev/name: 'Traefik'
     gethomepage.dev/icon: 'traefik.png'

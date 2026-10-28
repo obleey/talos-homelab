@@ -5,6 +5,7 @@ metadata:
   namespace: kubeseal-webgui
   annotations:
     gethomepage.dev/enabled: 'true'
+    gethomepage.dev/pod-selector: 'app=kubeseal-webgui'
     gethomepage.dev/group: 'Infrastructure'
     gethomepage.dev/name: 'Kubeseal'
     gethomepage.dev/icon: 'kubernetes.png'
