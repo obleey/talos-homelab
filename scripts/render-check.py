@@ -5,13 +5,14 @@
 - each servarr ApplicationSet element: the appset's valueFiles plus its go-templated helm.values
 - `kubectl kustomize` of the root (deployments/)
 """
-import glob
 import os
 import subprocess
 import sys
 import tempfile
 
 import yaml
+
+from repo import Repo
 
 ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True).stdout.strip()
 os.chdir(ROOT)
@@ -48,26 +49,21 @@ def go_template(template, element):
         return out.split("\n", 2)[2]
 
 
-for path in sorted(glob.glob("deployments/**/*.yaml", recursive=True)):
-    try:
-        docs = [d for d in yaml.safe_load_all(open(path)) if isinstance(d, dict)]
-    except yaml.YAMLError:
-        continue
-    for doc in docs:
-        if doc.get("kind") == "Application":
-            spec = doc["spec"]
-            for src in spec.get("sources") or [spec["source"]]:
-                if "chart" in src:
-                    helm_template(f"{path} ({src['chart']})", doc["metadata"]["name"], spec["destination"]["namespace"],
-                                  src, (src.get("helm") or {}).get("valueFiles", []))
-        elif doc.get("kind") == "ApplicationSet":
-            tmpl = doc["spec"]["template"]
-            for el in doc["spec"]["generators"][0]["list"]["elements"]:
-                src = tmpl["spec"]["sources"][0]
-                helm_cfg = src.get("helm") or {}
-                files = [f.replace("{{.name}}", el["name"]) for f in helm_cfg.get("valueFiles", [])]
-                values = go_template(helm_cfg.get("values", ""), el)
-                helm_template(f"{path} ({el['name']})", el["name"], tmpl["spec"]["destination"]["namespace"], src, files, values)
+for path, doc in Repo().docs:
+    if doc.get("kind") == "Application":
+        spec = doc["spec"]
+        for src in spec.get("sources") or [spec["source"]]:
+            if "chart" in src:
+                helm_template(f"{path} ({src['chart']})", doc["metadata"]["name"], spec["destination"]["namespace"],
+                              src, (src.get("helm") or {}).get("valueFiles", []))
+    elif doc.get("kind") == "ApplicationSet":
+        tmpl = doc["spec"]["template"]
+        for el in doc["spec"]["generators"][0]["list"]["elements"]:
+            src = tmpl["spec"]["sources"][0]
+            helm_cfg = src.get("helm") or {}
+            files = [f.replace("{{.name}}", el["name"]) for f in helm_cfg.get("valueFiles", [])]
+            values = go_template(helm_cfg.get("values", ""), el)
+            helm_template(f"{path} ({el['name']})", el["name"], tmpl["spec"]["destination"]["namespace"], src, files, values)
 
 run("kustomize deployments/", ["kubectl", "kustomize", "deployments"])
 

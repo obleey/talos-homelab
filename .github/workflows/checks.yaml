@@ -14,10 +14,9 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.15"
-      # python yq (jq syntax) + PyYAML; the runner's preinstalled yq is the incompatible Go one
-      - run: pip install yq
-      - run: scripts/check-routes.sh
-      - run: scripts/check-conventions.py
+      - run: pip install pyyaml
+      - run: scripts/lint.py
+      - run: scripts/test_lint.py
       - uses: azure/setup-helm@v5
       # every chart-based app renders the way ArgoCD will render it (no cluster access needed)
       - run: scripts/render-check.py

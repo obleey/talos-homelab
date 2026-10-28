@@ -285,7 +285,7 @@ kubectl create secret generic my-secret \
 3. Add a target for the hostname in `deployments/infrastructure/observability/alloy-blackbox/values.yaml`.
 4. Add any extra manifests (PVCs, SealedSecrets) in the same folder.
 
-The pre-commit hook runs `scripts/check-routes.sh` (every hostname has a probe target) and `scripts/check-conventions.py` (no cascade-delete finalizer on cluster-critical apps; each namespace comes from exactly one of a Namespace manifest or `CreateNamespace=true`). Enable it once per clone with `git config core.hooksPath .githooks`.
+The pre-commit hook runs `scripts/lint.py`, which fails when the repo contradicts itself: YAML that doesn't parse or has duplicate keys, a served hostname without a probe target (or the reverse), a `secretKeyRef` key missing from its SealedSecret, a `HOMEPAGE_VAR_*` homepage doesn't define, a `*.svc.cluster.local:<port>` that disagrees with the appset, an alert that can never fire or uses `$value`/unknown template functions, a dangling alert dashboard link, and the Application conventions (no cascade-delete finalizer on cluster-critical apps; each namespace comes from exactly one of a Namespace manifest or `CreateNamespace=true`). `scripts/test_lint.py` proves each check fires by breaking a copy of the repo. Both need only Python 3 and PyYAML. Enable the hook once per clone with `git config core.hooksPath .githooks`.
 
 ### Standalone app (own namespace or different lifecycle)
 
