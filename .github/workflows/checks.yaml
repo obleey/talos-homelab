@@ -10,7 +10,7 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -22,13 +22,14 @@ jobs:
       - uses: azure/setup-helm@v5
       # every chart-based app renders the way ArgoCD will render it (no cluster access needed)
       - run: scripts/render-check.py
-      # needs repo secret SLACK_WEBHOOK_URL (Slack incoming webhook); skipped while it's unset
-      - if: failure() && env.SLACK_WEBHOOK_URL != ''
+      # needs repo secret SLACK_BOT_TOKEN (the bot token Grafana uses); skipped while it's unset
+      - if: failure() && env.SLACK_BOT_TOKEN != ''
         uses: slackapi/slack-github-action@v2
         with:
-          webhook: ${{ env.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
+          method: chat.postMessage
+          token: ${{ env.SLACK_BOT_TOKEN }}
           payload: |
+            channel: "#monitoring"
             text: ":x: checks failed on ${{ github.repository }}"
             blocks:
               - type: header
