@@ -29,7 +29,12 @@ configs:
     url: https://argocd.talos-cluster.local.obleey.com
     timeout.reconciliation: 30s
     admin.enabled: false
-    oidc.config: $argocd-google-oauth:oidc.config
+    oidc.config: |
+      name: Google
+      issuer: https://accounts.google.com
+      clientID: 969518996878-7eqrupk76jvmpatnb89t2hlosaajk4i2.apps.googleusercontent.com
+      clientSecret: $argocd-google-oauth:client-secret
+      requestedScopes: ["openid", "profile", "email"]
     accounts.obleey: login
     accounts.obleey.enabled: "true"
     accounts.readonly: login, apiKey
