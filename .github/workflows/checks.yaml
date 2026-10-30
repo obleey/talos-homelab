@@ -20,3 +20,11 @@ jobs:
       - uses: azure/setup-helm@v5
       # every chart-based app renders the way ArgoCD will render it (no cluster access needed)
       - run: scripts/render-check.py
+      # needs repo secret SLACK_WEBHOOK_URL (Slack incoming webhook); skipped while it's unset
+      - if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TEXT: ":x: checks failed on ${{ github.repository }}@${{ github.ref_name }} (${{ github.event.head_commit.message || github.event.pull_request.title }}): ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        run: |
+          [ -n "$SLACK_WEBHOOK_URL" ] || exit 0
+          jq -n --arg text "$TEXT" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' -d @- "$SLACK_WEBHOOK_URL"
