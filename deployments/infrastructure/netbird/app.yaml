@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: ghcr.io/netbirdio/helm-charts
       chart: netbird-operator
-      targetRevision: 0.8.0
+      targetRevision: 0.9.0
       helm:
         releaseName: netbird-operator
         valueFiles:
