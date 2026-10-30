@@ -245,6 +245,11 @@ configMaps:
                 key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}" }}'
                 type: technitium
                 url: http://10.0.0.104:5380
+          - NetBird:
+              description: VPN (remote access)
+              href: '{{ "{{HOMEPAGE_VAR_NETBIRD_URL}}" }}'
+              icon: netbird.png
+              weight: 150
           - TrueNAS:
               description: Network storage
               href: https://truenas.local.obleey.com
