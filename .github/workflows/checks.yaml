@@ -30,4 +30,9 @@ jobs:
           token: ${{ env.SLACK_BOT_TOKEN }}
           payload: |
             channel: "#monitoring"
-            text: "talos-homelab checks failed on `${{ github.head_ref || github.ref_name }}`: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|view run>"
+            # same look as the Grafana alerts (alerts/grafana-alerting.yaml): red bar, title, *Label:* lines, links
+            attachments:
+              - color: danger
+                fallback: "talos-homelab checks failed on ${{ github.head_ref || github.ref_name }}"
+                title: "🔴 FAILED · checks — talos-homelab"
+                text: "*Branch:* `${{ github.head_ref || github.ref_name }}`  *Event:* `${{ github.event_name }}`  *By:* `${{ github.actor }}`\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔎 Run>   <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|📝 Commit>"
