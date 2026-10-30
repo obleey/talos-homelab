@@ -24,7 +24,7 @@ jobs:
       - run: scripts/render-check.py
       # needs repo secret SLACK_BOT_TOKEN (the bot token Grafana uses); skipped while it's unset
       - if: failure() && env.SLACK_BOT_TOKEN != ''
-        uses: slackapi/slack-github-action@v2
+        uses: slackapi/slack-github-action@v4
         with:
           method: chat.postMessage
           token: ${{ env.SLACK_BOT_TOKEN }}
