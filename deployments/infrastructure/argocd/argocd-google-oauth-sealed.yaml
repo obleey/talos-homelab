@@ -1,0 +1,15 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: argocd-google-oauth
+  namespace: argocd
+spec:
+  encryptedData:
+    oidc.config: AgBvclSvTXosTuNRQH541WF/OTNOSNNlfbBWdcB4SPrzTFzrYxRjRBN0DHQLm953bgO6R5rpIzOhzZoT4xgnB/DVxaxeEXCvoMAuWESC3/zVH7qs1bhP01WdyGwBIFa3ZltlvjgiDT5rDrfEIScUPhCeYRjs0OwBtTaCx/GIghgMuG1BS8RK8/VzOXXxpwtQCgCXqm7Ov/mNqtBbuKgh4km+Oh+x1O8Jm3JJSMrI04tsq9DEWPNEC/YbkiOWmveYfCrwu0dCBWIqM1ktsFMsl2aT1VO3Dxju8ZinylwglfaAN83YFVcLOd6nMgFIg6glmJQxFiA+X35+mYLdfzhtxosMFjD2MZ2LC3CCNOF0vXftepwLC6uLheKo6V0H+YZwsCR2X5H/pu4OJnb1WOR3byBfbRHL5wI5pGPGtiCQQhdFmiCnBIE85MQPDfuBOpENYuSAVXS+bfdqt6dB03afJhEaJHJBZ+JLAs9gZvZCyLhjbp74shz3vkX7ShACJw0XHbsWOJlVerozKMTrgwQTNULXsvub+a7wApaVJs2uH1lWAuY6gDGOczeIl6iztpYCa0Acn5MJdp1qA28Is+V3QBa2GkDRkrtcIcn31N2s7tEJBd5Sy/MfEnVCfFLpePgpLdVix0s7LnZOggObY/DUcudZbEy6nxLqjnYqxX/J/BDX5lk6DIBTMv5gzV6xs2UZ9UbevsFzFqR/1yKRrCZ5tOZT3+S3/QOxP6dxWABq+xCWdD8ACvWywWtrrGkyht86m7gIeycVwz5R+gV0QF/10fGP5xlqEU+vFFAzzHlk45v3S8WBgROYiF6QlVyArnHHF3bbPsMDDLS0pjypgdyWcUnZgPfG2GYBgUxLfRR7mHcctgQaAIUdA4xBm8BYSjL6PHliveesKDRP28jKh2/7BuFGa/59F1rwECgdKStxHszKRAZAAW8/yZB3fw1Y2ekKRQJfqmuTlJwjYCyxycjgqInZhekZAUO9PVV5LK2HoHURZbTWW7d8eQ==
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/part-of: argocd
+      name: argocd-google-oauth
+      namespace: argocd

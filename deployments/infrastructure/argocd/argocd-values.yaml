@@ -29,6 +29,7 @@ configs:
     url: https://argocd.talos-cluster.local.obleey.com
     timeout.reconciliation: 30s
     admin.enabled: false
+    oidc.config: $argocd-google-oauth:oidc.config
     accounts.obleey: login
     accounts.obleey.enabled: "true"
     accounts.readonly: login, apiKey
@@ -50,6 +51,7 @@ configs:
     policy.csv: |
       g, obleey, role:admin
       g, readonly, role:readonly
+      g, miha.oblishar@gmail.com, role:admin
 
 notifications:
   enabled: true
