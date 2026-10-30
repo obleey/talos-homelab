@@ -5,6 +5,8 @@ controllers:
     strategy: Recreate
     containers:
       main:
+        image:
+          pullPolicy: IfNotPresent
         env:
           TZ: Europe/Ljubljana
         probes:

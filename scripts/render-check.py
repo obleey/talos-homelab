@@ -33,7 +33,10 @@ def helm_template(label, release, ns, src, value_files, extra_values=""):
     with tempfile.NamedTemporaryFile("w", suffix=".yaml") as extra:
         extra.write(extra_values)
         extra.flush()
-        run(label, ["helm", "template", release, src["chart"], "--repo", src["repoURL"], "--version", str(src["targetRevision"]),
+        # ArgoCD writes OCI registries without a scheme (ghcr.io/org/charts); helm wants oci://<repo>/<chart>
+        repo = src["repoURL"]
+        chart = [src["chart"], "--repo", repo] if "://" in repo else [f"oci://{repo}/{src['chart']}"]
+        run(label, ["helm", "template", release, *chart, "--version", str(src["targetRevision"]),
                     "-n", ns, *API_VERSIONS, *sum((["-f", f] for f in files), []), "-f", extra.name])
 
 

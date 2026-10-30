@@ -1,3 +1,6 @@
+image:
+  pullPolicy: IfNotPresent
+
 sealedSecrets:
   autoFetchCert: true
   controllerName: sealed-secrets-controller
