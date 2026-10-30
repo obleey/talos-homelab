@@ -79,22 +79,6 @@
       ],
       "groupName": "observability images",
       "minimumReleaseAge": "3 days"
-    },
-    {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["ghcr.io/thephaseless/byparr"],
-      "matchUpdateTypes": [
-        "digest"
-      ],
-      "enabled": true
-    },
-    {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["ghcr.io/dan-online/autopulse"],
-      "matchUpdateTypes": [
-        "digest"
-      ],
-      "enabled": true
     }
   ]
 }

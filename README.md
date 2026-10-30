@@ -6,7 +6,7 @@ A three-node [Talos Linux](https://www.talos.dev) cluster run entirely from this
 graph LR
     Git[this repo] -->|poll / webhook| ArgoCD
     subgraph cluster [Talos cluster: control-plane-1 .160, worker-1 .161, worker-2 .162]
-        ArgoCD --> Infra[infrastructure<br/>cilium, cert-manager, traefik,<br/>longhorn, sealed-secrets]
+        ArgoCD --> Infra[infrastructure<br/>cilium, cert-manager, traefik,<br/>longhorn, sealed-secrets, netbird]
         ArgoCD --> Apps[app-template ApplicationSet<br/>servarr apps, homepage,<br/>technitium-secondary]
         ArgoCD --> Obs[observability<br/>VictoriaMetrics, VictoriaLogs,<br/>Grafana, Alloy]
     end
@@ -45,6 +45,7 @@ docs/adr/                      decisions future changes should not undo
 | ArgoCD | `argocd` | Manages itself after bootstrap; config and RBAC live in `argocd-values.yaml` |
 | metrics-server, kubelet-serving-cert-approver | `kube-system` | `kubectl top`; approve kubelet serving certs |
 | kubeseal-webgui | `kubeseal-webgui` | Browser UI for sealing secrets |
+| NetBird operator | `netbird` | Routing peer `talos-homelab` joins the cluster to `netbird.obleey.com` for remote access |
 
 ### Apps (one ApplicationSet, bjw-s [app-template](https://github.com/bjw-s-labs/helm-charts))
 
@@ -72,7 +73,7 @@ All hosts are under `talos-cluster.local.obleey.com`. The servarr apps share one
 
 ## Conventions
 
-- **Sync waves set creation order only:** sealed-secrets `-5`, cilium `-4`, cert-manager and metrics-server `-3`, traefik and longhorn `-2`, argocd `-1`, apps `0`, metrics and logs `1`, Alloy `2`. ArgoCD does not wait for health between waves (deliberately: one degraded app would block the rest); dependencies settle through retries.
+- **Sync waves set creation order only:** sealed-secrets `-5`, cilium `-4`, cert-manager and metrics-server `-3`, traefik and longhorn `-2`, argocd `-1`, apps and netbird `0`, metrics and logs `1`, Alloy `2`. ArgoCD does not wait for health between waves (deliberately: one degraded app would block the rest); dependencies settle through retries.
 - **Cluster-critical Applications have no cascade-delete finalizer** (sealed-secrets, cilium, cert-manager, argocd, longhorn), so deleting the Application never deletes the component.
 - **Each namespace is created exactly once:** a `Namespace` manifest or `CreateNamespace=true`, never both.
 - **Config volumes are never pruned:** `_common-values.yaml` marks them `Prune=false,Delete=false`.
