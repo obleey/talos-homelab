@@ -178,13 +178,13 @@ configMaps:
         layout:
           Infrastructure:
             style: row
-            columns: 6
+            columns: 2
           Media Servers:
             style: row
             columns: 2
           Media Management:
             style: row
-            columns: 6
+            columns: 2
           Downloads:
             style: row
             columns: 2
