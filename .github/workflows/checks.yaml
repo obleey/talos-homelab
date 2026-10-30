@@ -30,26 +30,4 @@ jobs:
           token: ${{ env.SLACK_BOT_TOKEN }}
           payload: |
             channel: "#monitoring"
-            text: ":x: checks failed on ${{ github.repository }}"
-            blocks:
-              - type: header
-                text:
-                  type: plain_text
-                  text: ":x: talos-homelab checks failed"
-              - type: section
-                fields:
-                  - type: mrkdwn
-                    text: "*Branch*\n`${{ github.head_ref || github.ref_name }}`"
-                  - type: mrkdwn
-                    text: "*By*\n${{ github.actor }}"
-                  - type: mrkdwn
-                    text: "*Commit*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
-                  - type: mrkdwn
-                    text: "*Event*\n${{ github.event_name }}"
-              - type: actions
-                elements:
-                  - type: button
-                    text:
-                      type: plain_text
-                      text: View run
-                    url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            text: "talos-homelab checks failed on `${{ github.head_ref || github.ref_name }}`: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|view run>"
