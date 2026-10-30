@@ -9,6 +9,8 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -21,10 +23,32 @@ jobs:
       # every chart-based app renders the way ArgoCD will render it (no cluster access needed)
       - run: scripts/render-check.py
       # needs repo secret SLACK_WEBHOOK_URL (Slack incoming webhook); skipped while it's unset
-      - if: failure()
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          TEXT: ":x: checks failed on ${{ github.repository }}@${{ github.ref_name }} (${{ github.event.head_commit.message || github.event.pull_request.title }}): ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-        run: |
-          [ -n "$SLACK_WEBHOOK_URL" ] || exit 0
-          jq -n --arg text "$TEXT" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' -d @- "$SLACK_WEBHOOK_URL"
+      - if: failure() && env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v2
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: ":x: checks failed on ${{ github.repository }}"
+            blocks:
+              - type: header
+                text:
+                  type: plain_text
+                  text: ":x: talos-homelab checks failed"
+              - type: section
+                fields:
+                  - type: mrkdwn
+                    text: "*Branch*\n`${{ github.head_ref || github.ref_name }}`"
+                  - type: mrkdwn
+                    text: "*By*\n${{ github.actor }}"
+                  - type: mrkdwn
+                    text: "*Commit*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                  - type: mrkdwn
+                    text: "*Event*\n${{ github.event_name }}"
+              - type: actions
+                elements:
+                  - type: button
+                    text:
+                      type: plain_text
+                      text: View run
+                    url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
