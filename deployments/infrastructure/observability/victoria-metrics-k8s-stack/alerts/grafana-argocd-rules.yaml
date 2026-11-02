@@ -326,7 +326,7 @@ data:
               __dashboardUid__: "qPkgGHg7k"
               __panelId__: "105"
               summary: "ArgoCD app stuck Progressing ({{ $labels.name }})"
-              description: "App {{ $labels.name }} in project {{ $labels.project }} has been Progressing for over 2 hours. Find the resource with: argocd app get {{ $labels.name }} -o tree | grep -v Healthy. Dest: {{ $labels.dest_namespace }}."
+              description: "App {{ $labels.name }} in project {{ $labels.project }} has been Progressing for over 2 hours. Find the non-Healthy resource with: argocd app get {{ $labels.name }} -o tree. Dest: {{ $labels.dest_namespace }}."
             isPaused: false
 
           - uid: argocd-cluster-connection-error
@@ -377,7 +377,6 @@ data:
             labels:
               severity: warning
             annotations:
-              __dashboardUid__: "qPkgGHg7k"
               summary: "ArgoCD cannot reach cluster {{ $labels.server }}"
               description: "ArgoCD has lost its connection to {{ $labels.server }}. Syncs targeting this cluster fail until it recovers."
             isPaused: false
@@ -430,7 +429,6 @@ data:
             labels:
               severity: warning
             annotations:
-              __dashboardUid__: "qPkgGHg7k"
               summary: "ArgoCD failing to fetch {{ $labels.repo }}"
               description: "The repo server cannot fetch {{ $labels.repo }}, so syncs and manifest generation are blocked. Check GitHub reachability and repo credentials."
             isPaused: false
@@ -483,7 +481,6 @@ data:
             labels:
               severity: warning
             annotations:
-              __dashboardUid__: "qPkgGHg7k"
               summary: "ArgoCD {{ $labels.job }} gRPC error rate above 5%"
               description: "{{ $labels.job }} is failing {{ $values.A.Value | printf \"%.1f\" }}% of gRPC requests. The API server or repo server is degraded."
             isPaused: false
@@ -536,7 +533,6 @@ data:
             labels:
               severity: warning
             annotations:
-              __dashboardUid__: "qPkgGHg7k"
               summary: "ArgoCD repo server has {{ $values.A.Value }} pending requests"
               description: "The repo server is backed up generating manifests, so syncs will lag. Check repo-server CPU and memory."
             isPaused: false
@@ -589,7 +585,6 @@ data:
             labels:
               severity: warning
             annotations:
-              __dashboardUid__: "qPkgGHg7k"
               summary: "ArgoCD git operations slow for {{ $labels.repo }}"
               description: "p95 git request duration for {{ $labels.repo }} is {{ $values.A.Value | printf \"%.0f\" }}s (threshold 30s). Check network latency to GitHub."
             isPaused: false
@@ -642,7 +637,6 @@ data:
             labels:
               severity: warning
             annotations:
-              __dashboardUid__: "qPkgGHg7k"
               summary: "ArgoCD app reconciliation is slow"
               description: "p95 app reconciliation takes {{ $values.A.Value | printf \"%.0f\" }}s (threshold 60s). The application controller may be overloaded."
             isPaused: false
