@@ -8,6 +8,10 @@ metadata:
 data:
   cilium-rules.yaml: |
     apiVersion: 1
+    # removed from this file in 2686623; provisioning never deletes rules on its own
+    deleteRules:
+      - orgId: 1
+        uid: cilium-agent-nat-table-full
     groups:
       - orgId: 1
         name: cilium

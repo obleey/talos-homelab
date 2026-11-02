@@ -132,9 +132,10 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  # Seconds since the last successful check; runs hourly, so > 3h means the check itself is broken
+                  # Seconds since the last successful check. The 3h threshold lives in the threshold step, not here:
+                  # a filtering query returns nothing when healthy, and NoData = Alerting would then fire
                   expr: >-
-                    time() - max by (token) (last_over_time(cloudflare_token_last_check_timestamp_seconds[7d])) > 3 * 3600
+                    time() - max by (token) (last_over_time(cloudflare_token_last_check_timestamp_seconds[7d]))
                   instant: true
                   refId: A
               - refId: threshold
@@ -145,7 +146,7 @@ data:
                 model:
                   conditions:
                     - evaluator:
-                        params: [0]
+                        params: [10800]
                         type: gt
                       operator:
                         type: and
