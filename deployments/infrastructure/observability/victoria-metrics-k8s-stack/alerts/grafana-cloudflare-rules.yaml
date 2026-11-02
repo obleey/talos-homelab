@@ -1,0 +1,172 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-cloudflare-rules
+  namespace: monitoring
+  labels:
+    grafana_alert: "1"
+data:
+  cloudflare-rules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: cloudflare-tokens
+        folder: Infrastructure
+        interval: 5m
+        rules:
+
+          - uid: cf-token-invalid
+            title: Cloudflare Token Invalid
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # cf-token-check (cert-manager CronJob, cron on helion) reports 0 when Cloudflare rejects the token
+                  expr: >-
+                    (1 - max by (token) (last_over_time(cloudflare_token_valid[3h]))) > 0
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Cloudflare token {{ $labels.token }} is invalid"
+              description: "Cloudflare rejects API token {{ $labels.token }} (expired, revoked or deleted). DNS-01 certificate renewals using it will fail. helion-traefik = CF_DNS_API_TOKEN in /opt/services/traefik/.traefik.env on helion; cluster-cert-manager = SealedSecret deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml."
+            isPaused: false
+
+          - uid: cf-token-expiring
+            title: Cloudflare Token Expiring Soon
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # Remaining seconds for tokens with an expiry date (0 = never expires, filtered out)
+                  expr: >-
+                    (max by (token) (last_over_time(cloudflare_token_expiry_timestamp_seconds[3h])) > 0) - time() < 30 * 24 * 3600
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 1h
+            labels:
+              severity: warning
+            annotations:
+              summary: "Cloudflare token {{ $labels.token }} expires in < 30 days"
+              description: "Cloudflare API token {{ $labels.token }} expires in {{ $values.A.Value | printf \"%.0f\" | humanizeDuration }}. Roll it in the Cloudflare dashboard and update it. helion-traefik = CF_DNS_API_TOKEN in /opt/services/traefik/.traefik.env on helion; cluster-cert-manager = SealedSecret deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml."
+            isPaused: false
+
+          - uid: cf-token-check-stale
+            title: Cloudflare Token Check Stale
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # Seconds since the last successful check; runs hourly, so > 3h means the check itself is broken
+                  expr: >-
+                    time() - max by (token) (last_over_time(cloudflare_token_last_check_timestamp_seconds[7d])) > 3 * 3600
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Cloudflare token check for {{ $labels.token }} is not running"
+              description: "No successful Cloudflare token check for {{ $labels.token }} in over 3h, so token expiry is unmonitored. Check the cf-token-check CronJob in cert-manager or the cron job on helion (crontab -l). helion-traefik = CF_DNS_API_TOKEN in /opt/services/traefik/.traefik.env on helion; cluster-cert-manager = SealedSecret deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml."
+            isPaused: false

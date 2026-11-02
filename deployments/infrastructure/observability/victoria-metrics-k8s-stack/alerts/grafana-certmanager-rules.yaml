@@ -190,7 +190,8 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'sum by (host) (rate(certmanager_http_acme_client_request_count{status="429"}[5m])) > 0'
+                  # metric lost its http_ prefix in cert-manager v1.19; match both so upgrades don't silence this
+                  expr: 'sum by (host) (rate({__name__=~"certmanager_(http_)?acme_client_request_count", status="429"}[5m])) > 0'
                   instant: true
                   refId: A
               - refId: threshold
@@ -227,4 +228,56 @@ data:
               __panelId__: "2"
               summary: "Cert-Manager hitting ACME rate limits for {{ $labels.host }}"
               description: "Cert-Manager is receiving 429 responses from the ACME server for {{ $labels.host }}. Certificate renewals will be delayed. Wait before retrying."
+            isPaused: false
+
+          - uid: certmgr-renewal-overdue
+            title: Cert-Manager Certificate Renewal Overdue
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # Seconds past the scheduled renewal time; a working renewal moves the timestamp forward within minutes
+                  expr: >-
+                    (time() - max by (exported_namespace, name) (certmanager_certificate_renewal_timestamp_seconds)) > 6 * 3600
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Certificate {{ $labels.name }} renewal is overdue"
+              description: "Certificate {{ $labels.name }} in {{ $labels.exported_namespace }} should have renewed {{ $values.A.Value | printf \"%.0f\" | humanizeDuration }} ago but hasn't. The old cert is still valid; check its Challenges (kubectl -n {{ $labels.exported_namespace }} get challenge) and the DNS provider token."
             isPaused: false

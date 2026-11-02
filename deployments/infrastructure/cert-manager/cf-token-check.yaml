@@ -1,0 +1,125 @@
+# Hourly check of cert-manager's Cloudflare token -> VictoriaMetrics.
+# helion runs the same script from cron; alerts in grafana-cloudflare-rules.yaml.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cf-token-check
+  namespace: cert-manager
+data:
+  cf-token-check.py: |
+    #!/usr/bin/env python3
+    """Verify a Cloudflare API token and emit Prometheus metrics (never the token itself).
+
+    usage: CF_TOKEN=... cf-token-check.py <name> <out.prom | http(s) import URL>
+
+    Used by the cert-manager CronJob (pushes to VictoriaMetrics) and by cron on helion
+    (writes a node-exporter textfile). Alerts: grafana-cloudflare-rules.yaml.
+    """
+    import datetime
+    import json
+    import os
+    import sys
+    import time
+    import urllib.error
+    import urllib.request
+
+    VERIFY = "https://api.cloudflare.com/client/v4/user/tokens/verify"
+
+
+    def verify(token):
+        req = urllib.request.Request(VERIFY, headers={"Authorization": "Bearer " + token})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.load(r).get("result") or {}
+        except urllib.error.HTTPError as e:  # a dead token comes back as 4xx with a JSON body
+            if e.code >= 500:
+                raise
+            return {}
+
+
+    def metrics(name, result, now):
+        expires = result.get("expires_on")
+        expiry = datetime.datetime.strptime(expires, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc).timestamp() if expires else 0
+        lbl = f'{{token="{name}"}}'
+        return (f"cloudflare_token_valid{lbl} {int(result.get('status') == 'active')}\n"
+                f"cloudflare_token_expiry_timestamp_seconds{lbl} {int(expiry)}\n"
+                f"cloudflare_token_last_check_timestamp_seconds{lbl} {int(now)}\n")
+
+
+    def main(name, dest):
+        # network/5xx errors raise and write nothing; the stale-check alert covers that
+        token = os.environ["CF_TOKEN"].strip().strip("\"'")  # env files often quote values
+        body = metrics(name, verify(token), time.time())
+        if dest.startswith("http"):
+            urllib.request.urlopen(urllib.request.Request(dest, data=body.encode(), method="POST"), timeout=30)
+        else:
+            tmp = dest + ".tmp"
+            with open(tmp, "w") as f:
+                f.write(body)
+            os.replace(tmp, dest)  # atomic, so the scraper never sees a half-written file
+
+
+    if __name__ == "__main__":
+        if sys.argv[1:] == ["--selftest"]:
+            m = metrics("t", {"status": "active", "expires_on": "2027-11-02T22:59:59Z"}, 1)
+            assert 'cloudflare_token_valid{token="t"} 1' in m and "seconds{token=\"t\"} 1825196399" in m, m
+            m = metrics("t", {}, 1)  # invalid token: verify() returns {}
+            assert 'valid{token="t"} 0' in m and 'expiry_timestamp_seconds{token="t"} 0' in m, m
+            print("ok")
+        else:
+            main(*sys.argv[1:])
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cf-token-check
+  namespace: cert-manager
+spec:
+  schedule: "17 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: check
+              image: python:3.13-alpine
+              args:
+                - python3
+                - /script/cf-token-check.py
+                - cluster-cert-manager
+                - http://vmsingle-vm.monitoring.svc.cluster.local:8428/api/v1/import/prometheus?extra_label=job=cf-token-check
+              env:
+                - name: CF_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: cloudflare-api-token
+                      key: api-token
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  memory: 64Mi
+              volumeMounts:
+                - name: script
+                  mountPath: /script
+          volumes:
+            - name: script
+              configMap:
+                name: cf-token-check
