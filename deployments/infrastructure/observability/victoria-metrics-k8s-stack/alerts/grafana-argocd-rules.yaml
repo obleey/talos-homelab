@@ -329,6 +329,324 @@ data:
               description: "App {{ $labels.name }} in project {{ $labels.project }} has been Progressing for over 2 hours. Find the resource with: argocd app get {{ $labels.name }} -o tree | grep -v Healthy. Dest: {{ $labels.dest_namespace }}."
             isPaused: false
 
+          - uid: argocd-cluster-connection-error
+            title: ArgoCD Cluster Connection Error
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # from awesome-prometheus-alerts (ci-cd/argocd); status is 1 when connected
+                  expr: >-
+                    (1 - argocd_cluster_connection_status) > 0
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              summary: "ArgoCD cannot reach cluster {{ $labels.server }}"
+              description: "ArgoCD has lost its connection to {{ $labels.server }}. Syncs targeting this cluster fail until it recovers."
+            isPaused: false
+
+          - uid: argocd-git-fetch-failures
+            title: ArgoCD Git Fetch Failures
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # from awesome-prometheus-alerts (ci-cd/argocd); counter only appears after the first failure
+                  expr: >-
+                    sum by (repo) (rate(argocd_git_fetch_fail_total[5m])) > 0
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              summary: "ArgoCD failing to fetch {{ $labels.repo }}"
+              description: "The repo server cannot fetch {{ $labels.repo }}, so syncs and manifest generation are blocked. Check GitHub reachability and repo credentials."
+            isPaused: false
+
+          - uid: argocd-high-grpc-error-rate
+            title: ArgoCD High gRPC Error Rate
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # from awesome-prometheus-alerts (ci-cd/argocd); % of failing gRPC calls per component, max 2.5% seen over 7d
+                  expr: >-
+                    100 * sum by (job) (rate(grpc_server_handled_total{job=~"argocd-.*", grpc_code=~"Internal|Unavailable|DeadlineExceeded|ResourceExhausted|Aborted|Unknown"}[5m])) / sum by (job) (rate(grpc_server_handled_total{job=~"argocd-.*"}[5m])) > 5
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              summary: "ArgoCD {{ $labels.job }} gRPC error rate above 5%"
+              description: "{{ $labels.job }} is failing {{ $values.A.Value | printf \"%.1f\" }}% of gRPC requests. The API server or repo server is degraded."
+            isPaused: false
+
+          - uid: argocd-repo-server-pending
+            title: ArgoCD Repo Server Too Many Pending Requests
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # from awesome-prometheus-alerts (ci-cd/argocd); max 3 seen over 7d
+                  expr: >-
+                    argocd_repo_pending_request_total > 50
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              summary: "ArgoCD repo server has {{ $values.A.Value }} pending requests"
+              description: "The repo server is backed up generating manifests, so syncs will lag. Check repo-server CPU and memory."
+            isPaused: false
+
+          - uid: argocd-slow-git-operations
+            title: ArgoCD Repo Server Slow Git Operations
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # from awesome-prometheus-alerts (ci-cd/argocd); p95 seconds, max 18.9s seen over 7d
+                  expr: >-
+                    histogram_quantile(0.95, sum by (repo, le) (rate(argocd_git_request_duration_seconds_bucket[5m]))) > 30
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              summary: "ArgoCD git operations slow for {{ $labels.repo }}"
+              description: "p95 git request duration for {{ $labels.repo }} is {{ $values.A.Value | printf \"%.0f\" }}s (threshold 30s). Check network latency to GitHub."
+            isPaused: false
+
+          - uid: argocd-slow-reconciliation
+            title: ArgoCD Application Controller Slow Reconciliation
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # from awesome-prometheus-alerts (ci-cd/argocd); p95 seconds, max 16s seen over 7d
+                  expr: >-
+                    histogram_quantile(0.95, sum by (le) (rate(argocd_app_reconcile_bucket[5m]))) > 60
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              summary: "ArgoCD app reconciliation is slow"
+              description: "p95 app reconciliation takes {{ $values.A.Value | printf \"%.0f\" }}s (threshold 60s). The application controller may be overloaded."
+            isPaused: false
+
           - uid: argocd-app-autosync-disabled
             title: ArgoCD App Auto-Sync Disabled
             condition: threshold
