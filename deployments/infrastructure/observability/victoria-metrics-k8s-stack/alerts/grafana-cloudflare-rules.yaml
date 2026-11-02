@@ -168,6 +168,6 @@ data:
             labels:
               severity: warning
             annotations:
-              summary: "Cloudflare token check for {{ $labels.token }} is not running"
-              description: "No successful Cloudflare token check for {{ $labels.token }} in over 3h, so token expiry is unmonitored. Check the cf-token-check CronJob in cert-manager or the cron job on helion (crontab -l). helion-traefik = CF_DNS_API_TOKEN in /opt/services/traefik/.traefik.env on helion; cluster-cert-manager = SealedSecret deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml."
+              summary: "Cloudflare token check for {{ if $labels.token }}{{ $labels.token }}{{ else }}any token (no check results at all){{ end }} is not running"
+              description: "No successful Cloudflare token check for {{ if $labels.token }}{{ $labels.token }}{{ else }}any token (no check results at all){{ end }} in over 3h, so token expiry is unmonitored. Check the cf-token-check CronJob in cert-manager or the cron job on helion (crontab -l). helion-traefik = CF_DNS_API_TOKEN in /opt/services/traefik/.traefik.env on helion; cluster-cert-manager = SealedSecret deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml."
             isPaused: false
