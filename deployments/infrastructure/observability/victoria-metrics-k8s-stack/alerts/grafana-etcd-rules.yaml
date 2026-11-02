@@ -169,3 +169,159 @@ data:
               summary: "Etcd high gRPC error rate on {{ $labels.grpc_service }}/{{ $labels.grpc_method }}"
               description: "Etcd gRPC error rate is {{ $values.A.Value | printf \"%.1f\" }}% (threshold: 5%) for {{ $labels.grpc_service }}/{{ $labels.grpc_method }}."
             isPaused: false
+
+          - uid: etcd-high-fsync-durations
+            title: Etcd High Fsync Durations
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # from awesome-prometheus-alerts (orchestrators/etcd); p99 WAL fsync, ~8ms normal here
+                  expr: >-
+                    histogram_quantile(0.99, sum by (instance, le) (rate(etcd_disk_wal_fsync_duration_seconds_bucket[5m]))) > 0.5
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Etcd WAL fsync slow on {{ $labels.instance }}"
+              description: "p99 etcd WAL fsync on {{ $labels.instance }} is {{ $values.A.Value | printf \"%.2f\" }}s (normally ~8ms). The control-plane disk is slow or failing; the API server will stall."
+            isPaused: false
+
+          - uid: etcd-db-quota-low-space
+            title: Etcd Database Quota Low Space
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # from awesome-prometheus-alerts (orchestrators/etcd); % of backend quota used, etcd goes read-only at 100%
+                  expr: >-
+                    100 * etcd_mvcc_db_total_size_in_bytes / etcd_server_quota_backend_bytes > 95
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 10m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Etcd database at {{ $values.A.Value | printf \"%.0f\" }}% of quota"
+              description: "Etcd on {{ $labels.instance }} is nearly at its backend quota. At 100% it rejects writes and the cluster freezes. Run: talosctl -n 10.0.0.160 etcd defrag"
+            isPaused: false
+
+          - uid: etcd-high-fragmentation
+            title: Etcd Database High Fragmentation
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # from awesome-prometheus-alerts (orchestrators/etcd); ratio of in-use to allocated, only once in-use exceeds 100 MiB
+                  expr: >-
+                    (last_over_time(etcd_mvcc_db_total_size_in_use_in_bytes[5m]) / last_over_time(etcd_mvcc_db_total_size_in_bytes[5m]) < 0.5) and on (instance) (last_over_time(etcd_mvcc_db_total_size_in_use_in_bytes[5m]) > 104857600)
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Etcd database fragmented on {{ $labels.instance }}"
+              description: "Less than half of the etcd database on {{ $labels.instance }} is in use. Talos doesn't defragment automatically; run: talosctl -n 10.0.0.160 etcd defrag"
+            isPaused: false
