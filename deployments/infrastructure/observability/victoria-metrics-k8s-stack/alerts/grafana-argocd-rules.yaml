@@ -275,6 +275,60 @@ data:
               description: "App {{ $labels.name }} in project {{ $labels.project }} has been {{ $labels.health_status }} for 15 minutes. Dest: {{ $labels.dest_namespace }}."
             isPaused: false
 
+          - uid: argocd-app-stuck-progressing
+            title: ArgoCD App Stuck Progressing
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 300
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # Not Healthy ignores Progressing (normal during rollouts); a stuck rollout or a
+                  # cert renewal that never finishes stays Progressing forever without this
+                  expr: 'argocd_app_info{health_status="Progressing"} == 1'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 2h
+            labels:
+              severity: warning
+            annotations:
+              __dashboardUid__: "qPkgGHg7k"
+              __panelId__: "105"
+              summary: "ArgoCD app stuck Progressing ({{ $labels.name }})"
+              description: "App {{ $labels.name }} in project {{ $labels.project }} has been Progressing for over 2 hours. Find the resource with: argocd app get {{ $labels.name }} -o tree | grep -v Healthy. Dest: {{ $labels.dest_namespace }}."
+            isPaused: false
+
           - uid: argocd-app-autosync-disabled
             title: ArgoCD App Auto-Sync Disabled
             condition: threshold
