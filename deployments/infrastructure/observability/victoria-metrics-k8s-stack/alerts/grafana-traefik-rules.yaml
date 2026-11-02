@@ -29,8 +29,9 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
+                  # netbird-server-h2c: cancelled long-lived gRPC streams count as 5xx, not real errors
                   expr: >-
-                    sum(rate(traefik_service_requests_total{code=~"5.*"}[3m])) by (service)
+                    sum(rate(traefik_service_requests_total{code=~"5.*", service!="netbird-server-h2c@docker"}[3m])) by (service)
                     / sum(rate(traefik_service_requests_total[3m])) by (service) * 100 > 5
                     and sum(rate(traefik_service_requests_total[3m])) by (service) > 0
                   instant: true

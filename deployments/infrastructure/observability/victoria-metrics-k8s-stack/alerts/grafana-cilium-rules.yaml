@@ -315,56 +315,6 @@ data:
               description: "Cilium agent {{ $labels.pod }} conntrack table is full, causing packet drops. Increase CT map size or investigate connection leak."
             isPaused: false
 
-          - uid: cilium-agent-nat-table-full
-            title: Cilium Agent NAT Table Full
-            condition: threshold
-            data:
-              - refId: A
-                relativeTimeRange:
-                  from: 300
-                  to: 0
-                datasourceUid: prometheus
-                model:
-                  datasource:
-                    type: prometheus
-                    uid: prometheus
-                  expr: 'sum(rate(cilium_drop_count_total{reason="No mapping for NAT masquerade"}[1m])) by (pod) > 0'
-                  instant: true
-                  refId: A
-              - refId: threshold
-                relativeTimeRange:
-                  from: 0
-                  to: 0
-                datasourceUid: "-100"
-                model:
-                  conditions:
-                    - evaluator:
-                        params: [0]
-                        type: gt
-                      operator:
-                        type: and
-                      query:
-                        params: [A]
-                      reducer:
-                        params: []
-                        type: last
-                      type: query
-                  datasource:
-                    type: __expr__
-                    uid: "-100"
-                  expression: A
-                  refId: threshold
-                  type: threshold
-            noDataState: OK
-            execErrState: Alerting
-            for: 5m
-            labels:
-              severity: critical
-            annotations:
-              summary: "Cilium NAT table full on {{ $labels.pod }}"
-              description: "Cilium agent {{ $labels.pod }} NAT table is full, causing masquerade failures and packet drops."
-            isPaused: false
-
           - uid: cilium-agent-high-drop-rate
             title: Cilium Agent High Drop Rate
             condition: threshold
@@ -378,7 +328,8 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: 'sum(rate(cilium_drop_count_total{reason!~"Policy denied|Unsupported L3 protocol"}[5m])) by (pod, reason) > 0.05'
+                  # 'Stale or unroutable IP' is normal while pods churn (all 14 firings in a week)
+                  expr: 'sum(rate(cilium_drop_count_total{reason!~"Policy denied|Unsupported L3 protocol|Stale or unroutable IP"}[5m])) by (pod, reason) > 0.05'
                   instant: true
                   refId: A
               - refId: threshold

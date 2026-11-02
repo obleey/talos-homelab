@@ -62,7 +62,7 @@ data:
                   type: threshold
             noDataState: OK
             execErrState: Alerting
-            for: 5m
+            for: 30m  # download bursts on worker-1 hit 50MB/s routinely
             labels:
               severity: warning
             annotations:
@@ -119,7 +119,7 @@ data:
                   type: threshold
             noDataState: OK
             execErrState: Alerting
-            for: 5m
+            for: 30m  # download bursts on worker-1 hit 50MB/s routinely
             labels:
               severity: warning
             annotations:

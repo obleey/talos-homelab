@@ -109,7 +109,7 @@ data:
                   type: threshold
             noDataState: OK
             execErrState: Alerting
-            for: 5m
+            for: 15m  # replica rebuild after a node reboot takes ~10m
             labels:
               severity: warning
             annotations:
@@ -369,7 +369,7 @@ data:
                   type: threshold
             noDataState: OK
             execErrState: Alerting
-            for: 0s
+            for: 30m  # Longhorn retries; only alert on failures that stick
             labels:
               severity: critical
             annotations:

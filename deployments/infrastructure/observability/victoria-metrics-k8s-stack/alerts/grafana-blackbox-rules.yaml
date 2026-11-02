@@ -57,7 +57,7 @@ data:
                   type: threshold
             noDataState: OK
             execErrState: Alerting
-            for: 1m
+            for: 5m  # single failed probes are blips, not outages
             labels:
               severity: critical
             annotations:
