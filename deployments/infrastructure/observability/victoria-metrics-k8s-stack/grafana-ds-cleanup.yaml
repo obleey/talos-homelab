@@ -1,0 +1,16 @@
+# Grafana never deletes a provisioned datasource when it's removed from config,
+# so the Loki one dropped in 342d817 lingers in the DB as read-only. Safe to
+# delete this file once it's gone.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-ds-cleanup
+  namespace: monitoring
+  labels:
+    grafana_datasource: "1"
+data:
+  cleanup.yaml: |
+    apiVersion: 1
+    deleteDatasources:
+      - name: Loki
+        orgId: 1
