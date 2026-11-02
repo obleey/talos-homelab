@@ -15,7 +15,7 @@ data:
       "description": "Log browser for Docker containers on non-Kubernetes hosts",
       "editable": true,
       "schemaVersion": 39,
-      "version": 15,
+      "version": 16,
       "refresh": "30s",
       "time": {
         "from": "now-1h",
@@ -25,7 +25,7 @@ data:
       "tags": [
         "docker",
         "logs",
-        "loki"
+        "victorialogs"
       ],
       "templating": {
         "list": [
@@ -77,31 +77,25 @@ data:
           {
             "name": "severity",
             "label": "Severity",
-            "type": "query",
-            "datasource": {
-              "type": "victoriametrics-logs-datasource",
-              "uid": "victorialogs"
-            },
-            "definition": "{host=\"$host\"}",
-            "query": {
-              "field": "level",
-              "query": "{host=\"$host\"}",
-              "refId": "A",
-              "type": "fieldValue"
-            },
-            "refresh": 2,
-            "sort": 1,
+            "type": "custom",
+            "description": "Case-insensitive; apps disagree on INFO/info/Warning/WARN",
+            "query": "error : error|err|fatal|crit|critical,warn : warn|warning,info : info,debug : debug|trace",
             "multi": false,
             "includeAll": true,
             "allValue": ".*",
-            "current": {}
+            "current": {
+              "text": "All",
+              "value": "$__all"
+            }
           },
           {
             "name": "search",
-            "label": "Search",
+            "label": "Search (regex)",
             "type": "textbox",
+            "query": "",
             "current": {
-              "value": ".*"
+              "text": "",
+              "value": ""
             },
             "hide": 0
           }
@@ -109,11 +103,11 @@ data:
       },
       "panels": [
         {
-          "id": 1,
-          "type": "logs",
-          "title": "Logs",
+          "id": 2,
+          "type": "timeseries",
+          "title": "Log volume by level",
           "gridPos": {
-            "h": 22,
+            "h": 7,
             "w": 24,
             "x": 0,
             "y": 0
@@ -122,63 +116,79 @@ data:
             "type": "victoriametrics-logs-datasource",
             "uid": "victorialogs"
           },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              },
+              "custom": {
+                "drawStyle": "bars",
+                "fillOpacity": 80,
+                "lineWidth": 0,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "error" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }] },
+              { "matcher": { "id": "byName", "options": "warn" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } }] },
+              { "matcher": { "id": "byName", "options": "info" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }] },
+              { "matcher": { "id": "byName", "options": "debug" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] },
+              { "matcher": { "id": "byName", "options": "unknown" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "gray" } }] }
+            ]
+          },
           "options": {
-            "showLabels": false,
-            "showTime": true,
-            "sortOrder": "Descending",
-            "wrapLogMessage": false
+            "legend": {
+              "displayMode": "list",
+              "placement": "right",
+              "calcs": ["sum"]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
           },
           "targets": [
             {
-              "expr": "{host=\"$host\", container=~\"$container\"} | filter level:~\"(?i)$severity\" | filter ~\"(?i)$search\"",
+              "expr": "{host=\"$host\", container=~\"$container\"} | filter level:~\"(?i)^($severity)$\" | filter ~\"(?i)$search\" | format if (level:=\"\") \"unknown\" as level | format \"<lc:level>\" as level | replace_regexp (\"^(warning)$\", \"warn\") at level | replace_regexp (\"^(err|fatal|crit|critical)$\", \"error\") at level | replace_regexp (\"^trace$\", \"debug\") at level | stats by (_time:$__interval, level) count() as value",
               "refId": "A",
-              "legendFormat": "{{container}}"
+              "legendFormat": "{{level}}",
+              "queryType": "statsRange"
             }
           ]
         },
         {
-          "id": 2,
-          "type": "timeseries",
-          "title": "Log Volume",
+          "id": 1,
+          "type": "logs",
+          "title": "Logs",
           "gridPos": {
-            "h": 6,
+            "h": 22,
             "w": 24,
             "x": 0,
-            "y": 22
+            "y": 7
           },
           "datasource": {
             "type": "victoriametrics-logs-datasource",
             "uid": "victorialogs"
           },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "fillOpacity": 15,
-                "lineWidth": 1,
-                "showPoints": "never"
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
           "options": {
-            "legend": {
-              "displayMode": "list",
-              "placement": "bottom"
-            },
-            "tooltip": {
-              "mode": "multi"
-            }
+            "showLabels": false,
+            "showCommonLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true,
+            "prettifyLogMessage": false,
+            "enableLogDetails": true,
+            "dedupStrategy": "none"
           },
           "targets": [
             {
-              "expr": "{host=\"$host\", container=~\"$container\"} | filter level:~\"(?i)$severity\" | filter ~\"(?i)$search\" | stats by (_time:$__interval, container) count() as value",
-              "refId": "A",
-              "legendFormat": "{{container}}",
-              "queryType": "statsRange"
+              "expr": "{host=\"$host\", container=~\"$container\"} | filter level:~\"(?i)^($severity)$\" | filter ~\"(?i)$search\"",
+              "refId": "A"
             }
           ]
         }
