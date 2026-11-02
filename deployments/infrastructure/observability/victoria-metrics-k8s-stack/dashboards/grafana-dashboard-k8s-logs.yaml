@@ -15,7 +15,7 @@ data:
       "description": "Pod log browser for Kubernetes workloads",
       "editable": true,
       "schemaVersion": 39,
-      "version": 6,
+      "version": 7,
       "refresh": "30s",
       "time": {
         "from": "now-1h",
@@ -24,7 +24,8 @@ data:
       "timezone": "browser",
       "tags": [
         "kubernetes",
-        "logs"
+        "logs",
+        "victorialogs"
       ],
       "templating": {
         "list": [
@@ -75,30 +76,24 @@ data:
           {
             "name": "severity",
             "label": "Severity",
-            "type": "query",
-            "datasource": {
-              "type": "victoriametrics-logs-datasource",
-              "uid": "victorialogs"
-            },
-            "definition": "{namespace=~\"$namespace\"}",
-            "query": {
-              "field": "level",
-              "query": "{namespace=~\"$namespace\"}",
-              "refId": "A",
-              "type": "fieldValue"
-            },
-            "refresh": 2,
-            "sort": 1,
+            "type": "custom",
+            "description": "Case-insensitive; apps disagree on INFO/info/Warning/WARN",
+            "query": "error : error|err|fatal|crit|critical,warn : warn|warning,info : info,debug : debug|trace",
             "multi": false,
             "includeAll": true,
             "allValue": ".*",
-            "current": {}
+            "current": {
+              "text": "All",
+              "value": "$__all"
+            }
           },
           {
             "name": "search",
-            "label": "Search",
+            "label": "Search (regex)",
             "type": "textbox",
+            "query": "",
             "current": {
+              "text": "",
               "value": ""
             },
             "hide": 0
@@ -109,9 +104,9 @@ data:
         {
           "id": 1,
           "type": "timeseries",
-          "title": "Log Volume",
+          "title": "Log volume by level",
           "gridPos": {
-            "h": 5,
+            "h": 7,
             "w": 24,
             "x": 0,
             "y": 0
@@ -123,31 +118,44 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "palette-classic"
+                "mode": "fixed",
+                "fixedColor": "text"
               },
               "custom": {
-                "fillOpacity": 15,
-                "lineWidth": 1,
-                "showPoints": "never"
+                "drawStyle": "bars",
+                "fillOpacity": 80,
+                "lineWidth": 0,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "normal"
+                }
               },
               "unit": "short"
             },
-            "overrides": []
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "error" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }] },
+              { "matcher": { "id": "byName", "options": "warn" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } }] },
+              { "matcher": { "id": "byName", "options": "info" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }] },
+              { "matcher": { "id": "byName", "options": "debug" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] },
+              { "matcher": { "id": "byName", "options": "unknown" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "gray" } }] }
+            ]
           },
           "options": {
             "legend": {
               "displayMode": "list",
-              "placement": "bottom"
+              "placement": "right",
+              "calcs": ["sum"]
             },
             "tooltip": {
-              "mode": "multi"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
             {
-              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter level:~\"(?i)$severity\" | filter ~\"(?i)$search\" | stats by (_time:$__interval, pod) count() as value",
+              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter level:~\"(?i)^($severity)$\" | filter ~\"(?i)$search\" | format if (level:=\"\") \"unknown\" as level | format \"<lc:level>\" as level | replace_regexp (\"^(warning)$\", \"warn\") at level | replace_regexp (\"^(err|fatal|crit|critical)$\", \"error\") at level | replace_regexp (\"^trace$\", \"debug\") at level | stats by (_time:$__interval, level) count() as value",
               "refId": "A",
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{level}}",
               "queryType": "statsRange"
             }
           ]
@@ -157,10 +165,10 @@ data:
           "type": "logs",
           "title": "Logs",
           "gridPos": {
-            "h": 23,
+            "h": 22,
             "w": 24,
             "x": 0,
-            "y": 5
+            "y": 7
           },
           "datasource": {
             "type": "victoriametrics-logs-datasource",
@@ -168,14 +176,17 @@ data:
           },
           "options": {
             "showLabels": false,
+            "showCommonLabels": false,
             "showTime": true,
             "sortOrder": "Descending",
-            "wrapLogMessage": false,
-            "enableLogDetails": true
+            "wrapLogMessage": true,
+            "prettifyLogMessage": false,
+            "enableLogDetails": true,
+            "dedupStrategy": "none"
           },
           "targets": [
             {
-              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter level:~\"(?i)$severity\" | filter ~\"(?i)$search\"",
+              "expr": "{namespace=~\"$namespace\", pod=~\"$pod\"} | filter level:~\"(?i)^($severity)$\" | filter ~\"(?i)$search\"",
               "refId": "A"
             }
           ]
