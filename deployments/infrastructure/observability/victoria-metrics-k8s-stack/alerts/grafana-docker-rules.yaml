@@ -221,17 +221,23 @@ data:
             data:
               - refId: A
                 relativeTimeRange:
-                  from: 600
+                  from: 1800
                   to: 0
                 datasourceUid: prometheus
                 model:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  # Seconds since deploy.sh last succeeded (every 5 min, no-op runs count). Threshold
-                  # lives in the threshold step so a healthy value doesn't turn into NoData.
+                  # doco-cd on helion polls every minute. 1 = no successful poll in 30m (doco-cd down
+                  # counts: the or vector(0) turns missing series into 0), +1 = a deployment failed.
+                  # Threshold lives in the threshold step so a healthy value doesn't turn into NoData.
                   expr: >-
-                    time() - max(helion_gitops_last_success_timestamp_seconds{instance="helion"})
+                    (
+                      (sum(increase(doco_cd_polls_total{instance="helion"}[30m])) or vector(0))
+                      - (sum(increase(doco_cd_poll_errors_total{instance="helion"}[30m])) or vector(0))
+                      < bool 1
+                    )
+                    + ((sum(increase(doco_cd_deployment_errors_total{instance="helion"}[30m])) or vector(0)) > bool 0)
                   instant: true
                   refId: A
               - refId: threshold
@@ -242,7 +248,7 @@ data:
                 model:
                   conditions:
                     - evaluator:
-                        params: [1800]
+                        params: [0]
                         type: gt
                       operator:
                         type: and
@@ -265,5 +271,5 @@ data:
               severity: warning
             annotations:
               summary: "helion GitOps deploys stopped"
-              description: "deploy.sh on helion hasn't succeeded for {{ $values.A.Value | printf \"%.0f\" | humanizeDuration }}: either a deploy failed or cron stopped. See ~/helion-deploy.log on helion; a hand-edited tracked file under /opt/services also blocks deploys."
+              description: "doco-cd on helion has had no successful poll in 30m, or a deployment failed. See `docker logs doco-cd-doco-cd-1` on helion."
             isPaused: false
