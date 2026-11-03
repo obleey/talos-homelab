@@ -273,3 +273,55 @@ data:
               summary: "helion GitOps deploys stopped"
               description: "doco-cd on helion has had no successful poll in 30m, or a deployment failed. See `docker logs doco-cd-doco-cd-1` on helion."
             isPaused: false
+
+          - uid: helion-backup-stale
+            title: Helion Backup Stale
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # Seconds since the last successful restic run on helion (daily at 03:20).
+                  # A missing metric means alloy or the backup job is broken, so NoData alerts.
+                  expr: time() - max(helion_backup_last_success_timestamp_seconds{instance="helion"})
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [172800]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "helion backup stale"
+              description: "No successful restic backup on helion for over 2 days ({{ $values.A.Value | printf \"%.0f\" }}s). See `docker logs backup-restic-1` on helion."
+            isPaused: false
