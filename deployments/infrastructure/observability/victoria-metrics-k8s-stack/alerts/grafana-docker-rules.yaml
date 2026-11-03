@@ -325,3 +325,111 @@ data:
               summary: "helion backup stale"
               description: "No successful restic backup on helion for over 2 days ({{ $values.A.Value | printf \"%.0f\" }}s). See `docker logs backup-restic-1` on helion."
             isPaused: false
+
+          - uid: helion-upload-webshell
+            title: Helion Upload Web Shell
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # security/upload-scan on helion (every 15m): PHP/.htaccess files or files containing <?php in
+                  # tilenhudrap's storage/app, where only images belong. +1 when the scan is over 1h old.
+                  expr: >-
+                    max by (volume) (helion_upload_suspicious_files{instance="helion"})
+                    + on() group_left()
+                    ((time() - max(helion_upload_scan_last_success_timestamp_seconds{instance="helion"})) > bool 3600)
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 0s
+            labels:
+              severity: critical
+            annotations:
+              summary: "Possible web shell in helion uploads ({{ $labels.volume }})"
+              description: "upload-scan found {{ $values.A.Value | printf \"%.0f\" }} PHP/.htaccess file(s) in {{ $labels.volume }}/app on helion (or the scan is over 1h old: then the value is +1). `docker logs security-upload-scan-1` lists them."
+            isPaused: false
+
+          - uid: helion-php-executed
+            title: Helion PHP File Executed
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 900
+                  to: 0
+                datasourceUid: victorialogs
+                model:
+                  datasource:
+                    type: victoriametrics-logs-datasource
+                    uid: victorialogs
+                  # nginx access log in tilenhudrap-app-1: a .php other than /index.php answered 2xx/5xx means PHP ran a
+                  # file that is not the front controller, i.e. a web shell. Probes for old shells get 403/404 and don't count.
+                  expr: 'container:"tilenhudrap-app-1" "HTTP/" | extract "\"<method> <path> HTTP/<_>\" <status> " | filter path:~"(?i)^[^?]*\\.(php[0-9]?|phtml|phar)($|[?/])" path:!~"^/index\\.php" status:~"^[25]" | stats count() hits'
+                  queryType: stats
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [0]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 0s
+            labels:
+              severity: critical
+            annotations:
+              summary: "PHP file other than index.php executed on tilenhudrap.com"
+              description: "{{ $values.A.Value | printf \"%.0f\" }} request(s) in 15m to a .php other than /index.php got 2xx/5xx from tilenhudrap-app-1: likely a web shell. VictoriaLogs: container:\"tilenhudrap-app-1\" \".php\""
+            isPaused: false
