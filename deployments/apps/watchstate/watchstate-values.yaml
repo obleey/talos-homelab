@@ -11,7 +11,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/arabcoders/watchstate
-          tag: v1.10.10
+          tag: v1.10.11
         env:
           WS_TZ: Europe/Ljubljana
         resources:
