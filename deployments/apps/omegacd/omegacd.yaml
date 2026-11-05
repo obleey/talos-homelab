@@ -38,8 +38,6 @@ spec:
             - { name: OMEGACD_WORKDIR, value: /data/work }
             - { name: OMEGACD_LOCAL_HOST, value: "false" }
             - { name: OMEGACD_TRUSTED_PROXIES, value: "10.244.0.0/16" }
-            - name: OMEGACD_ADMIN_PASSWORD
-              valueFrom: { secretKeyRef: { name: omegacd-keys, key: admin-password } }
             - name: OMEGACD_WEBHOOK_SECRET
               valueFrom: { secretKeyRef: { name: omegacd-keys, key: webhook-secret } }
           volumeMounts:
