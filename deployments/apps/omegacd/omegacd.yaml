@@ -30,16 +30,17 @@ spec:
     spec:
       containers:
         - name: omegacd
-          image: ghcr.io/obleey/omegacd:0.1.0-rc.5
+          image: ghcr.io/obleey/omegacd:0.1.0-rc.6
           ports:
             - { name: http, containerPort: 8080 }
           env:
             # work dir on the volume: an empty work dir makes OmegaCD restore (recreate) every Application
             - { name: OMEGACD_WORKDIR, value: /data/work }
-            - { name: OMEGACD_LOCAL_HOST, value: "false" }
-            - { name: OMEGACD_TRUSTED_PROXIES, value: "10.244.0.0/16" }
+            - { name: OMEGACD_LOCAL_HOST, value: 'false' }
+            - { name: OMEGACD_TRUSTED_PROXIES, value: '10.244.0.0/16' }
             - name: OMEGACD_WEBHOOK_SECRET
-              valueFrom: { secretKeyRef: { name: omegacd-keys, key: webhook-secret } }
+              valueFrom:
+                { secretKeyRef: { name: omegacd-keys, key: webhook-secret } }
           volumeMounts:
             - { name: data, mountPath: /data }
             - { name: keys, mountPath: /etc/omegacd, readOnly: true }
@@ -92,7 +93,7 @@ spec:
       namespace: traefik
       sectionName: websecure
   hostnames:
-    - "omegacd.talos-cluster.local.obleey.com"
+    - 'omegacd.talos-cluster.local.obleey.com'
   rules:
     - backendRefs:
         - name: omegacd
