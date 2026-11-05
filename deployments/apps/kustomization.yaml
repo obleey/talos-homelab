@@ -6,3 +6,4 @@ resources:
   - servarr-credentials-sealed.yaml
   - appset-servarr.yaml
   - kubeseal-webgui/app.yaml
+  - omegacd/app.yaml
