@@ -98,3 +98,16 @@ spec:
     - backendRefs:
         - name: omegacd
           port: 8080
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: omegacd
+  namespace: omegacd
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: omegacd }
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 60s
