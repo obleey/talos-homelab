@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: forgejo-smtp
+  namespace: forgejo
+spec:
+  encryptedData:
+    password: AgA254LDcT9Wf3OQTGFnM3NGw+WC48P+hjHWLS/0ZZX0PJAiNqZHrh4Qo2E26grouzxD/dCBnXdi06OV1tZa4VR8VJGHRfraVY8R5HrmomUSoP2/ZHFSH53/wor9M1Sajsk+TZAST01IQb/11tbcP6teSFQFoOfELsbkpE1czmRq+XmRX7iQcSM7TiurhJuZ/YHdADnwVne8Z5POAhA2pp+DsmogsRiqTeG7RoXYXecX3jhePcyQV0r0LAIgryuY0G/vDKbTMnpcpUu7ePsDb6Y7B44tzHGYvVSHtlgV3BTzf2jEcj2fCT7TsXUPBOAlZ4EU6Vtq8ET+Lhow8F0nVaUl/8VC91WNkI/et3kLpn9OpcMoXOb6K6AdywVS3B4HaOk8cJK2iJBbYTFA1S7kiKmPtWcBMeHqRFG0pEJ9TRm2b/BzMP34rbnm9mp5b1CJybkvoTQwp/GNL/kbZhbGAESHvpYIgrNgaOhpsDb1PKT1cmno970DRUB0n5D+symNaPghuQ/nhDEGERNLzj7sgFeZX2YgZQxWGZzOEVmN7kfCH7YHp1h8f6UTKEKhR5ttO4ivyc3kzGiyXm89A59urAO4DaQMauohU2+tE16P2En5rvZkcoWnxYTnwD/6c9iv3dbbAGR6Y4DPLFEhPPUaefGrsICy5RZqqG/26lkPbTGGs4x0QE5gaRp3PM/koNYjap8Q/BvnYBZhHVTwv0imopVKnF+HRTLDpZVwJXlGOywuYDowJzU=
+  template:
+    metadata:
+      name: forgejo-smtp
+      namespace: forgejo

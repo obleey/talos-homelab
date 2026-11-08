@@ -15,6 +15,10 @@ persistence:
     recurring-job-group.longhorn.io/daily-backup: enabled
 
 gitea:
+  # the SMTP password (a Resend API key with sending access only) from forgejo-smtp-sealed.yaml, never in these values
+  additionalConfigFromEnvs:
+    - name: FORGEJO__MAILER__PASSWD
+      valueFrom: { secretKeyRef: { name: forgejo-smtp, key: password } }
   admin:
     existingSecret: forgejo-admin # keys username, password
     email: obleey@git.talos-cluster.local.obleey.com
@@ -28,6 +32,14 @@ gitea:
     service:
       DISABLE_REGISTRATION: true
       REQUIRE_SIGNIN_VIEW: true
+      ENABLE_NOTIFY_MAIL: true # mail about issues, pull requests, mentions
+    mailer:
+      ENABLED: true
+      PROTOCOL: smtps # TLS from the start
+      SMTP_ADDR: smtp.resend.com
+      SMTP_PORT: 465
+      USER: resend
+      FROM: Forgejo <git@obleey.com> # obleey.com is verified in Resend
     repository:
       DEFAULT_PRIVATE: private
     actions:
