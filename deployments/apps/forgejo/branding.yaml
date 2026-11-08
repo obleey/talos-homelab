@@ -1,0 +1,124 @@
+# obleey code: Forgejo in Catppuccin, matching OmegaCD's UI (Mocha dark, Latte light, mauve accent).
+# Mounted over Forgejo's custom assets (/data/gitea/public/assets, forgejo-values.yaml). Each theme imports Forgejo's
+# own and only swaps its palette, so the themes keep working when Forgejo adds variables.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forgejo-branding
+  namespace: forgejo
+data:
+  theme-catppuccin-mocha.css: |
+    @import url("./theme-forgejo-dark.css");
+    gitea-theme-meta-info { --theme-display-name: "Catppuccin Mocha"; }
+    :root {
+      --mauve: #cba6f7;
+      /* Forgejo's grey ramp, darkest to lightest: crust … text */
+      --steel-900: #11111b; --steel-850: #181825; --steel-800: #1e1e2e; --steel-750: #232335;
+      --steel-700: #29293c; --steel-650: #313244; --steel-600: #3a3b50; --steel-550: #45475a;
+      --steel-500: #585b70; --steel-450: #6c7086; --steel-400: #7f849c; --steel-350: #9399b2;
+      --steel-300: #a6adc8; --steel-250: #b0b7d3; --steel-200: #bac2de; --steel-150: #c4cce9;
+      --steel-100: #cdd6f4;
+      --color-primary: var(--mauve);
+      --color-primary-contrast: #11111b;
+      --color-primary-dark-1: color-mix(in srgb, var(--mauve) 85%, white);
+      --color-primary-dark-2: color-mix(in srgb, var(--mauve) 75%, white);
+      --color-primary-dark-3: color-mix(in srgb, var(--mauve) 65%, white);
+      --color-primary-dark-4: color-mix(in srgb, var(--mauve) 55%, white);
+      --color-primary-dark-5: color-mix(in srgb, var(--mauve) 45%, white);
+      --color-primary-dark-6: color-mix(in srgb, var(--mauve) 35%, white);
+      --color-primary-dark-7: color-mix(in srgb, var(--mauve) 25%, white);
+      --color-primary-light-1: color-mix(in srgb, var(--mauve) 88%, black);
+      --color-primary-light-2: color-mix(in srgb, var(--mauve) 76%, black);
+      --color-primary-light-3: color-mix(in srgb, var(--mauve) 64%, black);
+      --color-primary-light-4: color-mix(in srgb, var(--mauve) 52%, black);
+      --color-primary-light-5: color-mix(in srgb, var(--mauve) 44%, black);
+      --color-primary-light-6: color-mix(in srgb, var(--mauve) 36%, black);
+      --color-primary-light-7: color-mix(in srgb, var(--mauve) 28%, black);
+      --color-primary-alpha-10: #cba6f719; --color-primary-alpha-20: #cba6f733; --color-primary-alpha-30: #cba6f74b;
+      --color-primary-alpha-40: #cba6f766; --color-primary-alpha-50: #cba6f780; --color-primary-alpha-60: #cba6f799;
+      --color-primary-alpha-70: #cba6f7b3; --color-primary-alpha-80: #cba6f7cc; --color-primary-alpha-90: #cba6f7e1;
+      --color-red: #f38ba8; --color-orange: #fab387; --color-yellow: #f9e2af; --color-green: #a6e3a1;
+      --color-teal: #94e2d5; --color-blue: #89b4fa; --color-violet: #b4befe; --color-purple: #cba6f7;
+      --color-pink: #f5c2e7; --color-brown: #f2cdcd;
+      --color-red-light: #f38ba8; --color-orange-light: #fab387; --color-yellow-light: #f9e2af;
+      --color-green-light: #a6e3a1; --color-teal-light: #94e2d5; --color-blue-light: #89b4fa;
+      --color-violet-light: #b4befe; --color-purple-light: #cba6f7; --color-pink-light: #f5c2e7;
+      --color-red-badge: #f38ba8; --color-green-badge: #a6e3a1; --color-yellow-badge: #f9e2af;
+      --color-orange-badge: #fab387;
+      --color-console-bg: #181825; --color-console-fg: #cdd6f4; --color-console-fg-subtle: #a6adc8;
+      --color-console-border: #313244; --color-console-menu-bg: #313244;
+      --color-ansi-black: #45475a; --color-ansi-red: #f38ba8; --color-ansi-green: #a6e3a1;
+      --color-ansi-yellow: #f9e2af; --color-ansi-blue: #89b4fa; --color-ansi-magenta: #f5c2e7;
+      --color-ansi-cyan: #94e2d5; --color-ansi-bright-black: #585b70; --color-ansi-bright-red: #f38ba8;
+      --color-ansi-bright-green: #a6e3a1; --color-ansi-bright-yellow: #f9e2af; --color-ansi-bright-blue: #89b4fa;
+      --color-ansi-bright-magenta: #f5c2e7; --color-ansi-bright-cyan: #94e2d5;
+      --color-tooltip-bg: #11111bf0; --color-tooltip-text: #cdd6f4;
+      --color-text-dark: #cdd6f4; --color-text-focus: #cdd6f4; --color-label-text: #11111b;
+      --color-indicator-idle: #a6e3a1; --color-indicator-active: #89b4fa;
+    }
+    ::selection { background: #cba6f74b; color: inherit; }
+
+  theme-catppuccin-latte.css: |
+    @import url("./theme-forgejo-light.css");
+    gitea-theme-meta-info { --theme-display-name: "Catppuccin Latte"; }
+    :root {
+      --mauve: #8839ef;
+      /* Forgejo's grey ramp, lightest to darkest: card … text */
+      --zinc-50: #fbfbfd; --zinc-100: #e6e9ef; --zinc-150: #e1e4eb; --zinc-200: #dce0e8;
+      --zinc-250: #d4d8e1; --zinc-300: #ccd0da; --zinc-350: #bcc0cc; --zinc-400: #acb0be;
+      --zinc-450: #9ca0b0; --zinc-500: #8c8fa1; --zinc-550: #7c7f93; --zinc-600: #6c6f85;
+      --zinc-650: #64677e; --zinc-700: #5c5f77; --zinc-750: #565970; --zinc-800: #515469;
+      --zinc-850: #4e5169; --zinc-900: #4c4f69;
+      --color-body: #eff1f5;
+      --color-input-background: #fbfbfd;
+      --color-hover: #ccd0da80;
+      --color-active: #ccd0da;
+      --color-primary: var(--mauve);
+      --color-primary-contrast: #ffffff;
+      --color-primary-dark-1: color-mix(in srgb, var(--mauve) 90%, black);
+      --color-primary-dark-2: color-mix(in srgb, var(--mauve) 80%, black);
+      --color-primary-dark-3: color-mix(in srgb, var(--mauve) 72%, black);
+      --color-primary-dark-4: color-mix(in srgb, var(--mauve) 64%, black);
+      --color-primary-dark-5: color-mix(in srgb, var(--mauve) 56%, black);
+      --color-primary-dark-6: color-mix(in srgb, var(--mauve) 48%, black);
+      --color-primary-dark-7: color-mix(in srgb, var(--mauve) 40%, black);
+      --color-primary-light-1: color-mix(in srgb, var(--mauve) 85%, white);
+      --color-primary-light-2: color-mix(in srgb, var(--mauve) 72%, white);
+      --color-primary-light-3: color-mix(in srgb, var(--mauve) 60%, white);
+      --color-primary-light-4: color-mix(in srgb, var(--mauve) 45%, white);
+      --color-primary-light-5: color-mix(in srgb, var(--mauve) 30%, white);
+      --color-primary-light-6: color-mix(in srgb, var(--mauve) 18%, white);
+      --color-primary-light-7: color-mix(in srgb, var(--mauve) 8%, white);
+      --color-primary-alpha-10: #8839ef19; --color-primary-alpha-20: #8839ef33; --color-primary-alpha-30: #8839ef4b;
+      --color-primary-alpha-40: #8839ef66; --color-primary-alpha-50: #8839ef80; --color-primary-alpha-60: #8839ef99;
+      --color-primary-alpha-70: #8839efb3; --color-primary-alpha-80: #8839efcc; --color-primary-alpha-90: #8839efe1;
+      --color-red: #d20f39; --color-orange: #fe640b; --color-yellow: #df8e1d; --color-green: #40a02b;
+      --color-teal: #179299; --color-blue: #1e66f5; --color-violet: #7287fd; --color-purple: #8839ef;
+      --color-pink: #ea76cb; --color-brown: #dd7878;
+      --color-red-light: #d20f39; --color-orange-light: #fe640b; --color-yellow-light: #df8e1d;
+      --color-green-light: #40a02b; --color-teal-light: #179299; --color-blue-light: #1e66f5;
+      --color-violet-light: #7287fd; --color-purple-light: #8839ef; --color-pink-light: #ea76cb;
+      --color-red-badge: #d20f39; --color-green-badge: #40a02b; --color-yellow-badge: #df8e1d;
+      --color-orange-badge: #fe640b;
+      --color-indicator-idle: #40a02b; --color-indicator-active: #1e66f5;
+    }
+    ::selection { background: #8839ef33; color: inherit; }
+
+  # the default: follows the browser's light or dark preference, as OmegaCD does
+  theme-catppuccin-auto.css: |
+    @import url("./theme-catppuccin-latte.css") (prefers-color-scheme: light);
+    @import url("./theme-catppuccin-mocha.css") (prefers-color-scheme: dark);
+    gitea-theme-meta-info { --theme-display-name: "Catppuccin (auto)"; }
+
+  # OmegaCD's tile (mauve to blue), with a code mark instead of the omega
+  logo.svg: |
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="obleey code">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#cba6f7"/>
+          <stop offset="1" stop-color="#89b4fa"/>
+        </linearGradient>
+      </defs>
+      <rect width="32" height="32" rx="8" fill="url(#g)"/>
+      <path d="M11.5 10.5 6.5 16l5 5.5M20.5 10.5l5 5.5-5 5.5M17.6 8.5l-3.2 15" fill="none" stroke="#11111b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>

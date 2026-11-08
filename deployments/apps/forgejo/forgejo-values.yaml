@@ -24,7 +24,13 @@ gitea:
     email: obleey@git.talos-cluster.local.obleey.com
     passwordMode: keepUpdated # the sealed secret is the source of truth
   config:
-    APP_NAME: Forgejo
+    APP_NAME: obleey code
+    ui:
+      THEMES: catppuccin-auto,catppuccin-mocha,catppuccin-latte,forgejo-auto,forgejo-light,forgejo-dark
+      DEFAULT_THEME: catppuccin-auto # the themes and logo come from branding.yaml
+    ui.meta:
+      AUTHOR: obleey
+      DESCRIPTION: obleey code, private Git and Actions
     server:
       DOMAIN: git.talos-cluster.local.obleey.com
       ROOT_URL: https://git.talos-cluster.local.obleey.com/
@@ -39,7 +45,7 @@ gitea:
       SMTP_ADDR: smtp.resend.com
       SMTP_PORT: 465
       USER: resend
-      FROM: Forgejo <git@obleey.com> # obleey.com is verified in Resend
+      FROM: obleey code <git@obleey.com> # obleey.com is verified in Resend
     repository:
       DEFAULT_PRIVATE: private
     actions:
@@ -58,10 +64,24 @@ httpRoute:
     gethomepage.dev/enabled: 'true'
     gethomepage.dev/pod-selector: 'app.kubernetes.io/name=forgejo'
     gethomepage.dev/group: 'Infrastructure'
-    gethomepage.dev/name: 'Forgejo'
+    gethomepage.dev/name: 'obleey code'
     gethomepage.dev/icon: 'forgejo.png'
     gethomepage.dev/description: 'Git and Actions'
     gethomepage.dev/weight: '140'
+
+# branding.yaml over Forgejo's custom assets (GITEA_CUSTOM is /data/gitea); the logo is the favicon too
+extraVolumes:
+  - name: branding
+    configMap:
+      name: forgejo-branding
+      items:
+        - { key: theme-catppuccin-mocha.css, path: css/theme-catppuccin-mocha.css }
+        - { key: theme-catppuccin-latte.css, path: css/theme-catppuccin-latte.css }
+        - { key: theme-catppuccin-auto.css, path: css/theme-catppuccin-auto.css }
+        - { key: logo.svg, path: img/logo.svg }
+        - { key: logo.svg, path: img/favicon.svg }
+extraContainerVolumeMounts:
+  - { name: branding, mountPath: /data/gitea/public/assets, readOnly: true }
 
 # Registers the runners in runners.yaml (forgejo-runner-0..2) from one shared secret, then idles.
 # Register is idempotent, so this runs on every start. Identifier = first 14 hex of the secret + ordinal,
