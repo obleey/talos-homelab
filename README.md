@@ -69,7 +69,7 @@ Private Git server at `git.` (HTTPS only, sign-in required, no self-registration
 kubectl -n forgejo get secret forgejo-admin -o jsonpath='{.data.password}' | base64 -d
 ```
 
-Three Actions runners (`forgejo-runner` StatefulSet, Docker-in-Docker, label `ubuntu-latest`) register themselves from the shared secret in `forgejo-runner`; to add one, raise `replicas` in `runners.yaml` and extend the loop in `forgejo-values.yaml`'s `register-runners`. Everything (SQLite, repos) is one Longhorn volume with a daily backup to TrueNAS (`daily-backup` RecurringJob, 14 kept).
+Three Actions runners (`forgejo-runner` StatefulSet, Docker-in-Docker, labels `ubuntu-latest`, `ubuntu-24.04`, `debian-13`) register themselves from the shared secret in `forgejo-runner`; to add one, raise `replicas` in `runners.yaml` and extend the loop in `forgejo-values.yaml`'s `register-runners`. Everything (SQLite, repos) is one Longhorn volume with a daily backup to TrueNAS (`daily-backup` RecurringJob, 14 kept).
 
 All hosts are under `talos-cluster.local.obleey.com`. The servarr apps share one NFS share (`starr-data`, mounted with a `subPath`) and each has its own Longhorn `<name>-config` volume.
 
