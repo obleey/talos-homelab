@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: forgejo-runner
+  namespace: forgejo
+spec:
+  encryptedData:
+    secret: AgCI8HdG/0E7jtpK1EKjvspn40XNPzffulDFXhhAQWldwinqfmQIEFpb3NtAZNkbp0kDbpFyyZ+6cSOuYMpKQE6TJyaM0JGSLVSupD4jvFG6p9+v//QN/9l2u+bw3aP/GYN5lLoSRR0OZi7g9gGtf4ijQccbrMPgdF4zUu+JUIDBsHasPl/Ig2v073aW99/JVuBUdVe8vtuaes2FVW+a2KHuU6uMxAudYHctC5Aw1Medh2JMCeU4Wk8f1v7zckkxNl0oywBkuPWHVPoXxIdamfuF0YWRGlMNoh7nGtV00abX2A0VNZiM5KlBqySsiQ3+STqq1mI0HETmUKPK6dB9X1/IXhbxzhU3Klyie3z1jtXHuIPhSmCn0PFNu77ndkby7V3roq7v+r+/yhkYcFVx6ZbmYU6SXAnc6ELjInmCZof8cUlJCdb1lRVokXeaDcNu9ycGHdw66Lnt2qbaXLdb2k5l00VMMfPl1C+73ZkRsQQR5OHt75CzPsyd4rpTbRnm7GXIvo+07kWAZymI0aNnWGTRhn8V3iYLjxSULsCSSQKolhTcQZ8+r2IOE4GEgHs55GIm6KzHp7H6xbZriAY7L7NodPWilZUnqUygkJ59ge3fVVwlJXIMP/uC1EYoZ2yyMUoBBpGKYt2q4JAT8uJwEaszbsitbZBzMaE1tBpIkRSKa56QI96KE601+yqXKqWHfHlhumJfhDbDCMVFYrIWwWzmWpEMWzphyeHpVMvZMd8DDPJbkpfyoNN3
+  template:
+    metadata:
+      name: forgejo-runner
+      namespace: forgejo

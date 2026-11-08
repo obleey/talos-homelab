@@ -39,6 +39,11 @@ alloy:
           module  = "http_home"
         }
         target {
+          name    = "git"
+          address = "https://git.talos-cluster.local.obleey.com"
+          module  = "http_home"
+        }
+        target {
           name    = "grafana"
           address = "https://grafana.talos-cluster.local.obleey.com"
           module  = "http_home"

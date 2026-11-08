@@ -61,6 +61,16 @@ docs/adr/                      decisions future changes should not undo
 | Homepage | `hub.` | Start page; tiles come from `HTTPRoute` annotations |
 | technitium-secondary | `technitium-secondary.` | Secondary DNS (`dns02`), LoadBalancer `10.0.0.201` |
 
+### Forgejo (`forgejo`, standalone Application)
+
+Private Git server at `git.` (HTTPS only, sign-in required, no self-registration, new repos private). The admin login is in `forgejo-admin`:
+
+```bash
+kubectl -n forgejo get secret forgejo-admin -o jsonpath='{.data.password}' | base64 -d
+```
+
+Three Actions runners (`forgejo-runner` StatefulSet, Docker-in-Docker, label `ubuntu-latest`) register themselves from the shared secret in `forgejo-runner`; to add one, raise `replicas` in `runners.yaml` and extend the loop in `forgejo-values.yaml`'s `register-runners`. Everything (SQLite, repos) is one Longhorn volume with a daily backup to TrueNAS (`daily-backup` RecurringJob, 14 kept).
+
 All hosts are under `talos-cluster.local.obleey.com`. The servarr apps share one NFS share (`starr-data`, mounted with a `subPath`) and each has its own Longhorn `<name>-config` volume.
 
 ### Observability (`monitoring`)

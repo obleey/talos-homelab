@@ -1,0 +1,9 @@
+# privileged: the runners' Docker-in-Docker sidecar needs it
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: forgejo
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
+    pod-security.kubernetes.io/audit: privileged

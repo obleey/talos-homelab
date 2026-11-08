@@ -1,0 +1,81 @@
+# SQLite on one Longhorn volume: repos, database and attachments all live in /data, so the volume's
+# Longhorn backups (daily, see longhorn/recurringjobs.yaml) are the whole Forgejo backup.
+image:
+  tag: 15.0.11 # keep equal to register-runners' image below
+
+strategy:
+  type: Recreate # RWO volume
+
+persistence:
+  size: 20Gi
+  labels:
+    # Longhorn reads recurring-job groups from the PVC; naming one group drops the implicit default, so list both
+    recurring-job-source.longhorn.io: enabled
+    recurring-job-group.longhorn.io/default: enabled
+    recurring-job-group.longhorn.io/daily-backup: enabled
+
+gitea:
+  admin:
+    existingSecret: forgejo-admin # keys username, password
+    email: obleey@git.talos-cluster.local.obleey.com
+    passwordMode: keepUpdated # the sealed secret is the source of truth
+  config:
+    APP_NAME: Forgejo
+    server:
+      DOMAIN: git.talos-cluster.local.obleey.com
+      ROOT_URL: https://git.talos-cluster.local.obleey.com/
+      DISABLE_SSH: true # clone over HTTPS; the gateway only serves 443
+    service:
+      DISABLE_REGISTRATION: true
+      REQUIRE_SIGNIN_VIEW: true
+    repository:
+      DEFAULT_PRIVATE: private
+    actions:
+      ENABLED: true
+      DEFAULT_ACTIONS_URL: https://github.com # `uses: actions/checkout@...` resolves like on GitHub
+
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: traefik-gateway
+      namespace: traefik
+      sectionName: websecure
+  hostnames:
+    - git.talos-cluster.local.obleey.com
+  annotations:
+    gethomepage.dev/enabled: 'true'
+    gethomepage.dev/pod-selector: 'app.kubernetes.io/name=forgejo'
+    gethomepage.dev/group: 'Infrastructure'
+    gethomepage.dev/name: 'Forgejo'
+    gethomepage.dev/icon: 'forgejo.png'
+    gethomepage.dev/description: 'Git and Actions'
+    gethomepage.dev/weight: '140'
+
+# Registers the runners in runners.yaml (forgejo-runner-0..2) from one shared secret, then idles.
+# Register is idempotent, so this runs on every start. Identifier = first 14 hex of the secret + ordinal,
+# token = its last 24 hex (Forgejo's offline registration format).
+extraContainers:
+  - name: register-runners
+    image: code.forgejo.org/forgejo/forgejo:15.0.11-rootless
+    command: [bash, -c]
+    args:
+      - |
+        set -e
+        for i in 0 1 2; do
+          until forgejo forgejo-cli actions register --name forgejo-runner-$i \
+            --secret "${RUNNER_SECRET:0:14}$(printf %02x $i)${RUNNER_SECRET:16}"; do sleep 5; done
+        done
+        exec sleep infinity
+    env:
+      - { name: GITEA_APP_INI, value: /data/gitea/conf/app.ini }
+      - { name: GITEA_CUSTOM, value: /data/gitea }
+      - { name: GITEA_WORK_DIR, value: /data }
+      - name: RUNNER_SECRET
+        valueFrom: { secretKeyRef: { name: forgejo-runner, key: secret } }
+    volumeMounts:
+      - { name: data, mountPath: /data }
+    resources:
+      requests: { cpu: 10m, memory: 32Mi }
+
+test:
+  enabled: false
