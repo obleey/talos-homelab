@@ -56,7 +56,7 @@ httpRoute:
 # token = its last 24 hex (Forgejo's offline registration format).
 extraContainers:
   - name: register-runners
-    image: code.forgejo.org/forgejo/forgejo:15.0.11-rootless
+    image: code.forgejo.org/forgejo/forgejo:17.0.1-rootless
     command: [bash, -c]
     args:
       - |
