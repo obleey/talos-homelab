@@ -68,6 +68,9 @@ httpRoute:
     gethomepage.dev/icon: 'forgejo.png'
     gethomepage.dev/description: 'Git and Actions'
     gethomepage.dev/weight: '140'
+    gethomepage.dev/widget.type: 'gitea' # Forgejo keeps the Gitea API
+    gethomepage.dev/widget.url: 'http://forgejo-http.forgejo.svc.cluster.local:3000'
+    gethomepage.dev/widget.key: '{{HOMEPAGE_VAR_FORGEJO_TOKEN}}'
 
 # branding.yaml over Forgejo's custom assets (GITEA_CUSTOM is /data/gitea); the logo is the favicon too
 extraVolumes:

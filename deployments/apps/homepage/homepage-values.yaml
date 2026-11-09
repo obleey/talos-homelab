@@ -255,6 +255,12 @@ configMaps:
               href: https://truenas.local.obleey.com
               icon: truenas.png
               weight: 160
+              widget:
+                type: truenas
+                version: 2 # websocket API; REST goes away in 26.04
+                url: https://truenas.local.obleey.com
+                key: '{{ "{{HOMEPAGE_VAR_TRUENAS_API_KEY}}" }}'
+                enablePools: true
       kubernetes.yaml: |
         gateway: true
         mode: cluster
