@@ -65,7 +65,7 @@ httpRoute:
     gethomepage.dev/pod-selector: 'app.kubernetes.io/name=forgejo'
     gethomepage.dev/group: 'Infrastructure'
     gethomepage.dev/name: 'obleey code'
-    gethomepage.dev/icon: 'forgejo.png'
+    gethomepage.dev/icon: 'https://git.talos-cluster.local.obleey.com/assets/img/logo.svg' # the branding.yaml logo
     gethomepage.dev/description: 'Git and Actions'
     gethomepage.dev/weight: '140'
     gethomepage.dev/widget.type: 'gitea' # Forgejo keeps the Gitea API

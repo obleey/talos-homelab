@@ -201,6 +201,10 @@ configMaps:
             - abbr: TH
               href: https://github.com/obleey/talos-homelab
               icon: github.png
+          - obleey code:
+            - abbr: OC
+              href: https://git.talos-cluster.local.obleey.com/obleey
+              icon: https://git.talos-cluster.local.obleey.com/assets/img/logo.svg
       widgets.yaml: |
         - greeting:
             text: Welcome back, Obleey!
