@@ -205,6 +205,10 @@ configMaps:
             - abbr: OC
               href: https://git.talos-cluster.local.obleey.com/obleey
               icon: https://git.talos-cluster.local.obleey.com/assets/img/logo.svg
+          - OmegaCD:
+            - abbr: OM
+              href: https://git.talos-cluster.local.obleey.com/obleey/omegacd
+              icon: https://git.talos-cluster.local.obleey.com/assets/img/logo.svg
       widgets.yaml: |
         - greeting:
             text: Welcome back, Obleey!
