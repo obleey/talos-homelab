@@ -1,5 +1,5 @@
 # Hourly check of cert-manager's Cloudflare token -> VictoriaMetrics.
-# helion runs the same script from cron; alerts in grafana-cloudflare-rules.yaml.
+# helion runs the same script in the cf-token-check container (helion repo, alloy/compose.yml); alerts in grafana-cloudflare-rules.yaml.
 apiVersion: v1
 kind: ConfigMap
 metadata:

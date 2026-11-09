@@ -28,7 +28,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  # cf-token-check (cert-manager CronJob, cron on helion) reports 0 when Cloudflare rejects the token
+                  # cf-token-check (cert-manager CronJob, alloy-cf-token-check-1 container on helion) reports 0 when Cloudflare rejects the token
                   expr: >-
                     (1 - max by (token) (last_over_time(cloudflare_token_valid[3h]))) > 0
                   instant: true
@@ -64,7 +64,7 @@ data:
               severity: critical
             annotations:
               summary: "Cloudflare token {{ $labels.token }} is invalid"
-              description: "Cloudflare rejects API token {{ $labels.token }} (expired, revoked or deleted). DNS-01 certificate renewals using it will fail. helion-traefik = CF_DNS_API_TOKEN in /opt/services/traefik/.traefik.env on helion; cluster-cert-manager = SealedSecret deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml."
+              description: "Cloudflare rejects API token {{ $labels.token }} (expired, revoked or deleted). DNS-01 certificate renewals using it will fail. helion-traefik = CF_DNS_API_TOKEN in the helion repo, traefik/.traefik.sops.env and alloy/.cloudflare.sops.env (update both, then Sync helion); cluster-cert-manager = SealedSecret deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml."
             isPaused: false
 
           - uid: cf-token-expiring
@@ -116,7 +116,7 @@ data:
               severity: warning
             annotations:
               summary: "Cloudflare token {{ $labels.token }} expires in < 30 days"
-              description: "Cloudflare API token {{ $labels.token }} expires in {{ $values.A.Value | printf \"%.0f\" | humanizeDuration }}. Roll it in the Cloudflare dashboard and update it. helion-traefik = CF_DNS_API_TOKEN in /opt/services/traefik/.traefik.env on helion; cluster-cert-manager = SealedSecret deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml."
+              description: "Cloudflare API token {{ $labels.token }} expires in {{ $values.A.Value | printf \"%.0f\" | humanizeDuration }}. Roll it in the Cloudflare dashboard and update it. helion-traefik = CF_DNS_API_TOKEN in the helion repo, traefik/.traefik.sops.env and alloy/.cloudflare.sops.env (update both, then Sync helion); cluster-cert-manager = SealedSecret deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml."
             isPaused: false
 
           - uid: cf-token-check-stale
@@ -169,5 +169,5 @@ data:
               severity: warning
             annotations:
               summary: "Cloudflare token check for {{ if $labels.token }}{{ $labels.token }}{{ else }}any token (no check results at all){{ end }} is not running"
-              description: "No successful Cloudflare token check for {{ if $labels.token }}{{ $labels.token }}{{ else }}any token (no check results at all){{ end }} in over 3h, so token expiry is unmonitored. Check the cf-token-check CronJob in cert-manager or the cron job on helion (crontab -l). helion-traefik = CF_DNS_API_TOKEN in /opt/services/traefik/.traefik.env on helion; cluster-cert-manager = SealedSecret deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml."
+              description: "No successful Cloudflare token check for {{ if $labels.token }}{{ $labels.token }}{{ else }}any token (no check results at all){{ end }} in over 3h, so token expiry is unmonitored. Check the cf-token-check CronJob in cert-manager or the cf-token-check container on helion (docker logs alloy-cf-token-check-1). helion-traefik = CF_DNS_API_TOKEN in the helion repo, traefik/.traefik.sops.env and alloy/.cloudflare.sops.env (update both, then Sync helion); cluster-cert-manager = SealedSecret deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml."
             isPaused: false
