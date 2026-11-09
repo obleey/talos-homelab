@@ -1,0 +1,93 @@
+# Nightly restic backup of the Forgejo volume to the Hetzner Storage Box (repo `git`, next to helion's `restic`),
+# ported from helion's backup/. Repo, password, Slack webhook and SSH key come from forgejo-restic-sealed.yaml.
+# The alert forgejo-backup-stale fires when the last success is over 2 days old.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forgejo-backup
+  namespace: forgejo
+data:
+  known_hosts: |
+    [u459247-sub1.your-storagebox.de]:23 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIICf9svRenC/PLKIL9nk6K/pxQgoiFC41wTNvoIncOxs
+  backup.sh: |
+    #!/bin/sh
+    set -euo pipefail
+
+    notify() {
+        [ -n "${SLACK_WEBHOOK_URL:-}" ] || return 0
+        echo "slack: $(wget -S -q -O- -T 30 --header 'Content-Type: application/json' --post-data "{\"text\":\"$1\"}" "$SLACK_WEBHOOK_URL" 2>&1 | grep -E 'HTTP/|^ok' | tr '\n' ' ')" || true
+    }
+    step=sqlite
+    trap '[ "$step" = done ] || notify ":red_circle: *Restic backup FAILED* — forgejo ($step)"' EXIT
+
+    # the live SQLite file (WAL mode) can be mid-checkpoint; back up a consistent copy instead
+    apk add --no-cache -q sqlite
+    mkdir -p /snapshot
+    sqlite3 /data/forgejo.db ".backup /snapshot/forgejo.db"
+
+    install -m 600 /run/storagebox/storagebox.key /tmp/storagebox.key
+    ssh_args="-p 23 -i /tmp/storagebox.key -o IdentitiesOnly=yes -o BatchMode=yes -o UserKnownHostsFile=/etc/backup/known_hosts"
+    r() { restic -o sftp.args="$ssh_args" "$@"; }
+
+    step=init
+    r cat config >/dev/null 2>&1 || r init
+    step=backup
+    r backup --host forgejo --exclude '/data/forgejo.db*' --exclude /data/lost+found /data /snapshot | tee /tmp/backup.log
+    step=forget
+    r forget --host forgejo --keep-daily 7 --keep-weekly 4 --keep-monthly 12 --prune
+    step=check
+    r check
+
+    step=done
+    notify ":white_check_mark: *Restic backup OK* — forgejo: $(grep -E '^(snapshot .* saved|processed |Added to)' /tmp/backup.log | tr '\n' ';' | sed 's/;$//; s/;/ · /g')"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: forgejo-backup
+  namespace: forgejo
+spec:
+  schedule: "20 3 * * *"
+  timeZone: Europe/Ljubljana
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never
+          # the volume is RWO, so run on the node that has it attached
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: forgejo
+                      app.kubernetes.io/instance: forgejo
+                  topologyKey: kubernetes.io/hostname
+          containers:
+            - name: restic
+              image: restic/restic:0.19.1@sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510
+              command: [sh, /etc/backup/backup.sh]
+              envFrom:
+                - secretRef:
+                    name: forgejo-restic
+              volumeMounts:
+                - { name: data, mountPath: /data } # read-write: sqlite3 needs the -shm file to read a WAL database
+                - { name: config, mountPath: /etc/backup, readOnly: true }
+                - { name: key, mountPath: /run/storagebox, readOnly: true }
+              resources:
+                requests: { cpu: 50m, memory: 128Mi }
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: gitea-shared-storage
+            - name: config
+              configMap:
+                name: forgejo-backup
+            - name: key
+              secret:
+                secretName: forgejo-restic
+                items:
+                  - { key: storagebox.key, path: storagebox.key }

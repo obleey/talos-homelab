@@ -170,3 +170,55 @@ data:
               summary: "Arr app API unreachable ({{ $labels.alias }})"
               description: "Scraparr cannot reach the {{ $labels.alias }} API. The pod may be running but the app is unresponsive."
             isPaused: false
+
+          - uid: forgejo-backup-stale
+            title: Forgejo Backup Stale
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  # Seconds since the forgejo-backup CronJob (restic to the Storage Box, daily at 03:20) last succeeded.
+                  # A missing metric means the CronJob never succeeded or is gone, so NoData alerts.
+                  expr: time() - max(kube_cronjob_status_last_successful_time{namespace="forgejo", cronjob="forgejo-backup"})
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [172800]
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: Alerting
+            execErrState: Alerting
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "forgejo backup stale"
+              description: "No successful restic backup of Forgejo for over 2 days ({{ $values.A.Value | printf \"%.0f\" }}s). See the logs of the last forgejo-backup job in the forgejo namespace."
+            isPaused: false

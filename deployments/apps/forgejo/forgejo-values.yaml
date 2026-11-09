@@ -1,5 +1,5 @@
-# SQLite on one Longhorn volume: repos, database and attachments all live in /data, so the volume's
-# Longhorn backups (daily, see longhorn/recurringjobs.yaml) are the whole Forgejo backup.
+# SQLite on one Longhorn volume: repos, database and attachments all live in /data. Backed up daily by Longhorn
+# to TrueNAS (longhorn/recurringjobs.yaml) and by restic to the Hetzner Storage Box (backup.yaml).
 image:
   tag: 15.0.11 # keep equal to register-runners' image below
 
