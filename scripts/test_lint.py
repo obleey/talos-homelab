@@ -36,6 +36,10 @@ CASES = [
      "template function 'abs' does not exist"),
     (f"{ALERTS}/grafana-coredns-rules.yaml", '__panelId__: "25"', 'note: "25"', "coredns-panic: Grafana rejects the whole provisioning reload"),
     (f"{ALERTS}/grafana-coredns-rules.yaml", '__panelId__: "25"', '__panelId__: "999"', "__panelId__ 999 is not a panel of dashboard k8s_system_coredns"),
+    (f"{APPS}/homepage/homepage-externalsecret.yaml", "secretKey: HOMEPAGE_VAR_GRAFANA_PASSWORD", "secretKey: HOMEPAGE_VAR_GRAFANA_PASSWD",
+     "HOMEPAGE_VAR_GRAFANA_PASSWORD is used"),
+    (f"{APPS}/homepage/homepage-externalsecret.yaml", "name: openbao", "name: openbaoo", "no SecretStore openbaoo in servarr"),
+    (f"{APPS}/homepage/homepage-externalsecret.yaml", "  data:", "  dataFrom:", "use data: so key names stay in git"),
 ]
 
 assert lint(ROOT) == [], lint(ROOT)

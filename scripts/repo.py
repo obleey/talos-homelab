@@ -1,4 +1,4 @@
-"""What the repo declares, read once for every check: YAML docs, appset apps, sealed keys, alert rules, dashboards."""
+"""What the repo declares, read once for every check: YAML docs, appset apps, secret keys, alert rules, dashboards."""
 import glob
 import json
 import os
@@ -58,9 +58,13 @@ class Repo:
                 apps.append({"host": el["name"], **el, "namespace": el.get("namespace", ns)})
         return apps
 
-    def sealed_keys(self):
-        """{secret name: set of encryptedData keys}; key names are plaintext in a SealedSecret."""
-        return {d["metadata"]["name"]: set(d["spec"].get("encryptedData", {})) for _, d in self.kind("SealedSecret")}
+    def secret_keys(self):
+        """{secret name: set of keys}: a SealedSecret's encryptedData keys, an ExternalSecret's data[].secretKey."""
+        keys = {d["metadata"]["name"]: set(d["spec"].get("encryptedData", {})) for _, d in self.kind("SealedSecret")}
+        for _, d in self.kind("ExternalSecret"):
+            name = (d["spec"].get("target") or {}).get("name", d["metadata"]["name"])
+            keys[name] = {e["secretKey"] for e in d["spec"].get("data") or []}
+        return keys
 
     def alert_rules(self):
         """(path, rule) for every rule in a grafana_alert ConfigMap."""

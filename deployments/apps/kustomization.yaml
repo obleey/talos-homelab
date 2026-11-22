@@ -4,6 +4,7 @@ resources:
   - namespace.yaml
   - starr-data.yaml
   - servarr-credentials-sealed.yaml
+  - openbao-store.yaml
   - appset-servarr.yaml
   - kubeseal-webgui/app.yaml
   - forgejo/app.yaml

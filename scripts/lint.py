@@ -4,7 +4,8 @@
 - yaml:        every file parses, no duplicate keys
 - conventions: critical apps carry no cascade finalizer; each namespace is created exactly once; no managed-by marker
 - routes:      every served hostname has a blackbox target, every target hostname is served
-- secrets:     every secretKeyRef into a SealedSecret names a key it has
+- secrets:     every secretKeyRef into a SealedSecret or ExternalSecret names a key it has
+- stores:      every ExternalSecret's SecretStore exists in its namespace, and it lists keys with data: (not dataFrom)
 - homepage:    every {{HOMEPAGE_VAR_*}} used is defined in homepage's env or homepage-secrets
 - ports:       every <app>.<ns>.svc.cluster.local:<port> URL matches the appset port
 - alerts:      no rule filters its query to <= 0 and then fires on > 0; dashboard links resolve
@@ -51,18 +52,30 @@ def routes(repo):
 
 
 def secrets(repo):
-    sealed, errors = repo.sealed_keys(), []
+    keys, errors = repo.secret_keys(), []
     for path, d in repo.docs:
         for node in walk(d):
             ref = node.get("secretKeyRef")
-            if isinstance(ref, dict) and ref.get("name") in sealed and ref.get("key") not in sealed[ref["name"]]:
-                errors.append(f"{path}: secretKeyRef {ref['name']}/{ref.get('key')} is not in the SealedSecret")
+            if isinstance(ref, dict) and ref.get("name") in keys and ref.get("key") not in keys[ref["name"]]:
+                errors.append(f"{path}: secretKeyRef {ref['name']}/{ref.get('key')} is not in the secret")
+    return errors
+
+
+def stores(repo):
+    have = {(d["metadata"].get("namespace"), d["metadata"]["name"]) for _, d in repo.kind("SecretStore")}
+    errors = []
+    for path, d in repo.kind("ExternalSecret"):
+        ns, ref = d["metadata"].get("namespace"), d["spec"].get("secretStoreRef") or {}
+        if (ns, ref.get("name")) not in have:
+            errors.append(f"{path}: no SecretStore {ref.get('name')} in {ns}")
+        if d["spec"].get("dataFrom"):
+            errors.append(f"{path}: {d['metadata']['name']} uses dataFrom; use data: so key names stay in git")
     return errors
 
 
 def homepage(repo):
     used = {(p, v) for p, t in repo.texts.items() for v in re.findall(r"\{\{\s*(HOMEPAGE_VAR_\w+)\s*\}\}", t)}
-    defined = set(repo.sealed_keys().get("homepage-secrets", set()))
+    defined = set(repo.secret_keys().get("homepage-secrets", set()))
     for _, d in repo.docs:
         for node in walk(d):
             if isinstance(node.get("env"), dict):
@@ -119,7 +132,7 @@ def alerts(repo):
     return errors
 
 
-CHECKS = [conventions, routes, secrets, homepage, ports, alerts]
+CHECKS = [conventions, routes, secrets, stores, homepage, ports, alerts]
 
 
 def lint(root="."):
