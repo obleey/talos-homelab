@@ -7,7 +7,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/gethomepage/homepage
-          tag: v2.7.0
+          tag: v2.8.0
         env:
           HOMEPAGE_ALLOWED_HOSTS: '{{ first .Values.route.app.hostnames }}'
           HOMEPAGE_VAR_SONARR_API_KEY:
