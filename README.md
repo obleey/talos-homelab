@@ -8,11 +8,12 @@ It's a working setup, not a template generator. Fork it, replace the values that
 graph LR
     Git[your fork] -->|poll| ArgoCD
     subgraph cluster [Talos cluster: 1 control plane + 2 workers]
-        ArgoCD --> Platform[platform<br/>Cilium, cert-manager, Traefik,<br/>Longhorn, Sealed Secrets]
+        ArgoCD --> Platform[platform<br/>Cilium, cert-manager, Traefik,<br/>Longhorn, External Secrets]
         ArgoCD --> Apps[apps<br/>one ApplicationSet:<br/>media stack, Homepage, DNS]
         ArgoCD --> Obs[observability<br/>VictoriaMetrics, VictoriaLogs,<br/>Grafana, Alloy]
     end
     NAS[NAS<br/>NFS media + backups] --- Apps
+    Bao[OpenBao on the NAS<br/>every secret] -->|External Secrets| cluster
     Users((LAN)) -->|*.your.domain| Traefik[Traefik gateway<br/>Cilium L2 IP] --> Apps
 ```
 
@@ -21,7 +22,7 @@ graph LR
 - **Talos + Cilium** without kube-proxy, LoadBalancer IPs announced on your LAN by Cilium L2. No MetalLB.
 - **HTTPS everywhere:** one Let's Encrypt wildcard certificate (Cloudflare DNS-01) on a Traefik Gateway API gateway. Every app is `https://<app>.<your domain>`, even on a LAN-only domain.
 - **Storage:** Longhorn replicated volumes with daily snapshots and weekly backups to NFS, plus a shared NFS media share.
-- **Secrets in Git:** Sealed Secrets, so the whole cluster state, credentials included, lives in the repo.
+- **Secrets outside Git:** [OpenBao](https://openbao.org) on the NAS holds every credential; [External Secrets Operator](https://external-secrets.io) turns them into Kubernetes Secrets. Git holds which secret and which keys each app gets, never a value. Each namespace can read only its own path.
 - **Apps with almost no YAML:** one ApplicationSet over the bjw-s [app-template](https://github.com/bjw-s-labs/helm-charts) chart. Adding an app is one list entry and one values file; Service, route, TLS and a 1Gi config volume come for free.
 - **Observability:** VictoriaMetrics and VictoriaLogs (30 days), Grafana with vendored dashboards, Grafana-managed alerts to Slack, and a blackbox probe for every hostname you serve.
 - **Guard rails:** a lint that catches the mistakes this repo has actually made (unprobed hostnames, missing secret keys, alerts that can't fire, …), a render check of every chart in CI, and Renovate for weekly version bumps.
@@ -30,9 +31,9 @@ graph LR
 
 | Layer | Components |
 | --- | --- |
-| Platform | Cilium, cert-manager, Traefik, Longhorn, Sealed Secrets, ArgoCD (manages itself), metrics-server, kubelet-serving-cert-approver |
+| Platform | Cilium, cert-manager, Traefik, Longhorn, External Secrets Operator, ArgoCD (manages itself), metrics-server, kubelet-serving-cert-approver. Sealed Secrets is still installed for one secret from another project and goes away later |
 | Media | Sonarr, Radarr, Prowlarr, Bazarr, qBittorrent, Unpackerr, Seerr, Plex, Jellyfin, Clonarr, WatchState, Autopulse, Byparr, Scraparr |
-| Tools | Homepage (start page with live widgets), Forgejo (Git + Actions runners), kubeseal-webgui, Technitium secondary DNS, NetBird routing peer (remote access) |
+| Tools | Homepage (start page with live widgets), Forgejo (Git + Actions runners), Technitium secondary DNS, NetBird routing peer (remote access), kubeseal-webgui (leaving with Sealed Secrets) |
 | Observability | VictoriaMetrics k8s stack (VMSingle, VMAgent, Grafana), VictoriaLogs, Alloy (logs, events, blackbox probes) |
 
 Every version is pinned in its Application's `targetRevision` (or image tag) and bumped by Renovate, so none are listed here.
@@ -63,10 +64,11 @@ docs/adr/                        decisions later changes shouldn't undo
 
 **Accounts**
 
+- An [OpenBao](https://openbao.org) (or Vault) server **outside the cluster**, reachable over HTTPS with a publicly trusted certificate. Mine runs on the NAS; see [Secrets](#4-put-your-secrets-in-openbao) for what it needs.
 - A domain on Cloudflare and an API token with `Zone:DNS:Edit` on it. The domain only needs to resolve on your LAN; Cloudflare is used for the DNS-01 challenge, not for serving.
 - Optional: a Slack bot token (alerts), Google OAuth clients (ArgoCD and Grafana login), a NetBird account, an SMTP provider for Forgejo, an off-site restic repo for Forgejo backups.
 
-**Tools on your workstation:** `talosctl`, `kubectl`, `helm`, `kubeseal`, Python 3 with PyYAML.
+**Tools on your workstation:** `talosctl`, `kubectl`, `helm`, `bao` (the OpenBao CLI), `jq`, Python 3 with PyYAML.
 
 ## Setup
 
@@ -90,9 +92,10 @@ git grep -l 'talos-cluster.local.obleey.com' | xargs sed -i '' 's|talos-cluster\
 | Timezone | `apps/_common-values.yaml` and `git grep Europe/Ljubljana` |
 | Google OAuth client IDs, allowed emails, ArgoCD users and RBAC | `argocd/argocd-values.yaml`, `victoria-metrics-k8s-stack/values.yaml` |
 | Things outside the cluster (TrueNAS, Technitium primary, NetBird URL) | `homepage/homepage-values.yaml` `services.yaml` |
+| OpenBao address | `server:` in every `openbao-store.yaml`, its probe in `alloy-blackbox/values.yaml` |
 | Fixed IP for the secondary DNS | `technitium-secondary/technitium-secondary-values.yaml`, its probe in `alloy-blackbox/values.yaml` |
 
-Don't want an app? See [Removing an app](#removing-an-app); doing it now saves sealing secrets for it.
+Don't want an app? See [Removing an app](#removing-an-app); doing it now saves creating its secrets.
 
 ### 2. Install Talos
 
@@ -146,22 +149,25 @@ helm install argocd argo/argo-cd -n argocd --version <version> \
 kubectl apply -f bootstrap/talos-cluster.yaml
 ```
 
-ArgoCD now creates everything in sync-wave order: sealed-secrets first, then Cilium, cert-manager, Traefik and Longhorn, then itself, the apps, and observability. Watch it with `kubectl -n argocd get applications`. Anything that needs a secret stays degraded until step 4.
+ArgoCD now creates everything in sync-wave order: External Secrets first, then Cilium, cert-manager, Traefik and Longhorn, then itself, the apps, and observability. Watch it with `kubectl -n argocd get applications`. Anything that needs a secret stays degraded until step 4.
 
-**Rebuilding an existing cluster?** Restore the old sealing key before `talos-cluster.yaml` (`kubectl apply -f sealed-secrets-key.yaml`) and every committed secret decrypts as-is; skip step 4.
+**Rebuilding an existing cluster?** OpenBao lives outside the cluster, so the order is: NAS up, OpenBao unsealed, then bootstrap. ESO logs in from each namespace and every Secret reappears; skip step 4. OpenBao itself comes back from its nightly raft snapshot.
 
-### 4. Seal your secrets
+### 4. Put your secrets in OpenBao
 
-The `*-sealed.yaml` files in this repo are encrypted for my cluster, so yours can't read them. Once the sealed-secrets controller is up, re-create each one with your own values:
+Each `*-externalsecret.yaml` in this repo names a Secret, its keys, and where in OpenBao they come from: `secret/<namespace>/<secret name>`, one KV field per key. Your OpenBao needs:
+
+- a **KV v2** engine mounted at `secret/`;
+- the **Kubernetes** auth method at `kubernetes/`, pointed at your API server and its CA. No reviewer token: each namespace's `openbao-reader` ServiceAccount has `system:auth-delegator`, so OpenBao reviews the client's own token;
+- per namespace with secrets (`servarr`, `forgejo`, `netbird`, `argocd`, `cert-manager`, `monitoring`): a policy reading `secret/data/<ns>/*` and a role `<ns>` bound to ServiceAccount `openbao-reader` in that namespace.
+
+Then write the values. The key names are in each ExternalSecret's `data:` list:
 
 ```bash
-kubectl create secret generic cloudflare-api-token -n cert-manager \
-  --from-literal=api-token=<token> --dry-run=client -o yaml \
-  | kubeseal --controller-namespace kube-system --controller-name sealed-secrets-controller --format yaml \
-  > deployments/infrastructure/cert-manager/cloudflare-api-token-sealed.yaml
+bao kv put -mount=secret cert-manager/cloudflare-api-token api-token=-   # paste the token, Ctrl-D
 ```
 
-Keep the secret name, namespace and keys of the file you're replacing (they're readable in plain text in it); the lint checks that every key a workload references exists. The ones you need:
+Keep the secret names, namespaces and keys; the lint checks that every key a workload references exists. The ones you need:
 
 | Secret | For | Needed |
 | --- | --- | --- |
@@ -173,14 +179,7 @@ Keep the secret name, namespace and keys of the file you're replacing (they're r
 | `grafana-google-oauth`, `argocd-google-oauth` | Google login | Optional |
 | `forgejo-*`, `unpackerr-ui`, `autopulse-secret`, `netbird-mgmt-api-key` | Those apps | If you keep them |
 
-Commit, push, and ArgoCD picks them up. Then back up the sealing key; without it, every sealed file in the repo is unreadable after a rebuild:
-
-```bash
-kubectl -n kube-system get secret -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-key.yaml
-# store in your password manager, then delete the file
-```
-
-kubeseal-webgui (`https://kubeseal.<your.domain>`) does the same from a browser.
+ESO refreshes hourly; `kubectl get externalsecret -A` shows `SecretSynced` for each once it has read them. Keep OpenBao's unseal keys and every restic password in your password manager: a restic password stored only in OpenBao can't restore OpenBao.
 
 ### 5. Point DNS at the gateway
 
@@ -209,11 +208,11 @@ Most apps go through the ApplicationSet:
 1. Add an element to `deployments/apps/appset-servarr.yaml`: `name`, and `port` if it has a web UI. A port gets a Service and the route `https://<name>.<your.domain>`; set `host` for a different subdomain and `namespace` to leave `servarr` (then add a `namespace.yaml` to its folder).
 2. Create `deployments/apps/<name>/<name>-values.yaml` with at least the image. `_common-values.yaml` already gives it the timezone, a `Recreate` strategy and a 1Gi Longhorn `/config` volume (`persistence.config.size` to change, `persistence.config.enabled: false` if stateless). Mount the media share with `existingClaim: starr-data` and a `subPath`. `sonarr-values.yaml` is a complete example.
 3. Add the hostname to the blackbox targets in `observability/alloy-blackbox/values.yaml`. The lint fails until you do.
-4. Put any extra manifests (SealedSecrets, PVCs) in the app's folder; the ApplicationSet applies them.
+4. Put any extra manifests (ExternalSecrets, PVCs) in the app's folder; the ApplicationSet applies them.
 
 For a Homepage tile, add `gethomepage.dev/*` annotations under `route.app.annotations`. app-template runs values through `tpl`, so Homepage's own placeholders are escaped: `'{{ "{{HOMEPAGE_VAR_X}}" }}'`.
 
-An app with its own Helm chart becomes a standalone Application instead: a folder with `app.yaml` (two sources: the chart, and this repo as `ref: values`), the values file and manifests, listed in `deployments/apps/kustomization.yaml`. Copy `kubeseal-webgui/`.
+An app with its own Helm chart becomes a standalone Application instead: a folder with `app.yaml` (two sources: the chart, and this repo as `ref: values`), the values file and manifests, listed in `deployments/apps/kustomization.yaml`. Copy `forgejo/`.
 
 ### Removing an app
 
@@ -221,11 +220,14 @@ Delete its element from `appset-servarr.yaml` (or its line in a `kustomization.y
 
 ### Changing a secret
 
-To add or rotate one key in an existing SealedSecret, seal just that value and replace its line under `encryptedData`; the other keys stay valid:
+Change it in OpenBao; Git doesn't change. `patch` touches one key and keeps the rest, and every write is a new version you can roll back to:
 
 ```bash
-printf %s '<value>' | kubeseal --raw --namespace <ns> --name <secret>
+bao kv patch -mount=secret <ns>/<secret> <key>=-                                        # value from stdin
+kubectl -n <ns> annotate externalsecret <secret> force-sync=$(date +%s) --overwrite      # don't wait for the hourly refresh
 ```
+
+A new secret is a `bao kv put` plus an ExternalSecret next to the app: copy an existing `*-externalsecret.yaml` and list every key under `data:` (not `dataFrom`, so the lint can see them). A new namespace also needs an `openbao-store.yaml` (copy one, change the namespace) and its policy and role in OpenBao.
 
 Pods read secrets at start: restart the consumers after a rotation.
 
@@ -239,9 +241,10 @@ kubectl -n servarr rollout restart deploy/homepage                              
 
 ## How it fits together
 
-- **Sync waves** order creation: sealed-secrets `-5`, Cilium `-4`, cert-manager and metrics-server `-3`, Traefik and Longhorn `-2`, ArgoCD `-1`, apps `0`, metrics and logs `1`, Alloy `2`. ArgoCD doesn't wait for health between waves (on purpose: one degraded app would block the rest); dependencies settle through retries.
-- **Cluster-critical Applications have no cascade-delete finalizer** (sealed-secrets, Cilium, cert-manager, ArgoCD, Longhorn): deleting the Application leaves the component running.
+- **Sync waves** order creation: External Secrets and sealed-secrets `-5`, Cilium `-4`, cert-manager and metrics-server `-3`, Traefik and Longhorn `-2`, ArgoCD `-1`, apps `0`, metrics and logs `1`, Alloy `2`. ArgoCD doesn't wait for health between waves (on purpose: one degraded app would block the rest); dependencies settle through retries.
+- **Cluster-critical Applications have no cascade-delete finalizer** (External Secrets, sealed-secrets, Cilium, cert-manager, ArgoCD, Longhorn): deleting the Application leaves the component running.
 - **Each namespace is created exactly once:** a `Namespace` manifest or `CreateNamespace=true`, never both.
+- **Secrets:** one `SecretStore` named `openbao` per namespace, logging in as that namespace's `openbao-reader`, so a namespace can only read `secret/<ns>/*`. ExternalSecrets keep the last good Secret when OpenBao is sealed or unreachable (`deletionPolicy: Retain`); a blackbox probe on OpenBao's health endpoint and an "ExternalSecret not syncing" alert say so.
 - **Shared credentials live once:** API keys several apps use are keys in `servarr-credentials`, read with `secretKeyRef`.
 - **Homepage tiles are route annotations.** Only things without a route in this cluster (NAS, primary DNS, VPN) are in Homepage's `services.yaml`. Set `gethomepage.dev/pod-selector` when pods aren't labelled `app.kubernetes.io/name=<route name>`.
 - **Observability:** VMAgent scrapes nodes, kube-state-metrics and every chart's ServiceMonitor. Alloy ships pod logs and Kubernetes events and redacts tokens and passwords before they leave the node. Hosts outside the cluster push to `prometheus.` and `loki.` behind basic auth. Alerts are Grafana-managed rules in `victoria-metrics-k8s-stack/alerts/`; VMAlert only evaluates recording rules. Dashboards are vendored ConfigMaps ([ADR 0001](docs/adr/0001-vendor-grafana-dashboards.md)).
@@ -251,7 +254,7 @@ kubectl -n servarr rollout restart deploy/homepage                              
 
 | Script | Runs in | Catches |
 | --- | --- | --- |
-| `scripts/lint.py` | pre-commit, CI | YAML that doesn't parse or has duplicate keys; hostnames without a probe and probes without a host; `secretKeyRef` keys missing from their SealedSecret; undefined `HOMEPAGE_VAR_*`; in-cluster URLs whose port disagrees with the ApplicationSet; alerts that can never fire or link to missing dashboards; the conventions above |
+| `scripts/lint.py` | pre-commit, CI | YAML that doesn't parse or has duplicate keys; hostnames without a probe and probes without a host; `secretKeyRef` keys missing from their secret; ExternalSecrets without a SecretStore in their namespace or using `dataFrom`; undefined `HOMEPAGE_VAR_*`; in-cluster URLs whose port disagrees with the ApplicationSet; alerts that can never fire or link to missing dashboards; the conventions above |
 | `scripts/test_lint.py` | pre-commit, CI | Breaks a copy of the repo once per check and asserts the check fires |
 | `scripts/render-check.py` | CI | `helm template` for every chart Application and ApplicationSet element, plus `kubectl kustomize deployments` |
 
@@ -265,7 +268,9 @@ kubectl -n servarr rollout restart deploy/homepage                              
 
 | What | Where it lives |
 | --- | --- |
-| Sealed-secrets private key | Your password manager (step 4). Without it, a rebuild means re-sealing everything |
+| Every secret value | OpenBao on the NAS; nightly raft snapshot backed up off-site with restic (restore drilled) |
+| OpenBao unseal keys, admin login, restic passwords | Your password manager. Without the unseal keys the snapshot is unreadable |
+| OpenBao's own config (compose, server config, policies script) | Kept with the NAS, outside this repo |
 | Talos machine configs and `talosconfig` | Generated in step 2; keep them with the key |
 | App config volumes | Longhorn: daily snapshots (7 kept), weekly backups to the NFS backup target (4 kept) |
 | Forgejo | Longhorn daily backup, plus a nightly restic backup off-site (`forgejo/backup.yaml`) with a stale-backup alert |
@@ -273,7 +278,7 @@ kubectl -n servarr rollout restart deploy/homepage                              
 | NFS exports, LAN DNS and its wildcard record | The NAS and DNS server |
 | Alloy on hosts outside the cluster | Those hosts |
 
-In this setup the NAS is TrueNAS (NFS, Technitium primary DNS), a VPS called `helion` pushes its metrics and logs into the cluster, and Forgejo's off-site backups go to a Hetzner Storage Box. None of that is required: drop the matching scrape targets, alerts and Homepage entries if you don't have it.
+In this setup the NAS is TrueNAS (NFS, Technitium primary DNS), OpenBao runs on the same NAS as a Docker stack with a Let's Encrypt certificate from TrueNAS, a VPS called `helion` pushes its metrics and logs into the cluster, and off-site backups go to a Hetzner Storage Box. None of that is required: drop the matching scrape targets, alerts and Homepage entries if you don't have it.
 
 ## License
 
