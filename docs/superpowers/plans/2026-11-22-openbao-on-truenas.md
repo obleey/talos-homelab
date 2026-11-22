@@ -12,14 +12,13 @@
 
 ## Global Constraints
 
-- OpenBao address `https://10.0.0.104:8200`. CA cert committed at `truenas/openbao/ca.crt`. Workstation env: `BAO_ADDR=https://10.0.0.104:8200`, `BAO_CACERT=truenas/openbao/ca.crt`.
-- Server cert SANs: `IP:10.0.0.104`, `IP:127.0.0.1`, `DNS:openbao.local.obleey.com`. 5-year validity. The CA private key goes into the password manager, not onto the NAS or into git.
+- OpenBao address `https://openbao.local.obleey.com:8200` (Let's Encrypt cert from TrueNAS ACME, synced by `~/Documents/code/openbao/sync-cert.sh`; publicly trusted, so no CA bundle anywhere). Workstation env: `BAO_ADDR=https://openbao.local.obleey.com:8200`.
 - KV v2 mounted at `secret/`. Path `secret/<namespace>/<secret-name>`. Keys identical to the current Secret's keys.
 - Per namespace: policy `<ns>-read` (`read` on `secret/data/<ns>/*`), Kubernetes-auth role `<ns>` (bound SA `openbao-reader`, namespace `<ns>`, TTL `1h`), ServiceAccount `openbao-reader`, ClusterRoleBinding `openbao-reader-<ns>` → `system:auth-delegator`, SecretStore `openbao`.
 - Namespaces: `servarr`, `forgejo`, `netbird`, `argocd`, `cert-manager`, `monitoring`.
 - ExternalSecret: `apiVersion: external-secrets.io/v1`, `metadata.name` = the replaced Secret's name, `secretStoreRef: {kind: SecretStore, name: openbao}`, explicit `data:` (one entry per key, `remoteRef: {key: <ns>/<secret-name>, property: <key>}`), no `dataFrom`, `refreshInterval: 1h`, `target: {name: <secret-name>, creationPolicy: Owner, deletionPolicy: Retain}`. Copy the SealedSecret template's `type` and `labels` into `target.template`.
 - Every SecretStore and ExternalSecret carries the annotation `argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true`. On a fresh bootstrap the CRDs don't exist yet.
-- Secret values never appear in git, in commit messages, or in command output. Pipe them, never echo them. Unseal keys, root token, CA key and both restic passwords live in the password manager.
+- Secret values never appear in git, in commit messages, or in command output. Pipe them, never echo them. Unseal keys, root token and both restic passwords live in 1Password (Personal vault).
 - `bao operator init` is run by Miha in their own terminal (not through the agent), because its output is the unseal keys.
 - Commit messages follow the repo's `area: description` style. No Co-Authored-By/Claude lines.
 - `scripts/lint.py` and `scripts/test_lint.py` pass after every task that touches `deployments/` or `scripts/`.
@@ -37,40 +36,40 @@
 ### Task 1: OpenBao stack on the NAS
 
 **Files:**
-- Create: `truenas/openbao/compose.yaml`, `truenas/openbao/openbao.hcl`, `truenas/openbao/ca.crt`, `truenas/openbao/README.md`
+- Create: `~/Documents/code/openbao/compose.yaml`, `~/Documents/code/openbao/openbao.hcl`, `~/Documents/code/openbao/sync-cert.sh`, `~/Documents/code/openbao/README.md`
 
 **Interfaces:**
-- Produces: a running, initialised, unsealed OpenBao at `https://10.0.0.104:8200`, the container named `openbao`, and the CA at `truenas/openbao/ca.crt`.
+- Produces: a running, initialised, unsealed OpenBao at `https://openbao.local.obleey.com:8200`, the container named `openbao`. (Done: Steps 2–8 were executed with a TrueNAS Let's Encrypt cert instead of Step 4's self-signed CA; see ledger rulings.)
 
 - [ ] **Step 1: Create the branch.** `git switch -c openbao`. Commit the spec and this plan as the first commit (`docs: OpenBao on TrueNAS design and plan`).
 - [ ] **Step 2: Write `openbao.hcl`.**
   - `storage "raft" { path = "/openbao/data", node_id = "truenas" }`
   - `listener "tcp" { address = "0.0.0.0:8200", tls_cert_file = "/openbao/tls/server.crt", tls_key_file = "/openbao/tls/server.key", telemetry { unauthenticated_metrics_access = false } }`
-  - `api_addr = "https://10.0.0.104:8200"`, `cluster_addr = "https://127.0.0.1:8201"` (single node; 8201 is not published)
+  - `api_addr = "https://openbao.local.obleey.com:8200"`, `cluster_addr = "https://127.0.0.1:8201"` (single node; 8201 is not published)
   - `ui = true`, `disable_mlock = true`
 - [ ] **Step 3: Write `compose.yaml`.**
   - Service `openbao`, `container_name: openbao`, image `openbao/openbao:<latest stable, pinned>` with a `# pinned: no Renovate on the NAS` comment, `restart: unless-stopped`.
   - `command: server -config=/openbao/config/openbao.hcl`, ports `8200:8200`.
   - Bind mounts from `/mnt/serve/stacks/openbao/{config(ro),tls(ro),data,audit,snapshots}` to `/openbao/...`.
-  - `environment: BAO_ADDR=https://127.0.0.1:8200, BAO_CACERT=/openbao/tls/ca.crt`, so `docker exec openbao bao …` works.
-- [ ] **Step 4: Generate the TLS material on the workstation** with `openssl`: a CA (5y), and a server key + cert signed by it with the SANs from Global Constraints. Copy `ca.crt` into `truenas/openbao/`. Put `ca.key` in the password manager and delete it locally.
-- [ ] **Step 5: Deploy on the NAS.** Create `/mnt/serve/stacks/openbao/{config,tls,data,audit,snapshots}`. Copy the hcl, compose, `ca.crt`, `server.crt` and `server.key` (mode 600). `chown` `data`, `audit` and `snapshots` to the image's runtime uid (`docker run --rm --entrypoint id openbao/openbao:<tag>`). Start the stack from Dockge.
+  - `environment: BAO_ADDR=https://127.0.0.1:8200, BAO_TLS_SERVER_NAME=openbao.local.obleey.com`, so `docker exec openbao bao …` works.
+- [ ] **Step 4: TLS.** TrueNAS ACME issues cert `openbao` for `openbao.local.obleey.com` (Cloudflare DNS-01); root cron job `sync-cert.sh` copies it into `tls/` and SIGHUPs OpenBao. Technitium A record `openbao.local.obleey.com → 10.0.0.104`.
+- [ ] **Step 5: Deploy on the NAS.** Create `/mnt/serve/stacks/openbao/{config,tls,data,audit,snapshots}`. Copy the hcl, compose and `sync-cert.sh`, run the sync once. `chown` `data`, `audit` and `snapshots` to the image's runtime uid (`docker run --rm --entrypoint id openbao/openbao:<tag>`). Start the stack from Dockge.
 - [ ] **Step 6: Verify it's up and uninitialised.** Run `bao status` from the workstation with the env from Global Constraints. Expected: `Initialized false`, `Sealed true`, exit code 2, no TLS error.
 - [ ] **Step 7: Miha initialises it in their own terminal.** `bao operator init -key-shares=3 -key-threshold=2`. The keys and root token go into the password manager. Then `bao operator unseal` twice.
 - [ ] **Step 8: Verify.** `bao status` → `Initialized true`, `Sealed false`, `Storage Type raft`.
-- [ ] **Step 9: Write `truenas/openbao/README.md`.** About 15 lines: what lives where on the NAS, how to deploy changes (copy + Dockge redeploy), the unseal procedure, that upgrades are manual (bump the tag, redeploy, unseal), and where the CA key lives.
+- [ ] **Step 9: Write `~/Documents/code/openbao/README.md`.** About 15 lines: what lives where on the NAS, how to deploy changes (copy + Dockge redeploy), the unseal procedure, that upgrades are manual (bump the tag, redeploy, unseal), and where the CA key lives.
 - [ ] **Step 10: Commit.** `openbao: Dockge stack for TrueNAS (raft, TLS, manual unseal)`
 
 ### Task 2: OpenBao configuration as code
 
 **Files:**
-- Create: `scripts/openbao-configure.sh`, `scripts/openbao-import.sh`
+- Create: `~/Documents/code/openbao/configure.sh`, `~/Documents/code/openbao/import.sh`
 
 **Interfaces:**
 - Consumes: the running OpenBao from Task 1, and an admin/root token in `BAO_TOKEN`.
 - Produces:
-  - `scripts/openbao-configure.sh`: idempotent, no args. Sets up the KV v2 mount `secret`, the `kubernetes` auth method, a file audit device, and `<ns>-read` + role `<ns>` for each namespace in `NAMESPACES=(servarr forgejo netbird argocd cert-manager monitoring)` at the top of the file.
-  - `scripts/openbao-import.sh <namespace> <secret-name>`: copies a live k8s Secret into `secret/<ns>/<secret-name>` without printing any value.
+  - `~/Documents/code/openbao/configure.sh`: idempotent, no args. Sets up the KV v2 mount `secret`, the `kubernetes` auth method, a file audit device, and `<ns>-read` + role `<ns>` for each namespace in `NAMESPACES=(servarr forgejo netbird argocd cert-manager monitoring)` at the top of the file.
+  - `~/Documents/code/openbao/import.sh <namespace> <secret-name>`: copies a live k8s Secret into `secret/<ns>/<secret-name>` without printing any value.
 
 - [ ] **Step 1: Write `openbao-configure.sh`.** `set -euo pipefail`. Each section checks before creating, so re-runs succeed:
   - `bao secrets list` → enable `kv-v2` at `secret` if missing.
@@ -91,8 +90,8 @@
 **Interfaces:**
 - Produces: `probe_success{job="blackbox", instance="openbao"}`, which the existing blackbox alert covers.
 
-- [ ] **Step 1: Add a module `http_openbao`:** `prober: http`, `timeout: 10s`, `http.valid_status_codes: [200]`, `http.method: GET`, `http.tls_config.insecure_skip_verify: true`.
-- [ ] **Step 2: Add the target** `name = "openbao"`, `address = "https://10.0.0.104:8200/v1/sys/health"`, `module = "http_openbao"`, under the "Home network appliances" comment.
+- [ ] **Step 1: Add a module `http_openbao`:** `prober: http`, `timeout: 10s`, `http.valid_status_codes: [200]`, `http.method: GET`, TLS verified (no skip), so the existing SSL-expiry alert also covers the cert.
+- [ ] **Step 2: Add the target** `name = "openbao"`, `address = "https://openbao.local.obleey.com:8200/v1/sys/health"`, `module = "http_openbao"`, under the "Home network appliances" comment.
 - [ ] **Step 3: Run the checks.** `scripts/lint.py && scripts/test_lint.py && scripts/render-check.py`. Expected: exit 0.
 - [ ] **Step 4: Merge to main and verify live.** In Grafana Explore, `probe_success{instance="openbao"}` = 1. Then `docker restart openbao` on the NAS (it comes back sealed) → the value drops to 0, and after 5m the blackbox alert reaches Slack with instance `openbao`. Unseal → it resolves.
 - [ ] **Step 5: Commit** (before merge). `alloy-blackbox: probe OpenBao health (sealed or down alerts)`
@@ -121,14 +120,14 @@
 - Delete: `deployments/apps/homepage/homepage-sealedsecrets.yaml`
 
 **Interfaces:**
-- Consumes: `scripts/openbao-import.sh` (Task 2) and ESO (Task 4).
+- Consumes: `~/Documents/code/openbao/import.sh` (Task 2) and ESO (Task 4).
 - Produces:
   - `Repo.secret_keys() -> dict[str, set[str]]`: `{secret name: keys}` from SealedSecret `encryptedData` plus ExternalSecret `spec.data[].secretKey`, keyed by `spec.target.name` (falling back to `metadata.name`).
   - `stores(repo) -> list[str]`, appended to `CHECKS`. Every later task's ExternalSecret must pass it.
   - The pattern file `openbao-store.yaml`: three docs (ServiceAccount `openbao-reader`, ClusterRoleBinding `openbao-reader-<ns>`, SecretStore `openbao`), reused verbatim per namespace with only `<ns>` changed.
 
 - [ ] **Step 1: Write the store file and the ExternalSecret.**
-  - `openbao-store.yaml`: namespace `servarr`. SecretStore `spec.provider.vault`: `server: https://10.0.0.104:8200`, `path: secret`, `version: v2`, `caBundle: <base64 of truenas/openbao/ca.crt>`, `auth.kubernetes: {mountPath: kubernetes, role: servarr, serviceAccountRef: {name: openbao-reader}}`.
+  - `openbao-store.yaml`: namespace `servarr`. SecretStore `spec.provider.vault`: `server: https://openbao.local.obleey.com:8200`, `path: secret`, `version: v2`, `auth.kubernetes: {mountPath: kubernetes, role: servarr, serviceAccountRef: {name: openbao-reader}}`.
   - `homepage-externalsecret.yaml`: name `homepage-secrets`, namespace `servarr`, with the 7 `HOMEPAGE_VAR_*` keys as `data:` entries (remote key `servarr/homepage-secrets`).
   - Add `openbao-store.yaml` to `deployments/apps/kustomization.yaml`. Don't delete the SealedSecret yet.
 - [ ] **Step 2: Write the failing test cases** (append to `CASES` in `scripts/test_lint.py`):
@@ -147,7 +146,7 @@
   - Add `stores` to `CHECKS` and to the module docstring.
 - [ ] **Step 5: Run the tests.** `scripts/lint.py && scripts/test_lint.py && scripts/render-check.py`. Expected: exit 0, `lint self-test: 16 cases ok`.
 - [ ] **Step 6: Import the values, then record the baseline.**
-  - `scripts/openbao-import.sh servarr homepage-secrets`. Expected: prints the 7 key names.
+  - `~/Documents/code/openbao/import.sh servarr homepage-secrets`. Expected: prints the 7 key names.
   - Record the baseline: `kubectl -n servarr get secret homepage-secrets -o json | jq -S .data | sha256sum`.
 - [ ] **Step 7: Commit, merge, verify.** `homepage: secrets from OpenBao via ESO; lint reads ExternalSecret keys`. After sync:
   - `kubectl -n servarr get externalsecret homepage-secrets` shows `SecretSynced`, Ready True.
@@ -175,7 +174,7 @@
 ### Task 7: Backup, audit shipping, and restore drill
 
 **Files (on the NAS, not in git):** `/mnt/serve/stacks/restic_cron/backup.sh`, `/mnt/serve/stacks/restic_cron/openbao-token`, `/mnt/serve/stacks/alloy-truenas/alloy.conf`
-**Files (git):** Modify `truenas/openbao/README.md` (backup and drill sections)
+**Files (git):** Modify `~/Documents/code/openbao/README.md` (backup and drill sections)
 
 **Interfaces:**
 - Consumes: the `snapshot` policy (Task 2).
@@ -199,7 +198,7 @@
   - `docker restart openbao` (sealed) and wait 20m.
   - Expected: `kubectl -n servarr get secret homepage-secrets` still exists, and both the blackbox alert and `external-secret-not-ready` reach Slack.
   - Unseal. Expected: both resolve without touching the cluster.
-- [ ] **Step 7: Document and commit.** Write the backup, restore and reboot procedures (Steps 2, 5, 6) into `truenas/openbao/README.md`. Commit `openbao: backup, audit shipping and restore drill docs`.
+- [ ] **Step 7: Document and commit.** Write the backup, restore and reboot procedures (Steps 2, 5, 6) into `~/Documents/code/openbao/README.md`. Commit `openbao: backup, audit shipping and restore drill docs`.
 
 ### Task 8: Migrate app secrets
 
@@ -208,12 +207,12 @@
 - Delete: `deployments/apps/servarr-credentials-sealed.yaml` (replace it in `deployments/apps/kustomization.yaml` with `servarr-credentials-externalsecret.yaml`), `autopulse/sealedsecret.yaml`, `unpackerr/unpackerr-ui-sealed.yaml`, `forgejo/forgejo-{admin,smtp,runner,restic}-sealed.yaml`, `netbird/netbird-mgmt-api-key-sealed.yaml`.
 
 **Interfaces:**
-- Consumes: the `openbao-store.yaml` pattern and the ExternalSecret shape (Task 5), and `scripts/openbao-import.sh` (Task 2).
+- Consumes: the `openbao-store.yaml` pattern and the ExternalSecret shape (Task 5), and `~/Documents/code/openbao/import.sh` (Task 2).
 
 Do the procedure below once per namespace group, as separate commits in this order: `servarr` (servarr-credentials, autopulse-secret, unpackerr-ui), `forgejo` (4 secrets), `netbird` (1).
 
 - [ ] **Step 1: Check the password manager.** Confirm `forgejo-restic`'s values are in it (anti-goal: no restic password only in OpenBao). If they aren't, `kubectl get secret` them into the password manager first.
-- [ ] **Step 2: Import and record baselines.** Run `scripts/openbao-import.sh <ns> <secret>` for each secret in the group. Record each Secret's `jq -S .data | sha256sum` baseline.
+- [ ] **Step 2: Import and record baselines.** Run `~/Documents/code/openbao/import.sh <ns> <secret>` for each secret in the group. Record each Secret's `jq -S .data | sha256sum` baseline.
 - [ ] **Step 3: Write the files.** Write the store file (if the namespace has none) and the ExternalSecrets with every key listed (copy the key names from `encryptedData`, plus `type` from the template). Delete the SealedSecrets.
 - [ ] **Step 4: Run the checks.** `scripts/lint.py && scripts/test_lint.py && scripts/render-check.py`. Expected: exit 0. `secrets()` still validates the `secretKeyRef`s into `servarr-credentials`, since its keys now come from the ExternalSecret.
 - [ ] **Step 5: Commit, merge, verify.** `<ns>: secrets from OpenBao via ESO`. For each secret:
@@ -260,9 +259,9 @@ Same procedure as Task 8, in the order `cert-manager`, `monitoring`, `argocd`. A
 - [ ] **Step 3: Delete and edit the files listed above.**
 - [ ] **Step 4: Rewrite the README.**
   - Replace the Sealed Secrets bullets ("Secrets in Git", the platform table, tools on your workstation: `kubeseal` → `bao`).
-  - Rewrite "4. Seal your secrets" into "Put your secrets in OpenBao" (`scripts/openbao-configure.sh`, `scripts/openbao-import.sh` or `bao kv put`), and the secrets table header.
+  - Rewrite "4. Seal your secrets" into "Put your secrets in OpenBao" (`~/Documents/code/openbao/configure.sh`, `~/Documents/code/openbao/import.sh` or `bao kv put`), and the secrets table header.
   - Rewrite the rebuild path: restore the NAS stack and data → unseal → bootstrap the cluster → ArgoCD installs ESO → secrets appear.
-  - Link `truenas/openbao/README.md` for unseal, backups and manual upgrades.
+  - Link `~/Documents/code/openbao/README.md` for unseal, backups and manual upgrades.
   - Drop kubeseal-webgui mentions (lines ~35, 51, 183, 216: the "copy kubeseal-webgui/" example becomes "copy forgejo/").
 - [ ] **Step 5: Run the checks.** `scripts/lint.py && scripts/test_lint.py && scripts/render-check.py`. Expected: exit 0. The `test_lint.py` case count is unchanged.
 - [ ] **Step 6: Commit, merge, verify.** `sealed-secrets: remove; OpenBao + ESO is the only secrets path`. After sync: the `sealed-secrets` and `kubeseal-webgui` Applications are gone, and all ExternalSecrets are Ready (`kubectl get externalsecret -A`). No blackbox alert for `kubeseal`.

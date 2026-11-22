@@ -10,7 +10,7 @@ Learning, and then running it for real. Miha wants hands-on experience with the 
 - Manual Shamir unseal after a NAS reboot. A Slack alert says when it's sealed or down.
 - External Secrets Operator (ESO) in the cluster, managed by ArgoCD, replaces Sealed Secrets for all 17 secrets.
 - Per-namespace access: each namespace can read only `secret/<namespace>/*`.
-- OpenBao's configuration (policies, auth roles, mounts) is reproducible from git.
+- OpenBao's configuration (policies, auth roles, mounts) is reproducible by re-running `~/Documents/code/openbao/configure.sh`.
 - OpenBao data is backed up off-site to the Storage Box, and a restore has been drilled.
 - The existing lint keeps checking secret key names.
 
@@ -49,11 +49,11 @@ Learning, and then running it for real. Miha wants hands-on experience with the 
 
 ### OpenBao on TrueNAS
 
-- Source of truth in git: `truenas/openbao/compose.yaml` and `truenas/openbao/openbao.hcl`, copied to `/mnt/serve/stacks/openbao/` and deployed with Dockge. *(My call: unlike the other NAS stacks, this one is in git because the rebuild path now starts here.)*
+- Stack files (`compose.yaml`, `openbao.hcl`, `sync-cert.sh`), the config scripts (`configure.sh`, `import.sh`) and the ops README live in `~/Documents/code/openbao/`, outside this repo and not in git (Miha's call), copied to `/mnt/serve/stacks/openbao/` and deployed with Dockge.
 - Image `openbao/openbao`, pinned to the current release.
 - Storage: integrated Raft, single node (`node_id = "truenas"`), data in `/mnt/serve/stacks/openbao/data`.
-- Listener `0.0.0.0:8200`, TLS on, self-signed CA plus a server cert for `10.0.0.104` / `openbao.local.obleey.com`, 5-year validity, generated once with `openssl`. The CA cert (public) is committed. *(ponytail: self-signed CA, move to a real CA if browsers ever need to trust it.)*
-- `api_addr = "https://10.0.0.104:8200"`, `cluster_addr = "https://10.0.0.104:8201"`, `ui = true`, `disable_mlock = true`.
+- Listener `0.0.0.0:8200`, TLS on, using a Let's Encrypt cert for `openbao.local.obleey.com` issued and renewed by TrueNAS's ACME client (DNS-01 via Cloudflare). A root cron job (`sync-cert.sh`) copies it into the stack and SIGHUPs OpenBao. Clients use the hostname (Technitium A record), since LE can't certify a LAN IP. *(Changed from a self-signed CA: the cert is publicly trusted, so there's no CA bundle in git and no CA key to guard, and the existing blackbox SSL-expiry alert covers it.)*
+- `api_addr = "https://openbao.local.obleey.com:8200"`, `cluster_addr = "https://127.0.0.1:8201"`, `ui = true`, `disable_mlock = true`.
 - File audit device writing to `/openbao/audit/audit.log`. Alloy on the NAS ships it to VictoriaLogs.
 - Optional DNS `openbao.local.obleey.com → 10.0.0.104` in Technitium. Clients use the IP so they don't depend on DNS.
 
@@ -61,7 +61,7 @@ Learning, and then running it for real. Miha wants hands-on experience with the 
 
 - `bao operator init -key-shares=3 -key-threshold=2`. Unseal keys and root token go into the password manager.
 - After a NAS reboot: `bao operator unseal` twice. Secrets already in the cluster keep working while OpenBao is sealed; only refreshes stop.
-- `scripts/openbao-configure.sh`: an idempotent script of `bao` commands that sets up the KV mount, Kubernetes auth, and one policy plus role per namespace. Run with an admin token whenever it changes. Namespaces are a list at the top of the script. *(My call over Terraform/OpenTofu: no state file, no provider.)*
+- `~/Documents/code/openbao/configure.sh`: an idempotent script of `bao` commands that sets up the KV mount, Kubernetes auth, and one policy plus role per namespace. Run with an admin token whenever it changes. Namespaces are a list at the top of the script. *(My call over Terraform/OpenTofu: no state file, no provider.)*
 
 ### Secrets layout and policies
 
@@ -73,7 +73,7 @@ Learning, and then running it for real. Miha wants hands-on experience with the 
 ### Cluster side
 
 - `deployments/infrastructure/external-secrets/app.yaml`: the `external-secrets` chart, pinned, same `Application` shape as `sealed-secrets/app.yaml`, sync-wave `-5` (ESO must exist before anything that reads secrets). ESO metrics are scraped by the existing stack.
-- Per namespace: ServiceAccount `openbao-reader`, a ClusterRoleBinding to `system:auth-delegator`, and a `SecretStore` named `openbao` (provider `vault`, server `https://10.0.0.104:8200`, path `secret`, version `v2`, `caBundle` = the committed CA, kubernetes auth role `<ns>`). These sit next to the namespace's existing secrets.
+- Per namespace: ServiceAccount `openbao-reader`, a ClusterRoleBinding to `system:auth-delegator`, and a `SecretStore` named `openbao` (provider `vault`, server `https://openbao.local.obleey.com:8200`, path `secret`, version `v2`, no `caBundle` (publicly trusted cert), kubernetes auth role `<ns>`). These sit next to the namespace's existing secrets.
 - Each SealedSecret becomes an `ExternalSecret` with the same target Secret name, so no consumer changes. Settings:
   - explicit `data:` entries, one per key (not `dataFrom`), so key names stay in git for the lint;
   - `refreshInterval: 1h`;
@@ -82,7 +82,7 @@ Learning, and then running it for real. Miha wants hands-on experience with the 
 
 ### Alerts
 
-- **Sealed or down:** a blackbox target `openbao` → `https://10.0.0.104:8200/v1/sys/health` in `alloy-blackbox/values.yaml`. This returns 200 only when unsealed (503 sealed, 501 uninitialised), so the existing blackbox alert fires after 5m. It needs a module with `insecure_skip_verify: true` and `valid_status_codes: [200]`. No new rule.
+- **Sealed or down:** a blackbox target `openbao` → `https://openbao.local.obleey.com:8200/v1/sys/health` in `alloy-blackbox/values.yaml`. This returns 200 only when unsealed (503 sealed, 501 uninitialised), so the existing blackbox alert fires after 5m. It needs a module with `valid_status_codes: [200]` and normal TLS verification, so the SSL-expiry alert also covers the cert. No new rule.
 - **Secret not syncing:** a new Grafana rule on ESO's ExternalSecret Ready=False condition metric, for 15m → Slack. It goes in the existing alerts folder, following the existing rule files.
 
 ### Lint
