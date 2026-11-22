@@ -141,6 +141,12 @@ alloy:
           address = "https://truenas.local.obleey.com"
           module  = "http_home"
         }
+        // 200 only when unsealed (503 sealed, 501 uninitialised), so the blackbox alert means "unseal me"
+        target {
+          name    = "openbao"
+          address = "https://openbao.local.obleey.com:8200/v1/sys/health"
+          module  = "http_plain"
+        }
 
         // Helion services
         target {

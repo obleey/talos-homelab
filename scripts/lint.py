@@ -16,7 +16,7 @@ import sys
 
 from repo import BLACKBOX, DOMAIN, Repo, hostnames, walk
 
-CRITICAL = {"sealed-secrets", "cilium", "cert-manager", "argocd", "longhorn"}
+CRITICAL = {"sealed-secrets", "external-secrets", "cilium", "cert-manager", "argocd", "longhorn"}
 PREEXISTING = {"kube-system", "argocd"}  # argocd is created during bootstrap (README)
 
 
