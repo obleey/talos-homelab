@@ -1,0 +1,42 @@
+# How this namespace reads OpenBao (secret/forgejo/*): ESO logs in with this SA's token via Kubernetes auth,
+# role "forgejo" (policy forgejo-read). OpenBao checks the token with a TokenReview made with that same token,
+# hence system:auth-delegator. Same three docs in every namespace with secrets; only the namespace changes.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: openbao-reader
+  namespace: forgejo
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: openbao-reader-forgejo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: openbao-reader
+    namespace: forgejo
+---
+apiVersion: external-secrets.io/v1
+kind: SecretStore
+metadata:
+  name: openbao
+  namespace: forgejo
+  annotations:
+    # on a fresh cluster ESO's CRDs don't exist yet when this is first synced
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  provider:
+    vault:
+      server: https://openbao.local.obleey.com:8200
+      path: secret
+      version: v2
+      auth:
+        kubernetes:
+          mountPath: kubernetes
+          role: forgejo
+          serviceAccountRef:
+            name: openbao-reader
