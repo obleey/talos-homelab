@@ -241,7 +241,7 @@ kubectl -n servarr rollout restart deploy/homepage                              
 
 ## How it fits together
 
-- **Sync waves** order creation: External Secrets and sealed-secrets `-5`, Cilium `-4`, cert-manager and metrics-server `-3`, Traefik and Longhorn `-2`, ArgoCD `-1`, apps `0`, metrics and logs `1`, Alloy `2`. ArgoCD doesn't wait for health between waves (on purpose: one degraded app would block the rest); dependencies settle through retries.
+- **Sync waves** order creation: External Secrets and sealed-secrets `-5`, Cilium `-4`, cert-manager and metrics-server `-3`, Traefik and Longhorn `-2`, ArgoCD `-1`, apps `0`, metrics and logs `1`, Alloy `2`. ArgoCD doesn't wait for health between waves (on purpose: one degraded app would block the rest); dependencies settle through retries. Inside an app it does: each namespace's `openbao-store.yaml` is wave `-2` and every ExternalSecret `-1`, so a Secret exists before the workload that reads it starts (and an app whose secret can't sync, e.g. OpenBao sealed, waits instead of crash-looping).
 - **Cluster-critical Applications have no cascade-delete finalizer** (External Secrets, sealed-secrets, Cilium, cert-manager, ArgoCD, Longhorn): deleting the Application leaves the component running.
 - **Each namespace is created exactly once:** a `Namespace` manifest or `CreateNamespace=true`, never both.
 - **Secrets:** one `SecretStore` named `openbao` per namespace, logging in as that namespace's `openbao-reader`, so a namespace can only read `secret/<ns>/*`. ExternalSecrets keep the last good Secret when OpenBao is sealed or unreachable (`deletionPolicy: Retain`); a blackbox probe on OpenBao's health endpoint and an "ExternalSecret not syncing" alert say so.
