@@ -271,8 +271,9 @@ kubectl -n servarr rollout restart deploy/homepage                              
 | Every secret value | OpenBao on the NAS; nightly raft snapshot backed up off-site with restic (restore drilled) |
 | OpenBao unseal keys, admin login, restic passwords | Your password manager. Without the unseal keys the snapshot is unreadable |
 | OpenBao's own config (compose, server config, policies script) | Kept with the NAS, outside this repo |
-| Talos machine configs and `talosconfig` | Generated in step 2; keep them with the key |
-| App config volumes | Longhorn: daily snapshots (7 kept), weekly backups to the NFS backup target (4 kept) |
+| Talos machine configs and `talosconfig` | Your password manager, the **live** configs (`talosctl get machineconfig persistent -o jsonpath='{.spec}'` per node), not the files from step 2: patches change them. Refresh after every `apply-config` or upgrade |
+| etcd | Nightly snapshot off-site (NAS root job with a `talosctl` credential limited to `os:etcd:backup`, restic, 14 days) |
+| App config volumes | Longhorn: daily snapshots (7 kept), weekly backups to the NFS backup target (4 kept); that target is copied off-site nightly (restic, 7 daily + 4 weekly) |
 | Forgejo | Longhorn daily backup, plus a nightly restic backup off-site (`forgejo/backup.yaml`) with a stale-backup alert |
 | `local-path` provisioner (Plex/Jellyfin cache) | Installed by hand |
 | NFS exports, LAN DNS and its wildcard record | The NAS and DNS server |
