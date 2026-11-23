@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - sealed-secrets/app.yaml
   - external-secrets/app.yaml
+  - reloader/app.yaml
   - cilium/app.yaml
   - cert-manager/app.yaml
   - traefik/app.yaml

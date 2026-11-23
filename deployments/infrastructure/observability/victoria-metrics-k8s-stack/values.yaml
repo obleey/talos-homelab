@@ -124,6 +124,8 @@ defaultDatasources:
       isDefault: false
 
 grafana:
+  annotations:
+    reloader.stakater.com/auto: "true"  # restart when its OpenBao-backed secrets change
   resources:
     requests:
       memory: 512Mi

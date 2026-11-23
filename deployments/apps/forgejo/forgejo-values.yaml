@@ -114,3 +114,7 @@ extraContainers:
 
 test:
   enabled: false
+
+deployment:
+  annotations:
+    reloader.stakater.com/auto: "true"  # restart when forgejo-admin / forgejo-smtp (OpenBao) change

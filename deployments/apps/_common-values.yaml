@@ -1,6 +1,9 @@
 # Defaults for every servarr app; each <app>-values.yaml is merged on top.
 controllers:
   main:
+    annotations:
+      # restart when a Secret or ConfigMap it reads changes (an OpenBao value via ESO, Homepage config)
+      reloader.stakater.com/auto: "true"
     # RWO volumes: a rolling update's new pod on another node can't attach until the old one is gone
     strategy: Recreate
     containers:
