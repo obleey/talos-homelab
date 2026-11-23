@@ -269,6 +269,13 @@ configMaps:
                 url: https://truenas.local.obleey.com
                 key: '{{ "{{HOMEPAGE_VAR_TRUENAS_API_KEY}}" }}'
                 enablePools: true
+          - OpenBao:
+              description: Secrets (on the NAS); down = sealed, unseal it
+              href: https://openbao.local.obleey.com:8200/ui
+              icon: openbao.png
+              weight: 170
+              # health answers 503 while sealed, so the status dot doubles as a "needs unsealing" light
+              siteMonitor: https://openbao.local.obleey.com:8200/v1/sys/health
       kubernetes.yaml: |
         gateway: true
         mode: cluster
