@@ -229,7 +229,7 @@ kubectl -n <ns> annotate externalsecret <secret> force-sync=$(date +%s) --overwr
 
 A new secret is a `bao kv put` plus an ExternalSecret next to the app: copy an existing `*-externalsecret.yaml` and list every key under `data:` (not `dataFrom`, so the lint can see them). A new namespace also needs an `openbao-store.yaml` (copy one, change the namespace) and its policy and role in OpenBao.
 
-Pods read secrets at start: restart the consumers after a rotation.
+Pods read secrets at start. Workloads annotated `reloader.stakater.com/auto: "true"` ([Reloader](https://github.com/stakater/Reloader); every app-template app, Forgejo and its runners, Grafana) restart by themselves when a Secret or ConfigMap they read changes; restart anything else by hand (NetBird's operator: its chart can't carry the annotation).
 
 ### Useful commands
 
