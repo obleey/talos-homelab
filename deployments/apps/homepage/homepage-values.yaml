@@ -171,6 +171,7 @@ configMaps:
         theme: dark
         color: slate
         headerStyle: clean
+        statusStyle: dot # pod state and siteMonitor latency both as a green/red dot
         hideErrors: true
         providers:
           longhorn:
