@@ -23,6 +23,18 @@ controllers:
             memory: 1Gi
           limits:
             memory: 4Gi
+        probes:
+          liveness:
+            enabled: true
+            type: HTTP
+            path: /identity
+          readiness:
+            enabled: true
+            type: HTTP
+            path: /identity
+          startup:
+            enabled: true
+            type: TCP
 
 persistence:
   config:
