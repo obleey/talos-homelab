@@ -12,7 +12,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/seerr-team/seerr
-          tag: v3.5.1
+          tag: v3.5.2
         resources:
           requests:
             cpu: 100m
