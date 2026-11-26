@@ -11,6 +11,8 @@ controllers:
         env:
           PUID: "1000"
           PGID: "1000"
+          # only these Host headers (plus localhost); a pod-IP Host is rejected, hence TCP probes
+          PROWLARR__SERVER__ALLOWEDHOSTS: '{{ first .Values.route.app.hostnames }},{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local'
         resources:
           requests:
             cpu: 100m
@@ -20,12 +22,10 @@ controllers:
         probes:
           liveness:
             enabled: true
-            type: HTTP
-            path: /
+            type: TCP
           readiness:
             enabled: true
-            type: HTTP
-            path: /
+            type: TCP
           startup:
             enabled: true
             type: TCP
