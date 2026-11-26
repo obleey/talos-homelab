@@ -5,6 +5,7 @@ metadata:
   namespace: kubeseal-webgui
   annotations:
     gethomepage.dev/enabled: 'true'
+    link.argocd.argoproj.io/external-link: 'https://kubeseal.talos-cluster.local.obleey.com'
     gethomepage.dev/pod-selector: 'app=kubeseal-webgui'
     gethomepage.dev/group: 'Infrastructure'
     gethomepage.dev/name: 'Kubeseal'

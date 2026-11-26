@@ -5,6 +5,7 @@ metadata:
   namespace: traefik
   annotations:
     gethomepage.dev/enabled: 'true'
+    link.argocd.argoproj.io/external-link: 'https://traefik.talos-cluster.local.obleey.com/dashboard/'
     gethomepage.dev/pod-selector: 'app.kubernetes.io/name=traefik'
     gethomepage.dev/group: 'Infrastructure'
     gethomepage.dev/name: 'Traefik'

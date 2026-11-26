@@ -62,6 +62,7 @@ httpRoute:
     - git.talos-cluster.local.obleey.com
   annotations:
     gethomepage.dev/enabled: 'true'
+    link.argocd.argoproj.io/external-link: 'https://git.talos-cluster.local.obleey.com'
     gethomepage.dev/pod-selector: 'app.kubernetes.io/name=forgejo'
     gethomepage.dev/group: 'Infrastructure'
     gethomepage.dev/name: 'obleey code'
