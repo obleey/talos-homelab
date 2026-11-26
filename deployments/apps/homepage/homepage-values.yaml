@@ -246,27 +246,30 @@ configMaps:
         - Infrastructure:
           - Technitium Primary:
               description: DNS server (primary)
-              href: http://10.0.0.104:5380
+              href: &technitium1 http://10.0.0.104:5380
+              siteMonitor: *technitium1
               icon: technitium.png
               weight: 140
               widget:
                 key: '{{ "{{HOMEPAGE_VAR_TECHNITIUM_API_KEY}}" }}'
                 type: technitium
-                url: http://10.0.0.104:5380
+                url: *technitium1
           - NetBird:
               description: VPN (remote access)
-              href: '{{ "{{HOMEPAGE_VAR_NETBIRD_URL}}" }}'
+              href: &netbird '{{ "{{HOMEPAGE_VAR_NETBIRD_URL}}" }}'
+              siteMonitor: *netbird
               icon: netbird.png
               weight: 150
           - TrueNAS:
               description: Network storage
-              href: https://truenas.local.obleey.com
+              href: &truenas https://truenas.local.obleey.com
+              siteMonitor: *truenas
               icon: truenas.png
               weight: 160
               widget:
                 type: truenas
                 version: 2 # websocket API; REST goes away in 26.04
-                url: https://truenas.local.obleey.com
+                url: *truenas
                 key: '{{ "{{HOMEPAGE_VAR_TRUENAS_API_KEY}}" }}'
                 enablePools: true
           - OpenBao:
