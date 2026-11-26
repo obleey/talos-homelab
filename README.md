@@ -6,7 +6,7 @@ It's a working setup, not a template generator. Fork it, replace the values that
 
 ```mermaid
 graph LR
-    Git[your fork] -->|poll| ArgoCD
+    Git[your fork] -->|push webhook via helion + NetBird, 30s poll as fallback| ArgoCD
     subgraph cluster [Talos cluster: 1 control plane + 2 workers]
         ArgoCD --> Platform[platform<br/>Cilium, cert-manager, Traefik,<br/>Longhorn, External Secrets]
         ArgoCD --> Apps[apps<br/>one ApplicationSet:<br/>media stack, Homepage, DNS]
@@ -25,6 +25,7 @@ graph LR
 - **Secrets outside Git:** [OpenBao](https://openbao.org) on the NAS holds every credential; [External Secrets Operator](https://external-secrets.io) turns them into Kubernetes Secrets. Git holds which secret and which keys each app gets, never a value. Each namespace can read only its own path.
 - **Apps with almost no YAML:** one ApplicationSet over the bjw-s [app-template](https://github.com/bjw-s-labs/helm-charts) chart. Adding an app is one list entry and one values file; Service, route, TLS and a 1Gi config volume come for free.
 - **Observability:** VictoriaMetrics and VictoriaLogs (30 days), Grafana with vendored dashboards, Grafana-managed alerts to Slack, and a blackbox probe for every hostname you serve.
+- **Deploys in seconds:** a GitHub push webhook reaches ArgoCD through a public route on helion (only signed `POST /api/webhook`, forwarded over NetBird). The HMAC secret lives in OpenBao (`argocd/argocd-webhook`) and is merged into `argocd-secret`; polling every 30s still catches anything the webhook misses.
 - **Guard rails:** a lint that catches the mistakes this repo has actually made (unprobed hostnames, missing secret keys, alerts that can't fire, …), a render check of every chart in CI, and Renovate for weekly version bumps.
 
 ### What runs
