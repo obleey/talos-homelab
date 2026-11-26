@@ -67,8 +67,6 @@ spec:
                       port: {{ .port }}
               route:
                 app:
-                  annotations:
-                    link.argocd.argoproj.io/external-link: https://{{ .host | default .name }}.talos-cluster.local.obleey.com
                   parentRefs:
                     - name: traefik-gateway
                       namespace: traefik

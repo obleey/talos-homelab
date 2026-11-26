@@ -5,7 +5,6 @@ metadata:
   namespace: monitoring
   annotations:
     gethomepage.dev/enabled: 'true'
-    link.argocd.argoproj.io/external-link: 'https://grafana.talos-cluster.local.obleey.com'
     gethomepage.dev/group: 'Monitoring'
     gethomepage.dev/name: 'Grafana'
     gethomepage.dev/icon: 'grafana.png'
