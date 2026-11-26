@@ -245,7 +245,7 @@ configMaps:
         # in-cluster services come from gethomepage.dev annotations on their HTTPRoutes; only things without a route live here
         - Infrastructure:
           - Technitium Primary:
-              description: DNS server (primary)
+              description: DNS server (primary, on the NAS)
               href: &technitium1 http://10.0.0.104:5380
               siteMonitor: *technitium1
               icon: technitium.png
