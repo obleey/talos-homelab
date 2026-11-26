@@ -325,6 +325,57 @@ data:
               description: 'Node {{ $labels.instance }} had {{ printf "%.0f" $values.A.Value }} OOM kill(s) in the last 15 minutes. A process was killed due to memory exhaustion.'
             isPaused: false
 
+          # the apiserver scrape failed (over maxScrapeSize) for days without anyone noticing
+          - uid: infra-scrape-target-down
+            title: Scrape Target Down
+            condition: threshold
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: prometheus
+                  expr: 'up'
+                  instant: true
+                  refId: A
+              - refId: threshold
+                relativeTimeRange:
+                  from: 0
+                  to: 0
+                datasourceUid: "-100"
+                model:
+                  conditions:
+                    - evaluator:
+                        params: [1]
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params: [A]
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: "-100"
+                  expression: A
+                  refId: threshold
+                  type: threshold
+            noDataState: OK
+            execErrState: Alerting
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Scrape target down ({{ $labels.job }})"
+              description: 'vmagent has failed to scrape {{ $labels.job }} at {{ $labels.instance }} for 10 minutes; its metrics are missing. The vmagent logs say why (for example "exceeds -promscrape.maxScrapeSize").'
+            isPaused: false
+
           - uid: infra-high-load
             title: Node High Load Average
             condition: threshold
