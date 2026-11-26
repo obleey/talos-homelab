@@ -25,7 +25,7 @@ graph LR
 - **Secrets outside Git:** [OpenBao](https://openbao.org) on the NAS holds every credential; [External Secrets Operator](https://external-secrets.io) turns them into Kubernetes Secrets. Git holds which secret and which keys each app gets, never a value. Each namespace can read only its own path.
 - **Apps with almost no YAML:** one ApplicationSet over the bjw-s [app-template](https://github.com/bjw-s-labs/helm-charts) chart. Adding an app is one list entry and one values file; Service, route, TLS and a 1Gi config volume come for free.
 - **Observability:** VictoriaMetrics and VictoriaLogs (30 days), Grafana with vendored dashboards, Grafana-managed alerts to Slack, and a blackbox probe for every hostname you serve.
-- **Deploys in seconds:** a GitHub push webhook reaches ArgoCD through a public route on helion (only signed `POST /api/webhook`, forwarded over NetBird). helion accepts it only from GitHub's hook IP ranges, and ArgoCD checks the HMAC secret (OpenBao `argocd/argocd-webhook`, merged into `argocd-secret`). Git polling is off, so a lost delivery waits for the next push or a manual Refresh.
+- **Deploys in seconds:** a GitHub push webhook reaches ArgoCD through a public route on helion (only signed `POST /api/webhook`, forwarded over NetBird). helion accepts it only from GitHub's hook IP ranges, and ArgoCD checks the HMAC secret (OpenBao `argocd/argocd-webhook`, merged into `argocd-secret`). A 15-minute git poll catches any lost delivery.
 - **Guard rails:** a lint that catches the mistakes this repo has actually made (unprobed hostnames, missing secret keys, alerts that can't fire, …), a render check of every chart in CI, and Renovate for weekly version bumps.
 
 ### What runs

@@ -27,7 +27,7 @@ configs:
     server.insecure: true
   cm:
     url: https://argocd.talos-cluster.local.obleey.com
-    timeout.reconciliation: 0s # no git polling; the GitHub push webhook (via helion) triggers refreshes. A lost delivery waits for the next push or a manual Refresh
+    timeout.reconciliation: 15m # the GitHub push webhook (via helion) does the fast path; this poll only catches a lost delivery
     admin.enabled: false
     oidc.config: |
       name: Google
