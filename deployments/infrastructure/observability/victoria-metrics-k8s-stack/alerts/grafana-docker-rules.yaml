@@ -128,7 +128,7 @@ data:
                   datasource:
                     type: prometheus
                     uid: prometheus
-                  expr: '(container_memory_working_set_bytes{name!="",name!~"cadvisor|alloy|dns-server|dns01",instance="truenas"} / container_spec_memory_limit_bytes{name!="",name!~"cadvisor|alloy|dns-server|dns01",instance="truenas"} > 0) * 100 > 80'
+                  expr: '(container_memory_working_set_bytes{name!="",instance="truenas"} / (container_spec_memory_limit_bytes{name!="",instance="truenas"} > 0)) * 100 > 80'  # only containers with a limit; every NAS container has one
                   instant: true
                   refId: A
               - refId: threshold

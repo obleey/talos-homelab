@@ -3,12 +3,13 @@ alloy:
     content: |
       prometheus.exporter.blackbox "probes" {
         config = `
+      # no 404: an unmatched Traefik route answers 404, so accepting it hid a full gateway outage (2026-11-26)
       modules:
         http_home:
           prober: http
           timeout: 10s
           http:
-            valid_status_codes: [200, 201, 301, 302, 401, 403, 404]
+            valid_status_codes: [200, 201, 301, 302, 401, 403]
             method: GET
             follow_redirects: true
             tls_config:
@@ -17,7 +18,7 @@ alloy:
           prober: http
           timeout: 10s
           http:
-            valid_status_codes: [200, 201, 301, 302, 401, 403, 404]
+            valid_status_codes: [200, 201, 301, 302, 401, 403]
             method: GET
             follow_redirects: true
       `
@@ -70,7 +71,7 @@ alloy:
         }
         target {
           name    = "loki"
-          address = "https://loki.talos-cluster.local.obleey.com"
+          address = "https://loki.talos-cluster.local.obleey.com/insert/loki/api/v1/push"
           module  = "http_home"
         }
         target {
@@ -85,7 +86,7 @@ alloy:
         }
         target {
           name    = "prometheus"
-          address = "https://prometheus.talos-cluster.local.obleey.com"
+          address = "https://prometheus.talos-cluster.local.obleey.com/api/v1/write"
           module  = "http_home"
         }
         target {

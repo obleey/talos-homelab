@@ -11,15 +11,15 @@ controllers:
       main:
         image:
           repository: ghcr.io/arabcoders/watchstate
-          tag: v1.10.11
+          tag: v1.11.0
         env:
           WS_TZ: Europe/Ljubljana
         resources:
           requests:
             cpu: 50m
-            memory: 128Mi
-          limits:
             memory: 256Mi
+          limits:
+            memory: 1Gi # a full Jellyfin/Plex import OOMed at 256Mi
         probes:
           liveness:
             enabled: true

@@ -1,0 +1,34 @@
+# ArgoCD only derives external links from Ingress hosts; this stamps the same link onto
+# every HTTPRoute from its first hostname, so routes never repeat their hostname in an annotation.
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicy
+metadata:
+  name: httproute-argocd-link
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["gateway.networking.k8s.io"]
+        apiVersions: ["*"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["httproutes"]
+  matchConditions:
+    - name: has-hostname
+      expression: has(object.spec.hostnames) && size(object.spec.hostnames) > 0
+  failurePolicy: Ignore
+  reinvocationPolicy: Never
+  mutations:
+    - patchType: ApplyConfiguration
+      applyConfiguration:
+        expression: >
+          Object{
+            metadata: Object.metadata{
+              annotations: {"link.argocd.argoproj.io/external-link": "https://" + object.spec.hostnames[0]}
+            }
+          }
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: httproute-argocd-link
+spec:
+  policyName: httproute-argocd-link

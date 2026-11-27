@@ -1,0 +1,6 @@
+reloader:
+  # marks a restart with reloader.stakater.com/last-reloaded-from on the pod template; client-side apply
+  # leaves fields it didn't set alone, so ArgoCD sees no drift
+  reloadStrategy: annotations
+  # opt-in: only workloads annotated reloader.stakater.com/auto restart (not e.g. Cilium on its own cert rotation)
+  autoReloadAll: false

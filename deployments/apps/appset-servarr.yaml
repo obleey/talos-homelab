@@ -44,8 +44,6 @@ spec:
     metadata:
       name: "{{.name}}"
       namespace: argocd
-      annotations:
-        link.argocd.argoproj.io/external-link: "{{if .port}}https://{{.host | default .name}}.talos-cluster.local.obleey.com{{end}}"
       finalizers:
         - resources-finalizer.argocd.argoproj.io
     spec:

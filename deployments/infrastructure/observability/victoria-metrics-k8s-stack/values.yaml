@@ -47,6 +47,13 @@ vmsingle:
         requests:
           storage: 20Gi
 
+# cert-manager owns the webhook cert; the chart default regenerates the CA on every sync,
+# and the apiserver rejects the operator's cert until the pod picks up the new secret.
+victoria-metrics-operator:
+  admissionWebhooks:
+    certManager:
+      enabled: true
+
 # VMAgent — scraping engine, replaces Prometheus scrape engine.
 # selectAllByDefault picks up ServiceMonitors/PodMonitors from all namespaces.
 vmagent:
@@ -54,6 +61,8 @@ vmagent:
   spec:
     selectAllByDefault: true
     scrapeInterval: 30s
+    extraArgs:
+      promscrape.maxScrapeSize: 64MiB # apiserver /metrics exceeds the 16MiB default
     externalLabels:
       cluster: talos-homelab
     resources:
@@ -124,6 +133,8 @@ defaultDatasources:
       isDefault: false
 
 grafana:
+  annotations:
+    reloader.stakater.com/auto: "true"  # restart when its OpenBao-backed secrets change
   resources:
     requests:
       memory: 512Mi

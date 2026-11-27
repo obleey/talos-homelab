@@ -1,4 +1,5 @@
 managementURL: https://netbird.obleey.com
+# no Reloader here: the chart can't annotate its Deployment; after rotating NB_API_KEY, restart netbird-operator by hand
 netbirdAPI:
   keyFromSecret:
     name: netbird-mgmt-api-key

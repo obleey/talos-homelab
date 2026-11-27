@@ -7,6 +7,8 @@ metadata:
   name: forgejo-runner
   namespace: forgejo
   labels: { app.kubernetes.io/name: forgejo-runner }
+  annotations:
+    reloader.stakater.com/auto: "true"  # restart when forgejo-runner (OpenBao) changes
 spec:
   replicas: 3
   serviceName: forgejo-runner
@@ -27,7 +29,7 @@ spec:
       initContainers:
         # native sidecar: the runner starts only once the daemon answers
         - name: dind
-          image: docker.io/library/docker:29.10.0-dind
+          image: docker.io/library/docker:29.10.1-dind
           restartPolicy: Always
           securityContext: { privileged: true }
           env:

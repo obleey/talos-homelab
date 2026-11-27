@@ -27,7 +27,7 @@ configs:
     server.insecure: true
   cm:
     url: https://argocd.talos-cluster.local.obleey.com
-    timeout.reconciliation: 30s
+    timeout.reconciliation: 15m # the GitHub push webhook (via helion) does the fast path; this poll only catches a lost delivery
     admin.enabled: false
     oidc.config: |
       name: Google
@@ -40,9 +40,9 @@ configs:
     accounts.readonly: login, apiKey
     accounts.readonly.enabled: "true"
     resource.links: |
-      - url: "https://{{index .spec.hostnames 0}}"
+      - url: "https://{{index .resource.spec.hostnames 0}}"
         title: "Open"
-        if: "len(spec.hostnames) > 0"
+        if: resource.kind == "HTTPRoute" && len(resource.spec.hostnames ?? []) > 0
     resource.customizations.ignoreDifferences.argoproj.io_Application: |
       jqPathExpressions:
         - .metadata.annotations["argocd.argoproj.io/tracking-id"]

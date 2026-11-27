@@ -79,6 +79,11 @@
       ],
       "groupName": "observability images",
       "minimumReleaseAge": "3 days"
+    },
+    {
+      "matchPackageNames": ["lscr.io/linuxserver/sonarr"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ]
 }

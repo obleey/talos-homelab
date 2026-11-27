@@ -7,10 +7,12 @@ controllers:
       main:
         image:
           repository: lscr.io/linuxserver/prowlarr
-          tag: 2.7.0.5723-ls168
+          tag: 3.0.2.5780-ls169
         env:
           PUID: "1000"
           PGID: "1000"
+          # only these Host headers (plus localhost); a pod-IP Host is rejected, hence TCP probes
+          PROWLARR__SERVER__ALLOWEDHOSTS: '{{ first .Values.route.app.hostnames }},{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local'
         resources:
           requests:
             cpu: 100m
@@ -20,12 +22,10 @@ controllers:
         probes:
           liveness:
             enabled: true
-            type: HTTP
-            path: /
+            type: TCP
           readiness:
             enabled: true
-            type: HTTP
-            path: /
+            type: TCP
           startup:
             enabled: true
             type: TCP

@@ -7,7 +7,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/prophetse7en/clonarr
-          tag: v3.5.0
+          tag: v3.5.1
         resources:
           requests:
             cpu: 50m

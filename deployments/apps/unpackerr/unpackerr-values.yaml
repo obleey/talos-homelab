@@ -40,6 +40,18 @@ controllers:
           limits:
             cpu: 250m
             memory: 256Mi
+        probes:
+          liveness:
+            enabled: true
+            type: HTTP
+            path: /
+          readiness:
+            enabled: true
+            type: HTTP
+            path: /
+          startup:
+            enabled: true
+            type: TCP
 
 persistence:
   config:
